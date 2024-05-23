@@ -20,6 +20,7 @@ import paddle
 
 
 class _Constant(object):
+
     def __init__(self, val):
         super().__init__()
         self.val = val

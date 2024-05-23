@@ -26,11 +26,12 @@ from paddleseg.core.infer import reverse_transform
 
 
 def evaluate(
-        img_dir,
-        gt_dir,
-        num_classes,
-        ignore_index=255,
-        print_detail=True, ):
+    img_dir,
+    gt_dir,
+    num_classes,
+    ignore_index=255,
+    print_detail=True,
+):
     """
     Launch evalution.
 

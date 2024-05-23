@@ -43,17 +43,18 @@ from paddleseg.utils import logger, utils
 def parse_args():
     parser = argparse.ArgumentParser(description='Test')
     parser.add_argument("--config", help="The config file.", type=str)
-    parser.add_argument(
-        "--model_path", help="The pretrained weights file.", type=str)
-    parser.add_argument(
-        '--save_dir',
-        help='The directory for saving the predict result.',
-        type=str,
-        default='./output/tmp')
+    parser.add_argument("--model_path",
+                        help="The pretrained weights file.",
+                        type=str)
+    parser.add_argument('--save_dir',
+                        help='The directory for saving the predict result.',
+                        type=str,
+                        default='./output/tmp')
     parser.add_argument('--width', help='width', type=int, default=512)
     parser.add_argument('--height', help='height', type=int, default=512)
-    parser.add_argument(
-        '--print_model', action='store_true', help='print model to log')
+    parser.add_argument('--print_model',
+                        action='store_true',
+                        help='print model to log')
     return parser.parse_args()
 
 
@@ -104,8 +105,10 @@ def export_onnx(args):
 
     input_spec = paddle.static.InputSpec(input_shape, 'float32', 'x')
     onnx_model_path = os.path.join(args.save_dir, model_name + "_model")
-    paddle.onnx.export(
-        model, onnx_model_path, input_spec=[input_spec], opset_version=11)
+    paddle.onnx.export(model,
+                       onnx_model_path,
+                       input_spec=[input_spec],
+                       opset_version=11)
     print("Completed export onnx model.\n")
 
     onnx_model_path = onnx_model_path + ".onnx"

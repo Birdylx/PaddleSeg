@@ -36,31 +36,27 @@ from nnunet.utils import save_segmentation_nifti_from_softmax, load_remove_save,
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '--ensemble_folds',
-        '--ensemble_folds',
-        nargs='+',
-        required=True,
-        help="The dirs of softmax results.")
-    parser.add_argument(
-        '--output_folder',
-        '--output_folder',
-        required=True,
-        default='output/ensemble',
-        help="The dirs of softmax results.")
-    parser.add_argument(
-        '--num_threads',
-        '--num_threads',
-        type=int,
-        default=2,
-        help='The number of threads.')
-    parser.add_argument(
-        "--gt_dir",
-        "--gt_dir",
-        required=False,
-        default=None,
-        type=str,
-        help='grount truth dir')
+    parser.add_argument('--ensemble_folds',
+                        '--ensemble_folds',
+                        nargs='+',
+                        required=True,
+                        help="The dirs of softmax results.")
+    parser.add_argument('--output_folder',
+                        '--output_folder',
+                        required=True,
+                        default='output/ensemble',
+                        help="The dirs of softmax results.")
+    parser.add_argument('--num_threads',
+                        '--num_threads',
+                        type=int,
+                        default=2,
+                        help='The number of threads.')
+    parser.add_argument("--gt_dir",
+                        "--gt_dir",
+                        required=False,
+                        default=None,
+                        type=str,
+                        help='grount truth dir')
     parser.add_argument(
         "--plan_path",
         "--plan_path",
@@ -68,20 +64,21 @@ def parse_args():
         default=None,
         type=str,
         help='If ensemble val folder, plan_path must be supplied.')
-    parser.add_argument(
-        "--folds", "--folds", default=5, type=int, required=False)
-    parser.add_argument(
-        '--postprocessing_json_path',
-        "--postprocessing_json_path",
-        required=False,
-        default=None,
-        type=str,
-        help='the path to postprocessing json.')
-    parser.add_argument(
-        '--save_npz',
-        action="store_true",
-        required=False,
-        help="stores npz and pkl")
+    parser.add_argument("--folds",
+                        "--folds",
+                        default=5,
+                        type=int,
+                        required=False)
+    parser.add_argument('--postprocessing_json_path',
+                        "--postprocessing_json_path",
+                        required=False,
+                        default=None,
+                        type=str,
+                        help='the path to postprocessing json.')
+    parser.add_argument('--save_npz',
+                        action="store_true",
+                        required=False,
+                        help="stores npz and pkl")
     return parser.parse_args()
 
 
@@ -114,15 +111,14 @@ def merge_files(files,
             regions_class_order = tmp
         else:
             regions_class_order = None
-        save_segmentation_nifti_from_softmax(
-            softmax,
-            out_file,
-            props[0],
-            3,
-            regions_class_order,
-            None,
-            None,
-            force_separate_z=None)
+        save_segmentation_nifti_from_softmax(softmax,
+                                             out_file,
+                                             props[0],
+                                             3,
+                                             regions_class_order,
+                                             None,
+                                             None,
+                                             force_separate_z=None)
         if store_npz:
             np.savez_compressed(out_file[:-7] + ".npz", softmax=softmax)
             with open(out_file[:-7] + ".pkl", 'wb') as f:
@@ -173,9 +169,10 @@ def merge(folders,
         out_files.append(os.path.join(output_folder, p + ".nii.gz"))
 
     p = Pool(threads)
-    p.starmap(merge_files,
-              zip(files, property_files, out_files, [override] * len(out_files),
-                  [store_npz] * len(out_files)))
+    p.starmap(
+        merge_files,
+        zip(files, property_files, out_files, [override] * len(out_files),
+            [store_npz] * len(out_files)))
     p.close()
     p.join()
 
@@ -183,8 +180,8 @@ def merge(folders,
         with open(postprocessing_file, 'rb') as f:
             pp_info = json.load(f)
         if 'min_valid_object_sizes' in pp_info.keys():
-            min_valid_object_sizes = ast.literal_eval(pp_info[
-                'min_valid_object_sizes'])
+            min_valid_object_sizes = ast.literal_eval(
+                pp_info['min_valid_object_sizes'])
         else:
             min_valid_object_sizes = None
         for_which_classes, min_valid_obj_size = pp_info[
@@ -197,10 +194,10 @@ def merge(folders,
         ]
         input_files = [os.path.join(output_folder, i) for i in nii_files]
         out_files = [os.path.join(output_folder_post, i) for i in nii_files]
-        results = p.starmap_async(load_remove_save,
-                                  zip(input_files, out_files,
-                                      [for_which_classes] * len(input_files),
-                                      [min_valid_obj_size] * len(input_files)))
+        results = p.starmap_async(
+            load_remove_save,
+            zip(input_files, out_files, [for_which_classes] * len(input_files),
+                [min_valid_obj_size] * len(input_files)))
         res = results.get()
         p.close()
         p.join()
@@ -278,8 +275,8 @@ def ensemble_val(val_folder1,
         patient_identifiers1_nii.sort()
         patient_identifiers1_nii = [
             i[:-7] for i in patient_identifiers1_nii
-            if not i.endswith("noPostProcess.nii.gz") and not i.endswith(
-                '_postprocessed.nii.gz')
+            if not i.endswith("noPostProcess.nii.gz")
+            and not i.endswith('_postprocessed.nii.gz')
         ]
 
         patient_identifiers2_nii = [
@@ -289,8 +286,8 @@ def ensemble_val(val_folder1,
         patient_identifiers2_nii.sort()
         patient_identifiers2_nii = [
             i[:-7] for i in patient_identifiers2_nii
-            if not i.endswith("noPostProcess.nii.gz") and not i.endswith(
-                '_postprocessed.nii.gz')
+            if not i.endswith("noPostProcess.nii.gz")
+            and not i.endswith('_postprocessed.nii.gz')
         ]
 
         if not all(
@@ -324,63 +321,61 @@ def ensemble_val(val_folder1,
                 os.path.join(folder_with_gt_segs, p + ".nii.gz"))
 
     p = Pool(threads)
-    p.starmap(merge_files,
-              zip(files, property_files, out_files, [override] * len(out_files),
-                  [False] * len(out_files)))
+    p.starmap(
+        merge_files,
+        zip(files, property_files, out_files, [override] * len(out_files),
+            [False] * len(out_files)))
     p.close()
     p.join()
 
-    if not os.path.isfile(os.path.join(output_folder, "summary.json")) and len(
-            out_files) > 0:
-        aggregate_scores(
-            tuple(zip(out_files, gt_segmentations)),
-            labels=plans['all_classes'],
-            json_output_file=os.path.join(output_folder, "summary.json"),
-            num_threads=threads)
+    if not os.path.isfile(os.path.join(output_folder,
+                                       "summary.json")) and len(out_files) > 0:
+        aggregate_scores(tuple(zip(out_files, gt_segmentations)),
+                         labels=plans['all_classes'],
+                         json_output_file=os.path.join(output_folder,
+                                                       "summary.json"),
+                         num_threads=threads)
     print("runing postprocessing...")
-    determine_postprocessing(
-        output_folder_base,
-        folder_with_gt_segs,
-        "ensembled_raw",
-        "temp",
-        "ensembled_postprocessed",
-        threads,
-        dice_threshold=0)
+    determine_postprocessing(output_folder_base,
+                             folder_with_gt_segs,
+                             "ensembled_raw",
+                             "temp",
+                             "ensembled_postprocessed",
+                             threads,
+                             dice_threshold=0)
     print("postprocessing done.")
 
 
 def main(args):
     os.makedirs(args.output_folder, exist_ok=True)
     if args.gt_dir is None:
-        merge(
-            args.ensemble_folds,
-            args.output_folder,
-            threads=args.num_threads,
-            postprocessing_file=args.postprocessing_json_path,
-            store_npz=args.save_npz)
+        merge(args.ensemble_folds,
+              args.output_folder,
+              threads=args.num_threads,
+              postprocessing_file=args.postprocessing_json_path,
+              store_npz=args.save_npz)
     else:
         assert args.plan_path is not None, "If ensemble val folders, please set plan_path."
         assert len(args.ensemble_folds
                    ) >= 2, "The number of ensemble folders must greater than 2."
 
         for folder1, folder2 in combinations(args.ensemble_folds, 2):
-            ensemble_name = "ensemble_" + folder1.split('/')[
-                -1] + "__" + folder2.split('/')[-1]
+            ensemble_name = "ensemble_" + folder1.split(
+                '/')[-1] + "__" + folder2.split('/')[-1]
             output_folder_base = os.path.join(args.output_folder, "ensembles",
                                               ensemble_name)
             os.makedirs(output_folder_base, exist_ok=True)
 
             print("ensembling fold: ", folder1, folder2)
-            ensemble_val(
-                folder1,
-                folder2,
-                output_folder_base,
-                args.plan_path,
-                "validation_raw",
-                args.folds,
-                args.gt_dir,
-                threads=args.num_threads,
-                override=True)
+            ensemble_val(folder1,
+                         folder2,
+                         output_folder_base,
+                         args.plan_path,
+                         "validation_raw",
+                         args.folds,
+                         args.gt_dir,
+                         threads=args.num_threads,
+                         override=True)
             print(folder1, folder2, "ensemble over.")
 
 

@@ -40,28 +40,25 @@ def get_train_loader(nranks,
     if nranks > 1:
         is_shuffle = False
         batch_size_per_gpu = int(batch_size / nranks)
-        train_sampler = DistributedBatchSampler(
-            train_dataset,
-            batch_size=batch_size_per_gpu,
-            shuffle=is_shuffle,
-            drop_last=True)
+        train_sampler = DistributedBatchSampler(train_dataset,
+                                                batch_size=batch_size_per_gpu,
+                                                shuffle=is_shuffle,
+                                                drop_last=True)
 
-        train_loader = DataLoader(
-            train_dataset,
-            batch_sampler=train_sampler,
-            num_workers=num_workers,
-            use_shared_memory=True,
-            collate_fn=collate_fn)
+        train_loader = DataLoader(train_dataset,
+                                  batch_sampler=train_sampler,
+                                  num_workers=num_workers,
+                                  use_shared_memory=True,
+                                  collate_fn=collate_fn)
     else:
 
-        train_loader = DataLoader(
-            train_dataset,
-            batch_size=batch_size,
-            num_workers=num_workers,
-            drop_last=True,
-            shuffle=is_shuffle,
-            use_shared_memory=True,
-            collate_fn=collate_fn)
+        train_loader = DataLoader(train_dataset,
+                                  batch_size=batch_size,
+                                  num_workers=num_workers,
+                                  drop_last=True,
+                                  shuffle=is_shuffle,
+                                  use_shared_memory=True,
+                                  collate_fn=collate_fn)
 
     return train_loader
 
@@ -176,8 +173,11 @@ def train(model,
     collate_fn = SegCollate()
     mask_collate_fn = SegCollate(batch_aug_fn=add_mask_params_to_batch)
 
-    train_loader = get_train_loader(
-        nranks, train_dataset, batch_size, num_workers, collate_fn=collate_fn)
+    train_loader = get_train_loader(nranks,
+                                    train_dataset,
+                                    batch_size,
+                                    num_workers,
+                                    collate_fn=collate_fn)
     unsupervised_train_loader_0 = get_train_loader(nranks, unsupervised_train_dataset, batch_size, \
                                                    num_workers, collate_fn=mask_collate_fn)
     unsupervised_train_loader_1 = get_train_loader(nranks, unsupervised_train_dataset, batch_size, \
@@ -291,8 +291,8 @@ def train(model,
             else:
                 for i in range(len(loss_list)):
                     avg_loss_list[i] += loss_list[i].numpy()
-            batch_cost_averager.record(
-                time.time() - batch_start, num_samples=batch_size)
+            batch_cost_averager.record(time.time() - batch_start,
+                                       num_samples=batch_size)
 
             current_iter = epoch * niters_per_epoch + idx + 1
             if ((current_iter % log_iters) == 0) and (local_rank == 0):
@@ -339,14 +339,16 @@ def train(model,
             if test_config is None:
                 test_config = {}
 
-            mean_iou, acc, _, _, _ = evaluate(
-                raw_model, val_dataset, num_workers=num_workers, **test_config)
+            mean_iou, acc, _, _, _ = evaluate(raw_model,
+                                              val_dataset,
+                                              num_workers=num_workers,
+                                              **test_config)
 
             raw_model.train()
 
         if ((epoch + 1) % save_epoch == 0 or
-            (epoch + 1) == nepochs) and local_rank == 0 and (
-                (epoch + 1) > (nepochs / 1.2)):
+            (epoch + 1) == nepochs) and local_rank == 0 and ((epoch + 1)
+                                                             > (nepochs / 1.2)):
             current_save_dir = os.path.join(save_dir,
                                             "epoch_{}".format(epoch + 1))
             if not os.path.isdir(current_save_dir):

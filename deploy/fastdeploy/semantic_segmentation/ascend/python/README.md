@@ -9,10 +9,10 @@
 ## 2. 部署模型准备  
 在部署前，请准备好您所需要运行的推理模型，你可以选择使用[预导出的推理模型](../README.md)或者[自行导出PaddleSeg部署模型](../README.md)，如果你部署的为**PP-Matting**、**PP-HumanMatting**以及**ModNet**请参考[Matting模型部署](../../../matting)。
 
-## 3. 运行部署示例 
+## 3. 运行部署示例
 ```bash
 # 下载部署示例代码
-git clone https://github.com/PaddlePaddle/PaddleSeg.git 
+git clone https://github.com/PaddlePaddle/PaddleSeg.git
 # 注意：如果当前分支找不到下面的fastdeploy测试代码，请切换到develop分支
 # git checkout develop
 cd PaddleSeg/deploy/fastdeploy/semantic_segmentation/ascend/python

@@ -87,11 +87,10 @@ class PointCrossEntropyLoss(nn.Layer):
         logit = paddle.transpose(logit, [0, 2, 1])
         no_ignore_label = label
         #no_ignore_label[label==self.ignore_index] = 0
-        loss = F.cross_entropy(
-            logit,
-            no_ignore_label,
-            ignore_index=self.ignore_index,
-            reduction='none')
+        loss = F.cross_entropy(logit,
+                               no_ignore_label,
+                               ignore_index=self.ignore_index,
+                               reduction='none')
 
         mask = label != self.ignore_index
         mask = paddle.cast(mask, 'float32')
@@ -153,8 +152,10 @@ def point_sample(input, points, align_corners=False, **kwargs):
     if points.dim() == 3:
         add_dim = True
         points = paddle.unsqueeze(points, axis=2)  # [2, 2048, 1, 2]
-    output = F.grid_sample(
-        input, denormalize(points), align_corners=align_corners, **kwargs)
+    output = F.grid_sample(input,
+                           denormalize(points),
+                           align_corners=align_corners,
+                           **kwargs)
     if add_dim:
         output = paddle.squeeze(output, axis=3)
     return output

@@ -169,6 +169,7 @@ class CPSBuilder(Builder):
         return self._build_loss('loss', loss_cfg)
 
     def _build_loss(self, loss_name, loss_cfg: dict):
+
         def _check_helper(loss_cfg, ignore_index):
             if 'ignore_index' not in loss_cfg:
                 loss_cfg['ignore_index'] = ignore_index

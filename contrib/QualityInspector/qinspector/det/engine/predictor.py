@@ -1,15 +1,15 @@
-# Copyright (c) 2023 PaddlePaddle Authors. All Rights Reserved. 
-#   
-# Licensed under the Apache License, Version 2.0 (the "License");   
-# you may not use this file except in compliance with the License.  
-# You may obtain a copy of the License at   
-#   
-#     http://www.apache.org/licenses/LICENSE-2.0    
-#   
-# Unless required by applicable law or agreed to in writing, software   
-# distributed under the License is distributed on an "AS IS" BASIS, 
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  
-# See the License for the specific language governing permissions and   
+# Copyright (c) 2023 PaddlePaddle Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
 # limitations under the License.
 
 import typing
@@ -25,6 +25,7 @@ logger = setup_logger('DetPredictor')
 
 
 class Predictor(Trainer):
+
     def predict(self, images, score_thresh=0.0):
 
         self.dataset.set_images(images)
@@ -32,10 +33,10 @@ class Predictor(Trainer):
 
         imid2path = self.dataset.get_imid2path()
         anno_file = self.dataset.get_anno()
-        clsid2catid, catid2name = get_categories(
-            self.cfg.metric, anno_file=anno_file)
+        clsid2catid, catid2name = get_categories(self.cfg.metric,
+                                                 anno_file=anno_file)
 
-        # Run Infer 
+        # Run Infer
         self.status['mode'] = 'test'
         self.model.eval()
         if self.cfg.get('print_flops', False):
@@ -56,14 +57,13 @@ class Predictor(Trainer):
                 if hasattr(value, 'numpy'):
                     outs[key] = value.numpy()
 
-            infer_res = self.get_det_res(
-                outs['bbox'],
-                outs['bbox_num'],
-                outs['im_id'],
-                clsid2catid,
-                catid2name,
-                imid2path,
-                score_thresh=score_thresh)
+            infer_res = self.get_det_res(outs['bbox'],
+                                         outs['bbox_num'],
+                                         outs['im_id'],
+                                         clsid2catid,
+                                         catid2name,
+                                         imid2path,
+                                         score_thresh=score_thresh)
             results.extend(infer_res)
 
         return results

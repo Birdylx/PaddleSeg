@@ -33,8 +33,12 @@ def get_depthwise_conv(dim, kernel_size=3):
     if isinstance(kernel_size, int):
         kernel_size = to_2tuple(kernel_size)
     padding = tuple([k // 2 for k in kernel_size])
-    return Conv2D(
-        dim, dim, kernel_size, padding=padding, bias_attr=True, groups=dim)
+    return Conv2D(dim,
+                  dim,
+                  kernel_size,
+                  padding=padding,
+                  bias_attr=True,
+                  groups=dim)
 
 
 class Mlp(nn.Layer):
@@ -66,27 +70,24 @@ class Mlp(nn.Layer):
 
 
 class StemConv(nn.Layer):
+
     def __init__(
-            self,
-            in_channels,
-            out_channels, ):
+        self,
+        in_channels,
+        out_channels,
+    ):
         super().__init__()
         self.proj = nn.Sequential(
-            nn.Conv2D(
-                in_channels,
-                out_channels // 2,
-                kernel_size=3,
-                stride=2,
-                padding=1),
-            SyncBatchNorm(out_channels // 2),
-            nn.GELU(),
-            nn.Conv2D(
-                out_channels // 2,
-                out_channels,
-                kernel_size=3,
-                stride=2,
-                padding=1),
-            SyncBatchNorm(out_channels))
+            nn.Conv2D(in_channels,
+                      out_channels // 2,
+                      kernel_size=3,
+                      stride=2,
+                      padding=1), SyncBatchNorm(out_channels // 2), nn.GELU(),
+            nn.Conv2D(out_channels // 2,
+                      out_channels,
+                      kernel_size=3,
+                      stride=2,
+                      padding=1), SyncBatchNorm(out_channels))
 
     def forward(self, x):
         x = self.proj(x)
@@ -173,13 +174,14 @@ class Block(nn.Layer):
     """
 
     def __init__(
-            self,
-            dim,
-            atten_kernel_sizes=[7, 11, 21],
-            mlp_ratio=4.0,
-            drop=0.0,
-            drop_path=0.0,
-            act_layer=nn.GELU, ):
+        self,
+        dim,
+        atten_kernel_sizes=[7, 11, 21],
+        mlp_ratio=4.0,
+        drop=0.0,
+        drop_path=0.0,
+        act_layer=nn.GELU,
+    ):
         super().__init__()
         self.norm1 = SyncBatchNorm(dim)
         self.attn = SpatialAttention(dim, atten_kernel_sizes)
@@ -191,8 +193,9 @@ class Block(nn.Layer):
                        act_layer=act_layer,
                        drop=drop)
 
-        layer_scale_init_value = paddle.full(
-            [dim, 1, 1], fill_value=1e-2, dtype="float32")
+        layer_scale_init_value = paddle.full([dim, 1, 1],
+                                             fill_value=1e-2,
+                                             dtype="float32")
         self.layer_scale_1 = paddle.create_parameter(
             [dim, 1, 1], "float32", attr=Assign(layer_scale_init_value))
         self.layer_scale_2 = paddle.create_parameter(
@@ -222,12 +225,11 @@ class OverlapPatchEmbed(nn.Layer):
         super().__init__()
         patch_size = to_2tuple(patch_size)
 
-        self.proj = nn.Conv2D(
-            in_chans,
-            embed_dim,
-            kernel_size=patch_size,
-            stride=stride,
-            padding=(patch_size[0] // 2, patch_size[1] // 2))
+        self.proj = nn.Conv2D(in_chans,
+                              embed_dim,
+                              kernel_size=patch_size,
+                              stride=stride,
+                              padding=(patch_size[0] // 2, patch_size[1] // 2))
         self.norm = SyncBatchNorm(embed_dim)
 
     def forward(self, x):
@@ -296,19 +298,17 @@ class MSCAN(nn.Layer):
             if i == 0:
                 patch_embed = StemConv(in_channels, embed_dims[0])
             else:
-                patch_embed = OverlapPatchEmbed(
-                    patch_size=3,
-                    stride=2,
-                    in_chans=embed_dims[i - 1],
-                    embed_dim=embed_dims[i])
+                patch_embed = OverlapPatchEmbed(patch_size=3,
+                                                stride=2,
+                                                in_chans=embed_dims[i - 1],
+                                                embed_dim=embed_dims[i])
 
             block = nn.LayerList([
-                Block(
-                    dim=embed_dims[i],
-                    atten_kernel_sizes=atten_kernel_sizes,
-                    mlp_ratio=mlp_ratios[i],
-                    drop=drop_rate,
-                    drop_path=drop_path_rates[cur + j])
+                Block(dim=embed_dims[i],
+                      atten_kernel_sizes=atten_kernel_sizes,
+                      mlp_ratio=mlp_ratios[i],
+                      drop=drop_rate,
+                      drop_path=drop_path_rates[cur + j])
                 for j in range(depths[i])
             ])
             norm = nn.LayerNorm(embed_dims[i])
@@ -367,17 +367,15 @@ def MSCAN_S(**kwargs):
 
 @manager.BACKBONES.add_component
 def MSCAN_B(**kwargs):
-    return MSCAN(
-        embed_dims=[64, 128, 320, 512],
-        depths=[3, 3, 12, 3],
-        drop_path_rate=0.1,
-        **kwargs)
+    return MSCAN(embed_dims=[64, 128, 320, 512],
+                 depths=[3, 3, 12, 3],
+                 drop_path_rate=0.1,
+                 **kwargs)
 
 
 @manager.BACKBONES.add_component
 def MSCAN_L(**kwargs):
-    return MSCAN(
-        embed_dims=[64, 128, 320, 512],
-        depths=[3, 5, 27, 3],
-        drop_path_rate=0.3,
-        **kwargs)
+    return MSCAN(embed_dims=[64, 128, 320, 512],
+                 depths=[3, 5, 27, 3],
+                 drop_path_rate=0.3,
+                 **kwargs)

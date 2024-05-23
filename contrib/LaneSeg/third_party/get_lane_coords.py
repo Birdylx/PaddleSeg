@@ -19,6 +19,7 @@ import numpy as np
 
 
 class LaneProcessor:
+
     def __init__(self,
                  num_classes=2,
                  ori_shape=(720, 1280),
@@ -42,8 +43,8 @@ class LaneProcessor:
             seg = seg_pred[batch]
             lane_coords = self.heatmap2coords(seg)
             for i in range(len(lane_coords)):
-                lane_coords[i] = sorted(
-                    lane_coords[i], key=lambda pair: pair[1])
+                lane_coords[i] = sorted(lane_coords[i],
+                                        key=lambda pair: pair[1])
             lane_coords_list.append(lane_coords)
         return lane_coords_list
 
@@ -74,9 +75,10 @@ class LaneProcessor:
                         if id > gap_start[i] and id < gap_end[i]:
                             gap_width = float(gap_end[i] - gap_start[i])
                             # line interpolation
-                            lane[id] = int((id - gap_start[
-                                i]) / gap_width * lane[gap_end[i]] + (gap_end[
-                                    i] - id) / gap_width * lane[gap_start[i]])
+                            lane[id] = int((id - gap_start[i]) / gap_width *
+                                           lane[gap_end[i]] +
+                                           (gap_end[i] - id) / gap_width *
+                                           lane[gap_start[i]])
                 if not all(x > 0 for x in lane):
                     print("Gaps still exist!")
                 coordinate[start:end + 1] = lane
@@ -133,8 +135,8 @@ class LaneProcessor:
         for i in range(self.num_classes - 1):
             heat_map = seg_pred[i + 1]
             if self.smooth:
-                heat_map = cv2.blur(
-                    heat_map, (9, 9), borderType=cv2.BORDER_REPLICATE)
+                heat_map = cv2.blur(heat_map, (9, 9),
+                                    borderType=cv2.BORDER_REPLICATE)
             coords = self.get_coords(heat_map)
             indexes = [i for i, x in enumerate(coords) if x > 0]
             if not indexes:

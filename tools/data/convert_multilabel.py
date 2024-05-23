@@ -61,8 +61,7 @@ def uwmgi_get_image_id(image_filepath):
 def uwmgi_rle_decode(mask_rle, image_shape):
     s = mask_rle.split()
     starts, lengths = [
-        np.asarray(
-            x, dtype=int) for x in (s[0:][::2], s[1:][::2])
+        np.asarray(x, dtype=int) for x in (s[0:][::2], s[1:][::2])
     ]
     starts -= 1
     ends = starts + lengths
@@ -157,8 +156,8 @@ def coco_to_multilabel_format(args):
 
             if img_w < 0 or img_h < 0:
                 print('Illegal width: {} or height: {} in annotation, '
-                      'and im_id: {} will be ignored'.format(img_w, img_h,
-                                                             img_id))
+                      'and im_id: {} will be ignored'.format(
+                          img_w, img_h, img_id))
                 continue
 
             ann_ids = coco.getAnnIds(imgIds=[img_id])
@@ -192,34 +191,30 @@ def coco_to_multilabel_format(args):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '--dataset_type',
-        help='the type of dataset, can be `uwmgi` or `coco`',
-        type=str)
-    parser.add_argument(
-        "--zip_input",
-        help="the directory of original dataset zip file",
-        type=str)
-    parser.add_argument(
-        "--img_input",
-        help="the directory of original dataset image file",
-        type=str)
+    parser.add_argument('--dataset_type',
+                        help='the type of dataset, can be `uwmgi` or `coco`',
+                        type=str)
+    parser.add_argument("--zip_input",
+                        help="the directory of original dataset zip file",
+                        type=str)
+    parser.add_argument("--img_input",
+                        help="the directory of original dataset image file",
+                        type=str)
     parser.add_argument(
         "--ann_input",
         help="the directory of original dataset annotation file",
         type=str)
-    parser.add_argument(
-        "--output", help="the directory to save converted dataset", type=str)
-    parser.add_argument(
-        '--train_proportion',
-        help='the proportion of train dataset',
-        type=float,
-        default=0.8)
-    parser.add_argument(
-        '--val_proportion',
-        help='the proportion of validation dataset',
-        type=float,
-        default=0.2)
+    parser.add_argument("--output",
+                        help="the directory to save converted dataset",
+                        type=str)
+    parser.add_argument('--train_proportion',
+                        help='the proportion of train dataset',
+                        type=float,
+                        default=0.8)
+    parser.add_argument('--val_proportion',
+                        help='the proportion of validation dataset',
+                        type=float,
+                        default=0.2)
     args = parser.parse_args()
 
     assert args.dataset_type in ['uwmgi', 'coco'], \

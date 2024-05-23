@@ -19,6 +19,7 @@ import paddle.nn as nn
 
 
 class Identity(nn.Layer):
+
     def __init__(self):
         super().__init__()
 
@@ -27,6 +28,7 @@ class Identity(nn.Layer):
 
 
 class ConvDropoutNormNonlin(nn.Layer):
+
     def __init__(self,
                  input_channels,
                  output_channels,

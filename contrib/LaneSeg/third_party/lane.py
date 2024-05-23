@@ -56,9 +56,8 @@ class LaneEval(object):
         matched = 0.
         for x_gts, thresh in zip(gt, threshs):
             accs = [
-                LaneEval.line_accuracy(
-                    np.array(x_preds), np.array(x_gts), thresh)
-                for x_preds in pred
+                LaneEval.line_accuracy(np.array(x_preds), np.array(x_gts),
+                                       thresh) for x_preds in pred
             ]
             max_acc = np.max(accs) if len(accs) > 0 else 0.
             if max_acc < LaneEval.pt_thresh:
@@ -72,9 +71,8 @@ class LaneEval(object):
         s = sum(line_accs)
         if len(gt) > 4:
             s -= min(line_accs)
-        return s / max(min(4.0, len(gt)),
-                       1.), fp / len(pred) if len(pred) > 0 else 0., fn / max(
-                           min(len(gt), 4.), 1.)
+        return s / max(min(4.0, len(gt)), 1.), fp / len(pred) if len(
+            pred) > 0 else 0., fn / max(min(len(gt), 4.), 1.)
 
     @staticmethod
     def bench_one_submit(pred_file, gt_file):

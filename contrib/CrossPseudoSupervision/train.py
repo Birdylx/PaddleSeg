@@ -26,39 +26,37 @@ def parse_args():
 
     # Common params
     parser.add_argument("--config", help="The path of config file.", type=str)
-    parser.add_argument(
-        '--device',
-        help='Set the device place for training model.',
-        default='gpu',
-        choices=['cpu', 'gpu', 'xpu', 'npu', 'mlu'],
-        type=str)
-    parser.add_argument(
-        '--save_dir',
-        help='The directory for saving the model snapshot.',
-        type=str,
-        default='./output')
+    parser.add_argument('--device',
+                        help='Set the device place for training model.',
+                        default='gpu',
+                        choices=['cpu', 'gpu', 'xpu', 'npu', 'mlu'],
+                        type=str)
+    parser.add_argument('--save_dir',
+                        help='The directory for saving the model snapshot.',
+                        type=str,
+                        default='./output')
     parser.add_argument(
         '--num_workers',
-        help='Number of workers for data loader. Bigger num_workers can speed up data processing.',
+        help=
+        'Number of workers for data loader. Bigger num_workers can speed up data processing.',
         type=int,
         default=0)
-    parser.add_argument(
-        '--do_eval',
-        help='Whether to do evaluation in training.',
-        action='store_true')
+    parser.add_argument('--do_eval',
+                        help='Whether to do evaluation in training.',
+                        action='store_true')
     parser.add_argument(
         '--use_vdl',
         help='Whether to record the data to VisualDL in training.',
         action='store_true')
 
     # Runntime params
-    parser.add_argument(
-        '--resume_model',
-        help='The path of the model to resume training.',
-        type=str)
+    parser.add_argument('--resume_model',
+                        help='The path of the model to resume training.',
+                        type=str)
     parser.add_argument('--nepochs', help='Iterations in training.', type=int)
-    parser.add_argument(
-        '--batch_size', help='Mini batch size of one gpu or cpu. ', type=int)
+    parser.add_argument('--batch_size',
+                        help='Mini batch size of one gpu or cpu. ',
+                        type=int)
     parser.add_argument(
         '--labeled_ratio',
         help='The ratio of total data to labeled data, if 2, is 1/2, i.e. 0.5',
@@ -75,18 +73,16 @@ def parse_args():
         help='Display logging information at every `log_iters`.',
         default=10,
         type=int)
-    parser.add_argument(
-        '--keep_checkpoint_max',
-        help='Maximum number of checkpoints to save.',
-        type=int,
-        default=5)
+    parser.add_argument('--keep_checkpoint_max',
+                        help='Maximum number of checkpoints to save.',
+                        type=int,
+                        default=5)
 
     # Other params
-    parser.add_argument(
-        '--seed',
-        help='Set the random seed in training.',
-        default=None,
-        type=int)
+    parser.add_argument('--seed',
+                        help='Set the random seed in training.',
+                        default=None,
+                        type=int)
     parser.add_argument(
         '--profiler_options',
         type=str,
@@ -95,11 +91,13 @@ def parse_args():
     )
     parser.add_argument(
         '--data_format',
-        help='Data format that specifies the layout of input. It can be "NCHW" or "NHWC". Default: "NCHW".',
+        help=
+        'Data format that specifies the layout of input. It can be "NCHW" or "NHWC". Default: "NCHW".',
         type=str,
         default='NCHW')
-    parser.add_argument(
-        '--opts', help='Update the key-value pairs of all options.', nargs='+')
+    parser.add_argument('--opts',
+                        help='Update the key-value pairs of all options.',
+                        nargs='+')
 
     return parser.parse_args()
 
@@ -107,13 +105,12 @@ def parse_args():
 def main(args):
     assert args.config is not None, \
         'No configuration file specified, please set --config'
-    cfg = Config(
-        args.config,
-        learning_rate=args.learning_rate,
-        nepochs=args.nepochs,
-        batch_size=args.batch_size,
-        labeled_ratio=args.labeled_ratio,
-        opts=args.opts)
+    cfg = Config(args.config,
+                 learning_rate=args.learning_rate,
+                 nepochs=args.nepochs,
+                 batch_size=args.batch_size,
+                 labeled_ratio=args.labeled_ratio,
+                 opts=args.opts)
     builder = CPSBuilder(cfg)
 
     utils.show_env_info()
@@ -145,27 +142,26 @@ def main(args):
     optimizer_r = builder.optimizer_r
     loss = builder.loss
 
-    train(
-        model,
-        train_dataset,
-        unsupervised_train_dataset=unsupervised_train_dataset,
-        mask_genarator=mask_genarator,
-        val_dataset=val_dataset,
-        optimizer_l=optimizer_l,
-        optimizer_r=optimizer_r,
-        save_dir=args.save_dir,
-        nepochs=cfg.nepochs,
-        labeled_ratio=cfg.labeled_ratio,
-        batch_size=cfg.batch_size,
-        resume_model=args.resume_model,
-        save_epoch=args.save_epoch,
-        log_iters=args.log_iters,
-        num_workers=args.num_workers,
-        use_vdl=args.use_vdl,
-        losses=loss,
-        keep_checkpoint_max=args.keep_checkpoint_max,
-        test_config=cfg.test_config,
-        profiler_options=args.profiler_options)
+    train(model,
+          train_dataset,
+          unsupervised_train_dataset=unsupervised_train_dataset,
+          mask_genarator=mask_genarator,
+          val_dataset=val_dataset,
+          optimizer_l=optimizer_l,
+          optimizer_r=optimizer_r,
+          save_dir=args.save_dir,
+          nepochs=cfg.nepochs,
+          labeled_ratio=cfg.labeled_ratio,
+          batch_size=cfg.batch_size,
+          resume_model=args.resume_model,
+          save_epoch=args.save_epoch,
+          log_iters=args.log_iters,
+          num_workers=args.num_workers,
+          use_vdl=args.use_vdl,
+          losses=loss,
+          keep_checkpoint_max=args.keep_checkpoint_max,
+          test_config=cfg.test_config,
+          profiler_options=args.profiler_options)
 
 
 if __name__ == '__main__':

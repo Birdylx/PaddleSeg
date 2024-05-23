@@ -33,16 +33,18 @@ def point_sample(input, point_coords, **grid_sample_kwargs):
     return output
 
 
-def d2_get_uncertain_point_coords_with_randomness(
-        coarse_logits, uncertainty_func, num_points, oversample_ratio,
-        importance_sample_ratio):
+def d2_get_uncertain_point_coords_with_randomness(coarse_logits,
+                                                  uncertainty_func, num_points,
+                                                  oversample_ratio,
+                                                  importance_sample_ratio):
     assert oversample_ratio >= 1
     assert importance_sample_ratio <= 1 and importance_sample_ratio >= 0
     num_boxes = coarse_logits.shape[0]
     num_sampled = int(num_points * oversample_ratio)
     point_coords = paddle.rand((num_boxes, num_sampled, 2))
-    point_logits = point_sample(
-        coarse_logits, point_coords, align_corners=False)
+    point_logits = point_sample(coarse_logits,
+                                point_coords,
+                                align_corners=False)
     # It is crucial to calculate uncertainty based on the sampled prediction value for the points.
     # Calculating uncertainties of the coarse predictions first and sampling them for points leads
     # to incorrect results.
@@ -53,8 +55,9 @@ def d2_get_uncertain_point_coords_with_randomness(
     point_uncertainties = uncertainty_func(point_logits)
     num_uncertain_points = int(importance_sample_ratio * num_points)
     num_random_points = num_points - num_uncertain_points
-    idx = paddle.topk(
-        point_uncertainties[:, 0, :], k=num_uncertain_points, axis=1)[1]
+    idx = paddle.topk(point_uncertainties[:, 0, :],
+                      k=num_uncertain_points,
+                      axis=1)[1]
     shift = num_sampled * paddle.arange(num_boxes, dtype='int64')
     idx += shift[:, None]
     point_coords = point_coords.reshape((-1, 2))
@@ -66,7 +69,8 @@ def d2_get_uncertain_point_coords_with_randomness(
                 point_coords,
                 paddle.rand((num_boxes, num_random_points, 2)),
             ],
-            axis=1, )
+            axis=1,
+        )
     return point_coords
 
 
@@ -139,10 +143,12 @@ def batch_sigmoid_ce_loss(inputs, targets):
     """
     hw = inputs.shape[1]
 
-    pos = F.binary_cross_entropy_with_logits(
-        inputs, paddle.ones_like(inputs), reduction='none')
-    neg = F.binary_cross_entropy_with_logits(
-        inputs, paddle.zeros_like(inputs), reduction='none')
+    pos = F.binary_cross_entropy_with_logits(inputs,
+                                             paddle.ones_like(inputs),
+                                             reduction='none')
+    neg = F.binary_cross_entropy_with_logits(inputs,
+                                             paddle.zeros_like(inputs),
+                                             reduction='none')
 
     loss = paddle.einsum('nc,mc->nm', pos, targets) + paddle.einsum(
         'nc,mc->nm', neg, (1 - targets))
@@ -178,6 +184,7 @@ def _max_by_axis(the_list):
 
 
 class NestedTensor(object):
+
     def __init__(self, tensors, mask):
         self.tensors = tensors
         self.mask = mask
@@ -244,9 +251,8 @@ class HungarianMatcher(nn.Layer):
 
         # Iterate through batch size
         for b in range(bs):
-            out_prob = F.softmax(
-                net_out_dict['logits'][b],
-                axis=-1)  # [num_queries, num_classes]
+            out_prob = F.softmax(net_out_dict['logits'][b],
+                                 axis=-1)  # [num_queries, num_classes]
             tgt_ids = sample_dict['gt_ids'][b]
 
             # Compute the classification cost. Contrary to the loss, we don't use the NLL,
@@ -266,11 +272,13 @@ class HungarianMatcher(nn.Layer):
             tgt_mask = point_sample(
                 tgt_mask,
                 paddle.tile(point_coords, (tgt_mask.shape[0], 1, 1)),
-                align_corners=False, ).squeeze(1)
+                align_corners=False,
+            ).squeeze(1)
             out_mask = point_sample(
                 out_mask,
                 paddle.tile(point_coords, (out_mask.shape[0], 1, 1)),
-                align_corners=False, ).squeeze(1)
+                align_corners=False,
+            ).squeeze(1)
 
             # Disable mixed-precision
             with paddle.amp.auto_cast(enable=False):
@@ -291,9 +299,8 @@ class HungarianMatcher(nn.Layer):
 
             indices.append(linear_sum_assignment(C))
 
-        return [(paddle.to_tensor(
-            i, dtype='int64'), paddle.to_tensor(
-                j, dtype='int64')) for i, j in indices]
+        return [(paddle.to_tensor(i, dtype='int64'),
+                 paddle.to_tensor(j, dtype='int64')) for i, j in indices]
 
     @paddle.no_grad()
     def forward(self, sample_dict, net_out_dict):
@@ -302,6 +309,7 @@ class HungarianMatcher(nn.Layer):
 
 @manager.RUNNERS.add_component
 class MaskFormerRunner(PanSegRunner):
+
     def __init__(self, num_classes, weight_ce, weight_mask, weight_dice,
                  eos_coef, num_points, oversample_ratio,
                  importance_sample_ratio):
@@ -312,11 +320,10 @@ class MaskFormerRunner(PanSegRunner):
         self.weight_dice = weight_dice
 
         # Use a Hungarian matcher
-        self.matcher = HungarianMatcher(
-            cost_class=weight_ce,
-            cost_mask=weight_mask,
-            cost_dice=weight_dice,
-            num_points=num_points)
+        self.matcher = HungarianMatcher(cost_class=weight_ce,
+                                        cost_mask=weight_mask,
+                                        cost_dice=weight_dice,
+                                        num_points=num_points)
         self.eos_coef = eos_coef
         self.empty_weight = paddle.ones((self.num_classes + 1, ))
         self.empty_weight[-1] = self.eos_coef
@@ -332,15 +339,15 @@ class MaskFormerRunner(PanSegRunner):
         idx = self._get_src_permutation_idx(indices)
         target_classes_o = paddle.concat(
             [t[J] for t, (_, J) in zip(sample_dict['gt_ids'], indices)])
-        target_classes = paddle.full(
-            src_logits.shape[:2], self.num_classes, dtype='int64')
+        target_classes = paddle.full(src_logits.shape[:2],
+                                     self.num_classes,
+                                     dtype='int64')
         target_classes[idx] = target_classes_o
 
-        loss_ce = F.cross_entropy(
-            src_logits.transpose((0, 2, 1)),
-            target_classes,
-            self.empty_weight,
-            axis=1)
+        loss_ce = F.cross_entropy(src_logits.transpose((0, 2, 1)),
+                                  target_classes,
+                                  self.empty_weight,
+                                  axis=1)
         return self.weight_ce * loss_ce
 
     def loss_masks(self, sample_dict, net_out_dict, indices, num_masks):
@@ -368,17 +375,20 @@ class MaskFormerRunner(PanSegRunner):
                 lambda logits: calculate_uncertainty(logits),
                 self.num_points,
                 self.oversample_ratio,
-                self.importance_sample_ratio, )
+                self.importance_sample_ratio,
+            )
             # Get gt labels
             point_labels = point_sample(
                 target_masks,
                 point_coords,
-                align_corners=False, ).squeeze(1)
+                align_corners=False,
+            ).squeeze(1)
 
         point_logits = point_sample(
             src_masks,
             point_coords,
-            align_corners=False, ).squeeze(1)
+            align_corners=False,
+        ).squeeze(1)
 
         loss_ce = sigmoid_ce_loss(point_logits, point_labels, num_masks)
         loss_dice = dice_loss(point_logits, point_labels, num_masks)
@@ -413,21 +423,21 @@ class MaskFormerRunner(PanSegRunner):
             return (data['logits'] - data['logits']).mean()
         # XXX: Inplace modification
         data['gt_ids'] = [
-            paddle.to_tensor(
-                gt_ids, dtype='int64')
+            paddle.to_tensor(gt_ids, dtype='int64')
             for i, gt_ids in enumerate(data['gt_ids']) if i in nonzero_len_idcs
         ]
         data['gt_masks'] = [
-            paddle.to_tensor(
-                gt_masks, dtype='float32')
+            paddle.to_tensor(gt_masks, dtype='float32')
             for i, gt_masks in enumerate(data['gt_masks'])
             if i in nonzero_len_idcs
         ]
         if len(nonzero_len_idcs) < net_out['logits'].shape[0]:
-            net_out['logits'] = paddle.index_select(
-                net_out['logits'], nonzero_len_idcs, axis=0)
-            net_out['masks'] = paddle.index_select(
-                net_out['masks'], nonzero_len_idcs, axis=0)
+            net_out['logits'] = paddle.index_select(net_out['logits'],
+                                                    nonzero_len_idcs,
+                                                    axis=0)
+            net_out['masks'] = paddle.index_select(net_out['masks'],
+                                                   nonzero_len_idcs,
+                                                   axis=0)
 
         # Retrieve the matching between the outputs and the targets
         indices = self.matcher(data, net_out)
@@ -446,16 +456,18 @@ class MaskFormerRunner(PanSegRunner):
 
         # Calculate auxiliary losses
         if 'aux_masks' in net_out and 'aux_logits' in net_out:
-            for i, (
-                    aux_logit, aux_mask
-            ) in enumerate(zip(net_out['aux_logits'], net_out['aux_masks'])):
-                aux_dict = build_info_dict(
-                    _type_='net_out', logits=aux_logit, masks=aux_mask)
+            for i, (aux_logit, aux_mask) in enumerate(
+                    zip(net_out['aux_logits'], net_out['aux_masks'])):
+                aux_dict = build_info_dict(_type_='net_out',
+                                           logits=aux_logit,
+                                           masks=aux_mask)
                 if len(nonzero_len_idcs) < aux_dict['logits'].shape[0]:
-                    aux_dict['logits'] = paddle.index_select(
-                        aux_dict['logits'], nonzero_len_idcs, axis=0)
-                    aux_dict['masks'] = paddle.index_select(
-                        aux_dict['masks'], nonzero_len_idcs, axis=0)
+                    aux_dict['logits'] = paddle.index_select(aux_dict['logits'],
+                                                             nonzero_len_idcs,
+                                                             axis=0)
+                    aux_dict['masks'] = paddle.index_select(aux_dict['masks'],
+                                                            nonzero_len_idcs,
+                                                            axis=0)
                 indices = self.matcher(data, aux_dict)
                 l1 = self.loss_labels(data, aux_dict, indices, num_masks)
                 l2 = self.loss_masks(data, aux_dict, indices, num_masks)

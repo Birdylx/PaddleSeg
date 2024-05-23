@@ -102,13 +102,14 @@ def create_slider(parent,
 
 
 class DockWidget(QDockWidget):
+
     def __init__(self, parent, name, text):
         super().__init__(parent=parent)
         self.setObjectName(name)
         self.setAllowedAreas(Qt.RightDockWidgetArea | Qt.LeftDockWidgetArea)
         # 感觉不给关闭好点。可以在显示里面取消显示
-        self.setFeatures(QDockWidget.DockWidgetMovable |
-                         QDockWidget.DockWidgetFloatable)
+        self.setFeatures(QDockWidget.DockWidgetMovable
+                         | QDockWidget.DockWidgetFloatable)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred,
                                            QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)

@@ -45,6 +45,7 @@ __all__ = ["MobileNetV2"]
 
 
 class ConvBNLayer(nn.Layer):
+
     def __init__(self,
                  num_channels,
                  filter_size,
@@ -57,15 +58,14 @@ class ConvBNLayer(nn.Layer):
                  use_cudnn=True):
         super(ConvBNLayer, self).__init__()
 
-        self._conv = Conv2D(
-            in_channels=num_channels,
-            out_channels=num_filters,
-            kernel_size=filter_size,
-            stride=stride,
-            padding=padding,
-            groups=num_groups,
-            weight_attr=ParamAttr(name=name + "_weights"),
-            bias_attr=False)
+        self._conv = Conv2D(in_channels=num_channels,
+                            out_channels=num_filters,
+                            kernel_size=filter_size,
+                            stride=stride,
+                            padding=padding,
+                            groups=num_groups,
+                            weight_attr=ParamAttr(name=name + "_weights"),
+                            bias_attr=False)
 
         self._batch_norm = BatchNorm(
             num_filters,
@@ -83,37 +83,35 @@ class ConvBNLayer(nn.Layer):
 
 
 class InvertedResidualUnit(nn.Layer):
+
     def __init__(self, num_channels, num_in_filter, num_filters, stride,
                  filter_size, padding, expansion_factor, name):
         super(InvertedResidualUnit, self).__init__()
         num_expfilter = int(round(num_in_filter * expansion_factor))
-        self._expand_conv = ConvBNLayer(
-            num_channels=num_channels,
-            num_filters=num_expfilter,
-            filter_size=1,
-            stride=1,
-            padding=0,
-            num_groups=1,
-            name=name + "_expand")
+        self._expand_conv = ConvBNLayer(num_channels=num_channels,
+                                        num_filters=num_expfilter,
+                                        filter_size=1,
+                                        stride=1,
+                                        padding=0,
+                                        num_groups=1,
+                                        name=name + "_expand")
 
-        self._bottleneck_conv = ConvBNLayer(
-            num_channels=num_expfilter,
-            num_filters=num_expfilter,
-            filter_size=filter_size,
-            stride=stride,
-            padding=padding,
-            num_groups=num_expfilter,
-            use_cudnn=False,
-            name=name + "_dwise")
+        self._bottleneck_conv = ConvBNLayer(num_channels=num_expfilter,
+                                            num_filters=num_expfilter,
+                                            filter_size=filter_size,
+                                            stride=stride,
+                                            padding=padding,
+                                            num_groups=num_expfilter,
+                                            use_cudnn=False,
+                                            name=name + "_dwise")
 
-        self._linear_conv = ConvBNLayer(
-            num_channels=num_expfilter,
-            num_filters=num_filters,
-            filter_size=1,
-            stride=1,
-            padding=0,
-            num_groups=1,
-            name=name + "_linear")
+        self._linear_conv = ConvBNLayer(num_channels=num_expfilter,
+                                        num_filters=num_filters,
+                                        filter_size=1,
+                                        stride=1,
+                                        padding=0,
+                                        num_groups=1,
+                                        name=name + "_linear")
 
     def forward(self, inputs, ifshortcut):
         y = self._expand_conv(inputs, if_act=True)
@@ -125,32 +123,31 @@ class InvertedResidualUnit(nn.Layer):
 
 
 class InvresiBlocks(nn.Layer):
+
     def __init__(self, in_c, t, c, n, s, name):
         super(InvresiBlocks, self).__init__()
 
-        self._first_block = InvertedResidualUnit(
-            num_channels=in_c,
-            num_in_filter=in_c,
-            num_filters=c,
-            stride=s,
-            filter_size=3,
-            padding=1,
-            expansion_factor=t,
-            name=name + "_1")
+        self._first_block = InvertedResidualUnit(num_channels=in_c,
+                                                 num_in_filter=in_c,
+                                                 num_filters=c,
+                                                 stride=s,
+                                                 filter_size=3,
+                                                 padding=1,
+                                                 expansion_factor=t,
+                                                 name=name + "_1")
 
         self._block_list = []
         for i in range(1, n):
-            block = self.add_sublayer(
-                name + "_" + str(i + 1),
-                sublayer=InvertedResidualUnit(
-                    num_channels=c,
-                    num_in_filter=c,
-                    num_filters=c,
-                    stride=1,
-                    filter_size=3,
-                    padding=1,
-                    expansion_factor=t,
-                    name=name + "_" + str(i + 1)))
+            block = self.add_sublayer(name + "_" + str(i + 1),
+                                      sublayer=InvertedResidualUnit(
+                                          num_channels=c,
+                                          num_in_filter=c,
+                                          num_filters=c,
+                                          stride=1,
+                                          filter_size=3,
+                                          padding=1,
+                                          expansion_factor=t,
+                                          name=name + "_" + str(i + 1)))
             self._block_list.append(block)
 
     def forward(self, inputs):
@@ -162,6 +159,7 @@ class InvresiBlocks(nn.Layer):
 
 @manager.BACKBONES.add_component
 class MobileNet(nn.Layer):
+
     def __init__(self,
                  input_channels=3,
                  scale=1.0,
@@ -180,13 +178,12 @@ class MobileNet(nn.Layer):
             (6, 320, 1, 1),
         ]
 
-        self.conv1 = ConvBNLayer(
-            num_channels=input_channels,
-            num_filters=int(32 * scale),
-            filter_size=3,
-            stride=2,
-            padding=1,
-            name=prefix_name + "conv1_1")
+        self.conv1 = ConvBNLayer(num_channels=input_channels,
+                                 num_filters=int(32 * scale),
+                                 filter_size=3,
+                                 stride=2,
+                                 padding=1,
+                                 name=prefix_name + "conv1_1")
 
         self.block_list = []
         i = 1
@@ -194,26 +191,24 @@ class MobileNet(nn.Layer):
         for layer_setting in bottleneck_params_list:
             t, c, n, s = layer_setting
             i += 1
-            block = self.add_sublayer(
-                prefix_name + "conv" + str(i),
-                sublayer=InvresiBlocks(
-                    in_c=in_c,
-                    t=t,
-                    c=int(c * scale),
-                    n=n,
-                    s=s,
-                    name=prefix_name + "conv" + str(i)))
+            block = self.add_sublayer(prefix_name + "conv" + str(i),
+                                      sublayer=InvresiBlocks(in_c=in_c,
+                                                             t=t,
+                                                             c=int(c * scale),
+                                                             n=n,
+                                                             s=s,
+                                                             name=prefix_name +
+                                                             "conv" + str(i)))
             self.block_list.append(block)
             in_c = int(c * scale)
 
         self.out_c = int(1280 * scale) if scale > 1.0 else 1280
-        self.conv9 = ConvBNLayer(
-            num_channels=in_c,
-            num_filters=self.out_c,
-            filter_size=1,
-            stride=1,
-            padding=0,
-            name=prefix_name + "conv9")
+        self.conv9 = ConvBNLayer(num_channels=in_c,
+                                 num_filters=self.out_c,
+                                 filter_size=1,
+                                 stride=1,
+                                 padding=0,
+                                 name=prefix_name + "conv9")
 
         self.feat_channels = [int(i * scale) for i in [16, 24, 32, 96, 1280]]
         self.pretrained = pretrained

@@ -18,6 +18,7 @@
 
 
 class SingleThreadedAugmenter:
+
     def __init__(self, data_loader, transform):
         self.data_loader = data_loader
         self.transform = transform

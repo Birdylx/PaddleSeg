@@ -39,7 +39,7 @@ if check_gdal():
 
 
 # 保存shp文件
-def save_shp(shp_path: str, tif_path: str, ignore_index: int=0) -> str:
+def save_shp(shp_path: str, tif_path: str, ignore_index: int = 0) -> str:
     if IMPORT_STATE == True:
         ds = gdal.Open(tif_path)
         srcband = ds.GetRasterBand(1)
@@ -52,8 +52,9 @@ def save_shp(shp_path: str, tif_path: str, ignore_index: int=0) -> str:
             os.remove(shp_path)
         dst_ds = drv.CreateDataSource(shp_path)
         prosrs = osr.SpatialReference(wkt=ds.GetProjection())
-        dst_layer = dst_ds.CreateLayer(
-            "segmentation", geom_type=ogr.wkbPolygon, srs=prosrs)
+        dst_layer = dst_ds.CreateLayer("segmentation",
+                                       geom_type=ogr.wkbPolygon,
+                                       srs=prosrs)
         dst_fieldname = "DN"
         fd = ogr.FieldDefn(dst_fieldname, ogr.OFTInteger)
         dst_layer.CreateField(fd)

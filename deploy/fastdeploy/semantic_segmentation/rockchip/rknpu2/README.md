@@ -2,7 +2,7 @@
 
 # PaddleSeg 语义分割模型RKNPU2部署方案-FastDeploy
 
-## 1. 说明   
+## 1. 说明  
 RKNPU2 提供了一个高性能接口来访问 Rockchip NPU，支持如下硬件的部署
 - RK3566/RK3568
 - RK3588/RK3588S
@@ -25,10 +25,10 @@ RKNPU2 提供了一个高性能接口来访问 Rockchip NPU，支持如下硬件
 | [Deeplabv3-ResNet101-OS8-cityscapes](https://bj.bcebos.com/paddlehub/fastdeploy/Deeplabv3_ResNet101_OS8_cityscapes_without_argmax_infer.tgz) | 150MB  | 1024x512 | 79.90% | 80.22%      | 80.47%         |
 
 
-## 3. 自行导出PaddleSeg部署模型 
+## 3. 自行导出PaddleSeg部署模型
 
 ### 3.1 模型版本
-支持[PaddleSeg](https://github.com/PaddlePaddle/PaddleSeg)高于2.6版本的Segmentation模型。目前FastDeploy测试过成功部署的模型:   
+支持[PaddleSeg](https://github.com/PaddlePaddle/PaddleSeg)高于2.6版本的Segmentation模型。目前FastDeploy测试过成功部署的模型:  
 - [U-Net系列模型](https://github.com/PaddlePaddle/PaddleSeg/blob/develop/configs/unet/README.md)
 - [PP-LiteSeg系列模型](https://github.com/PaddlePaddle/PaddleSeg/blob/develop/configs/pp_liteseg/README.md)
 - [PP-HumanSeg系列模型](https://github.com/PaddlePaddle/PaddleSeg/blob/develop/contrib/PP-HumanSeg/README.md)

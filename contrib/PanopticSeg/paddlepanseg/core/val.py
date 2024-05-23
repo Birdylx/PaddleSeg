@@ -67,27 +67,29 @@ def evaluate(model,
     eval_pan = True
 
     # Build batch sampler and data loader
-    batch_sampler = paddle.io.DistributedBatchSampler(
-        eval_dataset, batch_size=1, shuffle=False, drop_last=False)
-    loader = paddle.io.DataLoader(
-        eval_dataset,
-        batch_sampler=batch_sampler,
-        num_workers=num_workers,
-        return_list=True,
-        collate_fn=eval_dataset.collate
-        if hasattr(eval_dataset, 'collate') else None)
+    batch_sampler = paddle.io.DistributedBatchSampler(eval_dataset,
+                                                      batch_size=1,
+                                                      shuffle=False,
+                                                      drop_last=False)
+    loader = paddle.io.DataLoader(eval_dataset,
+                                  batch_sampler=batch_sampler,
+                                  num_workers=num_workers,
+                                  return_list=True,
+                                  collate_fn=eval_dataset.collate if hasattr(
+                                      eval_dataset, 'collate') else None)
 
     # Bind components to runner
     runner.bind(model=model, postprocessor=postprocessor)
 
     # Create launcher
-    launcher = AMPLauncher(
-        runner=runner, precision=precision, amp_level=amp_level)
+    launcher = AMPLauncher(runner=runner,
+                           precision=precision,
+                           amp_level=amp_level)
 
     total_iters = len(loader)
     if eval_sem:
-        sem_evaluator = SemSegEvaluator(
-            eval_dataset.num_classes, ignore_index=eval_dataset.ignore_index)
+        sem_evaluator = SemSegEvaluator(eval_dataset.num_classes,
+                                        ignore_index=eval_dataset.ignore_index)
     if eval_ins:
         ins_evaluator_ap50 = InsSegEvaluator(
             eval_dataset.num_classes,
@@ -107,8 +109,9 @@ def evaluate(model,
             convert_id=eval_dataset.convert_id_for_eval)
 
     if print_detail:
-        logger.info("Start evaluating (total_samples={}, total_iters={})...".
-                    format(len(eval_dataset), total_iters))
+        logger.info(
+            "Start evaluating (total_samples={}, total_iters={})...".format(
+                len(eval_dataset), total_iters))
     progbar_val = progbar.Progbar(target=total_iters, verbose=1)
     reader_cost_averager = TimeAverager()
     batch_cost_averager = TimeAverager()
@@ -127,8 +130,8 @@ def evaluate(model,
             if eval_pan:
                 pan_evaluator.update(data, pp_out)
 
-            batch_cost_averager.record(
-                time.time() - batch_start, num_samples=len(data['img']))
+            batch_cost_averager.record(time.time() - batch_start,
+                                       num_samples=len(data['img']))
             batch_cost = batch_cost_averager.get_average()
             reader_cost = reader_cost_averager.get_average()
 
@@ -145,8 +148,8 @@ def evaluate(model,
         sem_results = sem_evaluator.evaluate()
         results['sem_metrics'] = sem_results['sem_metrics']
     if eval_ins:
-        ins_results = build_info_dict(
-            _type_='metric', ins_metrics=OrderedDict())
+        ins_results = build_info_dict(_type_='metric',
+                                      ins_metrics=OrderedDict())
         ins_results_ap = ins_evaluator_ap.evaluate()
         ins_results_ap50 = ins_evaluator_ap50.evaluate()
         ins_results['ins_metrics']['mAP'] = ins_results_ap['ins_metrics']['mAP']
@@ -163,32 +166,31 @@ def evaluate(model,
     if print_detail:
         if eval_pan:
             logger.info(
-                tabulate_metrics(
-                    results['pan_metrics']['All'],
-                    digits=4,
-                    title="Pan Metrics of All Classes:"))
+                tabulate_metrics(results['pan_metrics']['All'],
+                                 digits=4,
+                                 title="Pan Metrics of All Classes:"))
             logger.info(
-                tabulate_metrics(
-                    results['pan_metrics']['Things'],
-                    digits=4,
-                    title="Pan Metrics of Thing Classes:"))
+                tabulate_metrics(results['pan_metrics']['Things'],
+                                 digits=4,
+                                 title="Pan Metrics of Thing Classes:"))
             logger.info(
-                tabulate_metrics(
-                    results['pan_metrics']['Stuff'],
-                    digits=4,
-                    title="Pan Metrics of Stuff Classes:"))
-            logger.info("PQ: {:.4f}".format(results['pan_metrics']['All'][
-                'pq']))
+                tabulate_metrics(results['pan_metrics']['Stuff'],
+                                 digits=4,
+                                 title="Pan Metrics of Stuff Classes:"))
+            logger.info("PQ: {:.4f}".format(
+                results['pan_metrics']['All']['pq']))
         if eval_sem:
             logger.info(
-                tabulate_metrics(
-                    results['sem_metrics'], digits=2, title="Sem metrics:"))
+                tabulate_metrics(results['sem_metrics'],
+                                 digits=2,
+                                 title="Sem metrics:"))
             logger.info("mIoU: {:.4f}".format(results['sem_metrics']['mIoU']))
         if eval_ins:
             logger.info(
-                tabulate_metrics(
-                    results['ins_metrics'], digits=2, title="Ins metrics:"))
-            logger.info("mAP: {:.4f}, mAP50: {:.4f}".format(results[
-                'ins_metrics']['mAP'], results['ins_metrics']['mAP50']))
+                tabulate_metrics(results['ins_metrics'],
+                                 digits=2,
+                                 title="Ins metrics:"))
+            logger.info("mAP: {:.4f}, mAP50: {:.4f}".format(
+                results['ins_metrics']['mAP'], results['ins_metrics']['mAP50']))
 
     return results

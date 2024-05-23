@@ -67,25 +67,23 @@ class CPSDeeplabV3P(nn.Layer):
         self.backbone1 = backbone_l
         self.backbone2 = backbone_r
 
-        self.branch1 = DeepLabV3P(
-            num_classes=num_classes,
-            backbone=self.backbone1,
-            backbone_indices=backbone_indices,
-            aspp_ratios=aspp_ratios,
-            aspp_out_channels=aspp_out_channels,
-            align_corners=align_corners,
-            pretrained=pretrained,
-            data_format=data_format)
+        self.branch1 = DeepLabV3P(num_classes=num_classes,
+                                  backbone=self.backbone1,
+                                  backbone_indices=backbone_indices,
+                                  aspp_ratios=aspp_ratios,
+                                  aspp_out_channels=aspp_out_channels,
+                                  align_corners=align_corners,
+                                  pretrained=pretrained,
+                                  data_format=data_format)
 
-        self.branch2 = DeepLabV3P(
-            num_classes=num_classes,
-            backbone=self.backbone2,
-            backbone_indices=backbone_indices,
-            aspp_ratios=aspp_ratios,
-            aspp_out_channels=aspp_out_channels,
-            align_corners=align_corners,
-            pretrained=pretrained,
-            data_format=data_format)
+        self.branch2 = DeepLabV3P(num_classes=num_classes,
+                                  backbone=self.backbone2,
+                                  backbone_indices=backbone_indices,
+                                  aspp_ratios=aspp_ratios,
+                                  aspp_out_channels=aspp_out_channels,
+                                  align_corners=align_corners,
+                                  pretrained=pretrained,
+                                  data_format=data_format)
 
         self.bn_eps = bn_eps
         self.bn_momentum = bn_momentum
@@ -102,24 +100,22 @@ class CPSDeeplabV3P(nn.Layer):
         norm_layer = nn.BatchNorm2D if paddle.distributed.ParallelEnv(
         ).nranks == 1 else nn.SyncBatchNorm
         # Initialize subnetwork one
-        self.init_weight(
-            self.branch1.head,
-            init.kaiming_normal_,
-            norm_layer,
-            self.bn_eps,
-            self.bn_momentum,
-            mode='fan_in',
-            nonlinearity='relu')
+        self.init_weight(self.branch1.head,
+                         init.kaiming_normal_,
+                         norm_layer,
+                         self.bn_eps,
+                         self.bn_momentum,
+                         mode='fan_in',
+                         nonlinearity='relu')
 
         # Initialize subnetwork two
-        self.init_weight(
-            self.branch2.head,
-            init.kaiming_normal_,
-            norm_layer,
-            self.bn_eps,
-            self.bn_momentum,
-            mode='fan_in',
-            nonlinearity='relu')
+        self.init_weight(self.branch2.head,
+                         init.kaiming_normal_,
+                         norm_layer,
+                         self.bn_eps,
+                         self.bn_momentum,
+                         mode='fan_in',
+                         nonlinearity='relu')
 
     def init_weight(self, module_list, conv_init, norm_layer, bn_eps,
                     bn_momentum, **kwargs):

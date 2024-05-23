@@ -58,17 +58,22 @@ urls = {
 
 dataset_addr = {
     "Promise12": {
-        "dataset_root": "data/Promise12",
-        "raw_dataset_dir": "Promise12_raw",
+        "dataset_root":
+        "data/Promise12",
+        "raw_dataset_dir":
+        "Promise12_raw",
         "images_dir":
         ("prostate/TrainingData_Part1", "prostate/TrainingData_Part2",
          "prostate/TrainingData_Part3"),
-        "labels_dir": ("prostate/TrainingData_Part1",
-                       "prostate/TrainingData_Part2",
-                       "prostate/TrainingData_Part3"),
-        "images_dir_test": "prostate/TestData",
-        "phase_dir": "Promise12_phase0/",
-        "urls": urls["Promise12"],
+        "labels_dir":
+        ("prostate/TrainingData_Part1", "prostate/TrainingData_Part2",
+         "prostate/TrainingData_Part3"),
+        "images_dir_test":
+        "prostate/TestData",
+        "phase_dir":
+        "Promise12_phase0/",
+        "urls":
+        urls["Promise12"],
         "valid_suffix": ("mhd", "mhd"),
         "filter_key": ({
             "segmentation": False
@@ -81,16 +86,20 @@ dataset_addr = {
         }
     },
     "Prostate_mri": {
-        "dataset_root": "data/Prostate_mri",
-        "raw_dataset_dir": "Prostate_mri_raw",
+        "dataset_root":
+        "data/Prostate_mri",
+        "raw_dataset_dir":
+        "Prostate_mri_raw",
         "images_dir": ("Processed_data_nii/BIDMC", "Processed_data_nii/BMC",
                        "Processed_data_nii/HK", "Processed_data_nii/I2CVB",
                        "Processed_data_nii/RUNMC", "Processed_data_nii/UCL"),
         "labels_dir": ("Processed_data_nii/BIDMC", "Processed_data_nii/BMC",
                        "Processed_data_nii/HK", "Processed_data_nii/I2CVB",
                        "Processed_data_nii/RUNMC", "Processed_data_nii/UCL"),
-        "phase_dir": "Prostate_mri_phase0/",
-        "urls": urls["Prostate_mri"],
+        "phase_dir":
+        "Prostate_mri_phase0/",
+        "urls":
+        urls["Prostate_mri"],
         "valid_suffix": ("nii.gz", "nii.gz"),
         "filter_key": ({
             "segmentation": False
@@ -133,6 +142,7 @@ dataset_profile = {
 
 
 class Prep_prostate(Prep):
+
     def __init__(self,
                  dataset_root="data/TemDataSet",
                  raw_dataset_dir="TemDataSet_seg_raw/",
@@ -142,23 +152,27 @@ class Prep_prostate(Prep):
                  urls=None,
                  valid_suffix=("nii.gz", "nii.gz"),
                  filter_key=(None, None),
-                 uncompress_params={"format": "zip",
-                                    "num_files": 1},
+                 uncompress_params={
+                     "format": "zip",
+                     "num_files": 1
+                 },
                  images_dir_test=""):
 
         super().__init__(dataset_root, raw_dataset_dir, images_dir, labels_dir,
                          phase_dir, urls, valid_suffix, filter_key,
                          uncompress_params, images_dir_test)
 
-        self.preprocess={"images":[           # todo: make params set automatically
-                        normalize,
-                        wrapped_partial(
-                            resample, new_shape=[512, 512, 24],
-                            order=1)],
-                        "labels":[
-                        wrapped_partial(
-                            resample, new_shape=[512, 512, 24], order=0)],
-                        "images_test":[normalize,]}
+        self.preprocess = {
+            "images": [  # todo: make params set automatically
+                normalize,
+                wrapped_partial(resample, new_shape=[512, 512, 24], order=1)
+            ],
+            "labels":
+            [wrapped_partial(resample, new_shape=[512, 512, 24], order=0)],
+            "images_test": [
+                normalize,
+            ]
+        }
 
     def generate_txt(self, split=1.0):
         """generate the train_list.txt and val_list.txt"""
@@ -178,10 +192,14 @@ class Prep_prostate(Prep):
             for name in image_files_npy  # to have the save order
         ]
 
-        self.split_files_txt(
-            txtname[0], image_files_npy, label_files_npy, split=split)
-        self.split_files_txt(
-            txtname[1], image_files_npy, label_files_npy, split=split)
+        self.split_files_txt(txtname[0],
+                             image_files_npy,
+                             label_files_npy,
+                             split=split)
+        self.split_files_txt(txtname[1],
+                             image_files_npy,
+                             label_files_npy,
+                             split=split)
 
         self.split_files_txt(txtname[2], test_file_npy)
 

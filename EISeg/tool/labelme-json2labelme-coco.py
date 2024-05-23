@@ -200,13 +200,14 @@ class LabelFile(object):
                 data = json.load(f)
             version = data.get("version")
             if version is None:
-                logging.warning("Loading JSON file ({}) of unknown version".
-                                format(filename))
+                logging.warning(
+                    "Loading JSON file ({}) of unknown version".format(
+                        filename))
             elif version.split(".")[0] != __version__.split(".")[0]:
                 logging.warning("This JSON file ({}) may be incompatible with "
                                 "current labelme. version in file: {}, "
-                                "current version: {}".format(filename, version,
-                                                             __version__))
+                                "current version: {}".format(
+                                    filename, version, __version__))
 
             if data["imageData"] is not None:
                 imageData = base64.b64decode(data["imageData"])
@@ -221,7 +222,8 @@ class LabelFile(object):
             self._check_image_height_and_width(
                 base64.b64encode(imageData).decode("utf-8"),
                 data.get("imageHeight"),
-                data.get("imageWidth"), )
+                data.get("imageWidth"),
+            )
             shapes = [
                 dict(
                     label=s["label"],
@@ -232,7 +234,8 @@ class LabelFile(object):
                     other_data={
                         k: v
                         for k, v in s.items() if k not in shape_keys
-                    }, ) for s in data["shapes"]
+                    },
+                ) for s in data["shapes"]
             ]
         except Exception as e:
             raise LabelFileError(e)
@@ -266,15 +269,16 @@ class LabelFile(object):
         return imageHeight, imageWidth
 
     def save(
-            self,
-            filename,
-            shapes,
-            imagePath,
-            imageHeight,
-            imageWidth,
-            imageData=None,
-            otherData=None,
-            flags=None, ):
+        self,
+        filename,
+        shapes,
+        imagePath,
+        imageHeight,
+        imageWidth,
+        imageData=None,
+        otherData=None,
+        flags=None,
+    ):
         if imageData is not None:
             imageData = base64.b64encode(imageData).decode("utf-8")
             imageHeight, imageWidth = self._check_image_height_and_width(
@@ -290,7 +294,8 @@ class LabelFile(object):
             imagePath=imagePath,
             imageData=imageData,
             imageHeight=imageHeight,
-            imageWidth=imageWidth, )
+            imageWidth=imageWidth,
+        )
         for key, value in otherData.items():
             assert key not in data
             data[key] = value
@@ -333,11 +338,13 @@ def main():
             version=None,
             year=now.year,
             contributor=None,
-            date_created=now.strftime("%Y-%m-%d %H:%M:%S.%f"), ),
+            date_created=now.strftime("%Y-%m-%d %H:%M:%S.%f"),
+        ),
         licenses=[dict(
             url=None,
             id=0,
-            name=None, )],
+            name=None,
+        )],
         images=[
             # license, url, file_name, height, width, date_captured, id
         ],
@@ -347,7 +354,8 @@ def main():
         ],
         categories=[
             # supercategory, id, name
-        ], )
+        ],
+    )
 
     class_name_to_id = {}
     for i, line in enumerate(open(args.labels).readlines()):
@@ -361,7 +369,8 @@ def main():
             dict(
                 supercategory=None,
                 id=class_id,
-                name=class_name, ))
+                name=class_name,
+            ))
 
     out_ann_file = osp.join(args.output_dir, "annotations.json")
     label_files = glob.glob(osp.join(args.input_dir, "*.json"))
@@ -383,7 +392,8 @@ def main():
                 height=img.shape[0],
                 width=img.shape[1],
                 date_captured=None,
-                id=image_id, ))
+                id=image_id,
+            ))
 
         masks = {}  # for area
         segmentations = collections.defaultdict(list)  # for segmentation
@@ -444,22 +454,25 @@ def main():
                     segmentation=segmentations[instance],
                     area=area,
                     bbox=bbox,
-                    iscrowd=0, ))
+                    iscrowd=0,
+                ))
 
         if not args.noviz:
             viz = img
             if masks:
-                labels, captions, masks = zip(
-                    *[(class_name_to_id[cnm], cnm, msk)
-                      for (cnm, gid), msk in masks.items()
-                      if cnm in class_name_to_id])
+                labels, captions, masks = zip(*[(class_name_to_id[cnm], cnm,
+                                                 msk)
+                                                for (cnm,
+                                                     gid), msk in masks.items()
+                                                if cnm in class_name_to_id])
                 viz = imgviz.instances2rgb(
                     image=img,
                     labels=labels,
                     masks=masks,
                     captions=captions,
                     font_size=15,
-                    line_width=2, )
+                    line_width=2,
+                )
             out_viz_file = osp.join(args.output_dir, "Visualization",
                                     base + ".jpg")
             imgviz.io.imsave(out_viz_file, viz)

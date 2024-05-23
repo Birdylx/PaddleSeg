@@ -125,7 +125,8 @@ def main(args):
             lbl = shape2label(
                 img_size=img.shape,
                 shapes=data['shapes'],
-                class_name_mapping=class_name_to_id, )
+                class_name_mapping=class_name_to_id,
+            )
 
             # Assume label ranges [0, 255] for uint8,
             if lbl.min() >= 0 and lbl.max() <= 255:

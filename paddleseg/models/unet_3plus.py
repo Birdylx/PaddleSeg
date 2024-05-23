@@ -61,14 +61,14 @@ class UNet3Plus(nn.Layer):
         if self.is_deepsup:
             self.deepsup = DeepSup(self.up_channels, self.filters, num_classes)
             if self.is_CGM:
-                self.cls = nn.Sequential(
-                    nn.Dropout(p=0.5),
-                    nn.Conv2D(self.filters[4], 2, 1),
-                    nn.AdaptiveMaxPool2D(1),
-                    nn.Sigmoid())
+                self.cls = nn.Sequential(nn.Dropout(p=0.5),
+                                         nn.Conv2D(self.filters[4], 2, 1),
+                                         nn.AdaptiveMaxPool2D(1), nn.Sigmoid())
         else:
-            self.outconv1 = nn.Conv2D(
-                self.up_channels, num_classes, 3, padding=1)
+            self.outconv1 = nn.Conv2D(self.up_channels,
+                                      num_classes,
+                                      3,
+                                      padding=1)
         # initialise weights
         for sublayer in self.sublayers():
             if isinstance(sublayer, nn.Conv2D):
@@ -103,6 +103,7 @@ class UNet3Plus(nn.Layer):
 
 
 class Encoder(nn.Layer):
+
     def __init__(self, in_channels, filters, is_batchnorm):
         super(Encoder, self).__init__()
         self.conv1 = UnetConv2D(in_channels, filters[0], is_batchnorm)
@@ -121,6 +122,7 @@ class Encoder(nn.Layer):
 
 
 class Decoder(nn.Layer):
+
     def __init__(self, filters, cat_channels, up_channels):
         super(Decoder, self).__init__()
         '''stage 4d'''
@@ -228,13 +230,14 @@ class Decoder(nn.Layer):
         hd5_UT_hd1 = self.hd5_UT_hd1_cbr(self.hd5_UT_hd1(hd5))
         # hd1->320*320*up_channels
         hd1 = self.cbr1d_1(
-            paddle.concat([
-                h1_Cat_hd1, hd2_UT_hd1, hd3_UT_hd1, hd4_UT_hd1, hd5_UT_hd1
-            ], 1))
+            paddle.concat(
+                [h1_Cat_hd1, hd2_UT_hd1, hd3_UT_hd1, hd4_UT_hd1, hd5_UT_hd1],
+                1))
         return [hd1, hd2, hd3, hd4, hd5]
 
 
 class DeepSup(nn.Layer):
+
     def __init__(self, up_channels, filters, num_classes):
         super(DeepSup, self).__init__()
         self.convup5 = ConvUp2D(filters[4], num_classes, 16)
@@ -254,24 +257,23 @@ class DeepSup(nn.Layer):
 
 
 class ConvBnReLU2D(nn.Sequential):
+
     def __init__(self, in_channels, out_channels):
-        super(ConvBnReLU2D, self).__init__(
-            nn.Conv2D(
-                in_channels, out_channels, 3, padding=1),
-            nn.BatchNorm(out_channels),
-            nn.ReLU())
+        super(ConvBnReLU2D,
+              self).__init__(nn.Conv2D(in_channels, out_channels, 3, padding=1),
+                             nn.BatchNorm(out_channels), nn.ReLU())
 
 
 class ConvUp2D(nn.Sequential):
+
     def __init__(self, in_channels, out_channels, scale_factor):
         super(ConvUp2D, self).__init__(
-            nn.Conv2D(
-                in_channels, out_channels, 3, padding=1),
-            nn.Upsample(
-                scale_factor=scale_factor, mode='bilinear'))
+            nn.Conv2D(in_channels, out_channels, 3, padding=1),
+            nn.Upsample(scale_factor=scale_factor, mode='bilinear'))
 
 
 class MaxPoolConv2D(nn.Sequential):
+
     def __init__(self, in_channels, out_channels, is_batchnorm):
         super(MaxPoolConv2D, self).__init__(
             nn.MaxPool2D(kernel_size=2),
@@ -279,6 +281,7 @@ class MaxPoolConv2D(nn.Sequential):
 
 
 class UnetConv2D(nn.Layer):
+
     def __init__(self,
                  in_channels,
                  out_channels,

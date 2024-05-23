@@ -85,8 +85,10 @@ class KNet(nn.Layer):
         self.kernel_generate_head = build_kernel_generate_head(
             kernel_generate_head_params)
         if self.enable_auxiliary_loss:
-            self.aux_head = layers.AuxLayer(
-                1024, 256, num_classes, dropout_prob=dropout_prob)
+            self.aux_head = layers.AuxLayer(1024,
+                                            256,
+                                            num_classes,
+                                            dropout_prob=dropout_prob)
         self.init_weight()
 
     def forward(self, x):
@@ -97,26 +99,25 @@ class KNet(nn.Layer):
         sem_seg, feats, seg_kernels = self.kernel_generate_head(feats)
         stage_segs = [sem_seg]
         for i in range(self.num_stages):
-            sem_seg, seg_kernels = self.kernel_update_head[i](
-                feats, seg_kernels, sem_seg)
+            sem_seg, seg_kernels = self.kernel_update_head[i](feats,
+                                                              seg_kernels,
+                                                              sem_seg)
             stage_segs.append(sem_seg)
         if self.training:
             if self.enable_auxiliary_loss:
                 stage_segs.append(aux_out)
             for i, v in enumerate(stage_segs):
-                stage_segs[i] = F.interpolate(
-                    v,
-                    paddle.shape(x)[2:],
-                    mode='bilinear',
-                    align_corners=self.align_corners)
+                stage_segs[i] = F.interpolate(v,
+                                              paddle.shape(x)[2:],
+                                              mode='bilinear',
+                                              align_corners=self.align_corners)
             return stage_segs
         # only return the prediction of the last stage during testing
         return [
-            F.interpolate(
-                stage_segs[-1],
-                paddle.shape(x)[2:],
-                mode='bilinear',
-                align_corners=self.align_corners)
+            F.interpolate(stage_segs[-1],
+                          paddle.shape(x)[2:],
+                          mode='bilinear',
+                          align_corners=self.align_corners)
         ]
 
     def init_weight(self):
@@ -135,6 +136,7 @@ def build_kernel_generate_head(kwargs):
 
 
 class UPerKernelHead(UPerNetHead):
+
     def forward(self, inputs):
         laterals = []
         for i, lateral_conv in enumerate(self.lateral_convs):
@@ -156,11 +158,10 @@ class UPerKernelHead(UPerNetHead):
         fpn_outs.append(laterals[-1])
 
         for i in range(fpn_levels - 1, 0, -1):
-            fpn_outs[i] = F.interpolate(
-                fpn_outs[i],
-                size=paddle.shape(fpn_outs[0])[2:],
-                mode='bilinear',
-                align_corners=self.align_corners)
+            fpn_outs[i] = F.interpolate(fpn_outs[i],
+                                        size=paddle.shape(fpn_outs[0])[2:],
+                                        mode='bilinear',
+                                        align_corners=self.align_corners)
         fuse_out = paddle.concat(fpn_outs, axis=1)
         feats = self.fpn_bottleneck(fuse_out)
         output = self.conv_seg(feats)
@@ -176,6 +177,7 @@ class UPerKernelHead(UPerNetHead):
 
 
 class FCNKernelHead(nn.Layer):
+
     def __init__(self,
                  in_channels=2048,
                  channels=512,
@@ -200,23 +202,21 @@ class FCNKernelHead(nn.Layer):
         for i in range(num_convs):
             _in_channels = self.in_channels if i == 0 else self.channels
             convs.append(
-                layers.ConvBNReLU(
-                    _in_channels,
-                    self.channels,
-                    kernel_size=kernel_size,
-                    padding=conv_padding,
-                    dilation=dilation))
+                layers.ConvBNReLU(_in_channels,
+                                  self.channels,
+                                  kernel_size=kernel_size,
+                                  padding=conv_padding,
+                                  dilation=dilation))
 
         if len(convs) == 0:
             self.convs = nn.Identity()
         else:
             self.convs = nn.Sequential(*convs)
         if self.concat_input:
-            self.conv_cat = layers.ConvBNReLU(
-                self.in_channels + self.channels,
-                self.channels,
-                kernel_size=kernel_size,
-                padding=kernel_size // 2)
+            self.conv_cat = layers.ConvBNReLU(self.in_channels + self.channels,
+                                              self.channels,
+                                              kernel_size=kernel_size,
+                                              padding=kernel_size // 2)
 
         self.conv_seg = nn.Conv2D(channels, num_classes, kernel_size=1)
 
@@ -244,6 +244,7 @@ class FCNKernelHead(nn.Layer):
 
 
 class FFN(nn.Layer):
+
     def __init__(self,
                  embed_dims=256,
                  feedforward_channels=1024,
@@ -259,9 +260,8 @@ class FFN(nn.Layer):
         layers = []
         in_channels = embed_dims
         layers.append(
-            nn.Sequential(
-                nn.Linear(in_channels, feedforward_channels), self.activate,
-                nn.Dropout(ffn_drop)))
+            nn.Sequential(nn.Linear(in_channels, feedforward_channels),
+                          self.activate, nn.Dropout(ffn_drop)))
         layers.append(nn.Linear(feedforward_channels, embed_dims))
         layers.append(nn.Dropout(ffn_drop))
         self.layers = nn.Sequential(*layers)
@@ -278,17 +278,19 @@ class FFN(nn.Layer):
 
 
 class KernelUpdator(nn.Layer):
+
     def __init__(
-            self,
-            in_channels=256,
-            feat_channels=64,
-            out_channels=None,
-            input_feat_shape=3,
-            gate_sigmoid=True,
-            gate_norm_act=False,
-            activate_out=False,
-            norm_fn=nn.LayerNorm,
-            act_fn=nn.ReLU, ):
+        self,
+        in_channels=256,
+        feat_channels=64,
+        out_channels=None,
+        input_feat_shape=3,
+        gate_sigmoid=True,
+        gate_norm_act=False,
+        activate_out=False,
+        norm_fn=nn.LayerNorm,
+        act_fn=nn.ReLU,
+    ):
         super(KernelUpdator, self).__init__()
         self.in_channels = in_channels
         self.feat_channels = feat_channels
@@ -372,6 +374,7 @@ class KernelUpdator(nn.Layer):
 
 
 class KernelUpdateHead(nn.Layer):
+
     def __init__(self,
                  num_classes=150,
                  num_ffn_fcs=2,
@@ -392,11 +395,10 @@ class KernelUpdateHead(nn.Layer):
                  kernel_updator_cfg=None):
         super(KernelUpdateHead, self).__init__()
         if kernel_updator_cfg is None:
-            kernel_updator_cfg = dict(
-                in_channels=256,
-                feat_channels=256,
-                out_channels=256,
-                input_feat_shape=3)
+            kernel_updator_cfg = dict(in_channels=256,
+                                      feat_channels=256,
+                                      out_channels=256,
+                                      input_feat_shape=3)
         self.num_classes = num_classes
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -408,11 +410,11 @@ class KernelUpdateHead(nn.Layer):
         self.feat_gather_stride = feat_gather_stride
         self.mask_transform_stride = mask_transform_stride
 
-        self.attention = nn.MultiHeadAttention(
-            in_channels * conv_kernel_size**2,
-            num_heads,
-            dropout,
-            bias_attr=True)
+        self.attention = nn.MultiHeadAttention(in_channels *
+                                               conv_kernel_size**2,
+                                               num_heads,
+                                               dropout,
+                                               bias_attr=True)
         self.attention_norm = nn.LayerNorm(in_channels * conv_kernel_size**2)
 
         self.kernel_update_conv = KernelUpdator(**kernel_updator_cfg)
@@ -420,12 +422,12 @@ class KernelUpdateHead(nn.Layer):
         if feat_transform is not None:
             kernel_size = 1
             transform_channels = in_channels
-            self.feat_transform = nn.Conv2D(
-                transform_channels,
-                in_channels,
-                kernel_size,
-                stride=feat_gather_stride,
-                padding=int(feat_gather_stride // 2))
+            self.feat_transform = nn.Conv2D(transform_channels,
+                                            in_channels,
+                                            kernel_size,
+                                            stride=feat_gather_stride,
+                                            padding=int(feat_gather_stride //
+                                                        2))
         else:
             self.feat_transform = None
 
@@ -439,8 +441,7 @@ class KernelUpdateHead(nn.Layer):
         self.mask_fcs = nn.LayerList()
         for _ in range(num_mask_fcs):
             self.mask_fcs.append(
-                nn.Linear(
-                    in_channels, in_channels, bias_attr=False))
+                nn.Linear(in_channels, in_channels, bias_attr=False))
             self.mask_fcs.append(nn.LayerNorm(in_channels))
             self.mask_fcs.append(act_fn())
 
@@ -455,8 +456,9 @@ class KernelUpdateHead(nn.Layer):
 
         mask_h, mask_w = paddle.shape(mask_preds)[-2:]
         if mask_h != H or mask_w != W:
-            gather_mask = F.interpolate(
-                mask_preds, (H, W), align_corners=False, mode='bilinear')
+            gather_mask = F.interpolate(mask_preds, (H, W),
+                                        align_corners=False,
+                                        mode='bilinear')
         else:
             gather_mask = mask_preds
 
@@ -492,38 +494,36 @@ class KernelUpdateHead(nn.Layer):
         mask_feat = self.fc_mask(mask_feat).transpose([0, 1, 3, 2])
 
         if (self.mask_transform_stride == 2 and self.feat_gather_stride == 1):
-            mask_x = F.interpolate(
-                x, scale_factor=0.5, mode='bilinear', align_corners=False)
+            mask_x = F.interpolate(x,
+                                   scale_factor=0.5,
+                                   mode='bilinear',
+                                   align_corners=False)
             H, W = paddle.shape(mask_x)[-2:]
         else:
             mask_x = x
-        mask_feat = mask_feat.reshape([
-            N, num_proposals, C, self.conv_kernel_size, self.conv_kernel_size
-        ])
+        mask_feat = mask_feat.reshape(
+            [N, num_proposals, C, self.conv_kernel_size, self.conv_kernel_size])
         # [B, C, H, W] -> [1, B*C, H, W]
         new_mask_preds = []
         for i in range(N):
             new_mask_preds.append(
-                F.conv2d(
-                    mask_x[i:i + 1],
-                    mask_feat[i],
-                    padding=int(self.conv_kernel_size // 2)))
+                F.conv2d(mask_x[i:i + 1],
+                         mask_feat[i],
+                         padding=int(self.conv_kernel_size // 2)))
 
         new_mask_preds = paddle.concat(new_mask_preds, axis=0)
         new_mask_preds = new_mask_preds.reshape([N, num_proposals, H, W])
         if self.mask_transform_stride == 2:
-            new_mask_preds = F.interpolate(
-                new_mask_preds,
-                scale_factor=2,
-                mode='bilinear',
-                align_corners=False)
+            new_mask_preds = F.interpolate(new_mask_preds,
+                                           scale_factor=2,
+                                           mode='bilinear',
+                                           align_corners=False)
 
         if mask_shape is not None and mask_shape[0] != H:
-            new_mask_preds = F.interpolate(
-                new_mask_preds,
-                mask_shape,
-                align_corners=False,
-                mode='bilinear')
+            new_mask_preds = F.interpolate(new_mask_preds,
+                                           mask_shape,
+                                           align_corners=False,
+                                           mode='bilinear')
 
         return new_mask_preds, obj_feat.transpose([0, 1, 3, 2]).reshape([
             N, num_proposals, self.in_channels, self.conv_kernel_size,

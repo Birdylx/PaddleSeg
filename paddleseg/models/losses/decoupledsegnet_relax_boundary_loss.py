@@ -120,10 +120,9 @@ class RelaxBoundaryLoss(nn.Layer):
         for i in range(n):
             if self.calculate_weights:
                 class_weights = self.calculate_weights(label[i])
-            loss = loss + self.custom_nll(
-                logit[i].unsqueeze(0),
-                label[i].unsqueeze(0),
-                class_weights=class_weights,
-                border_weights=border_weights,
-                ignore_mask=ignore_mask[i])
+            loss = loss + self.custom_nll(logit[i].unsqueeze(0),
+                                          label[i].unsqueeze(0),
+                                          class_weights=class_weights,
+                                          border_weights=border_weights,
+                                          ignore_mask=ignore_mask[i])
         return loss

@@ -38,22 +38,26 @@ class Bottleneck(nn.Layer):
         self.stride = stride
         self.downsample = downsample
 
-        self.conv1 = nn.Conv2D(
-            inplanes, planes, kernel_size=1, stride=stride, bias_attr=False)
+        self.conv1 = nn.Conv2D(inplanes,
+                               planes,
+                               kernel_size=1,
+                               stride=stride,
+                               bias_attr=False)
         self.bn1 = nn.BatchNorm2D(planes)
 
-        self.conv2 = nn.Conv2D(
-            planes,
-            planes,
-            kernel_size=3,
-            stride=1,
-            padding=self.padding,
-            bias_attr=False,
-            dilation=dilation)
+        self.conv2 = nn.Conv2D(planes,
+                               planes,
+                               kernel_size=3,
+                               stride=1,
+                               padding=self.padding,
+                               bias_attr=False,
+                               dilation=dilation)
         self.bn2 = nn.BatchNorm2D(planes)
 
-        self.conv3 = nn.Conv2D(
-            planes, planes * 4, bias_attr=False, kernel_size=1)
+        self.conv3 = nn.Conv2D(planes,
+                               planes * 4,
+                               bias_attr=False,
+                               kernel_size=1)
         self.bn3 = nn.BatchNorm2D(planes * 4)
 
         self.relu = nn.ReLU()
@@ -82,6 +86,7 @@ class Bottleneck(nn.Layer):
 
 
 class ClassifierModule(nn.Layer):
+
     def __init__(self, inplanes, dilation_series, padding_series, num_classes):
         super(ClassifierModule, self).__init__()
         self.conv2d_list = nn.LayerList()
@@ -92,15 +97,14 @@ class ClassifierModule(nn.Layer):
                 initializer=nn.initializer.Constant(value=0.0),
                 learning_rate=10.0)
             self.conv2d_list.append(
-                nn.Conv2D(
-                    inplanes,
-                    num_classes,
-                    kernel_size=3,
-                    stride=1,
-                    padding=padding,
-                    dilation=dilation,
-                    weight_attr=weight_attr,
-                    bias_attr=bias_attr))
+                nn.Conv2D(inplanes,
+                          num_classes,
+                          kernel_size=3,
+                          stride=1,
+                          padding=padding,
+                          dilation=dilation,
+                          weight_attr=weight_attr,
+                          bias_attr=bias_attr))
 
     def forward(self, x):
         out = self.conv2d_list[0](x)
@@ -110,6 +114,7 @@ class ClassifierModule(nn.Layer):
 
 
 class ResNetMulti(nn.Layer):
+
     def __init__(self, block, num_layers, num_classes):
         super(ResNetMulti, self).__init__()
         self.weight_attr = paddle.ParamAttr(
@@ -120,25 +125,33 @@ class ResNetMulti(nn.Layer):
         self.weight_attr_conv = paddle.ParamAttr(
             initializer=paddle.nn.initializer.Normal(std=0.01))
         self.inplanes = 64
-        self.conv1 = nn.Conv2D(
-            3,
-            64,
-            kernel_size=7,
-            stride=2,
-            padding=3,
-            bias_attr=False,
-            weight_attr=self.weight_attr_conv)
-        self.bn1 = nn.BatchNorm2D(
-            64, bias_attr=self.bias_attr, weight_attr=self.weight_attr)
+        self.conv1 = nn.Conv2D(3,
+                               64,
+                               kernel_size=7,
+                               stride=2,
+                               padding=3,
+                               bias_attr=False,
+                               weight_attr=self.weight_attr_conv)
+        self.bn1 = nn.BatchNorm2D(64,
+                                  bias_attr=self.bias_attr,
+                                  weight_attr=self.weight_attr)
         self.relu = nn.ReLU()
-        self.maxpool = nn.MaxPool2D(
-            kernel_size=3, stride=2, padding=1, ceil_mode=True)
+        self.maxpool = nn.MaxPool2D(kernel_size=3,
+                                    stride=2,
+                                    padding=1,
+                                    ceil_mode=True)
         self.layer1 = self._make_layer(block, 64, num_layers[0])
         self.layer2 = self._make_layer(block, 128, num_layers[1], stride=2)
-        self.layer3 = self._make_layer(
-            block, 256, num_layers[2], stride=1, dilation=2)
-        self.layer4 = self._make_layer(
-            block, 512, num_layers[3], stride=1, dilation=4)
+        self.layer3 = self._make_layer(block,
+                                       256,
+                                       num_layers[2],
+                                       stride=1,
+                                       dilation=2)
+        self.layer4 = self._make_layer(block,
+                                       512,
+                                       num_layers[3],
+                                       stride=1,
+                                       dilation=4)
         self.layer5 = self._make_pred_layer(ClassifierModule, 1024,
                                             [6, 12, 18, 24], [6, 12, 18, 24],
                                             num_classes)
@@ -154,25 +167,22 @@ class ResNetMulti(nn.Layer):
         downsample = None
         if stride != 1 or self.inplanes != planes * block.expansion or dilation == 2 or dilation == 4:
             downsample = nn.Sequential(
-                nn.Conv2D(
-                    self.inplanes,
-                    planes * block.expansion,
-                    kernel_size=1,
-                    stride=stride,
-                    bias_attr=False,
-                    weight_attr=self.weight_attr_conv),
-                nn.BatchNorm2D(
-                    planes * block.expansion,
-                    bias_attr=self.bias_attr,
-                    weight_attr=self.weight_attr))
+                nn.Conv2D(self.inplanes,
+                          planes * block.expansion,
+                          kernel_size=1,
+                          stride=stride,
+                          bias_attr=False,
+                          weight_attr=self.weight_attr_conv),
+                nn.BatchNorm2D(planes * block.expansion,
+                               bias_attr=self.bias_attr,
+                               weight_attr=self.weight_attr))
         nnlayers = nn.LayerList()
         nnlayers.append(
-            block(
-                self.inplanes,
-                planes,
-                stride,
-                dilation=dilation,
-                downsample=downsample))
+            block(self.inplanes,
+                  planes,
+                  stride,
+                  dilation=dilation,
+                  downsample=downsample))
         self.inplanes = planes * block.expansion
 
         for i in range(1, blocks):
@@ -197,14 +207,18 @@ class ResNetMulti(nn.Layer):
 
         # Resolution 1
         x_aug = self.layer5(x3)
-        x_aug = F.interpolate(
-            x_aug, size=input_size, mode='bilinear', align_corners=True)
+        x_aug = F.interpolate(x_aug,
+                              size=input_size,
+                              mode='bilinear',
+                              align_corners=True)
 
         # Resolution 2
         x4 = self.layer4(x3)
         x6 = self.layer6(x4)
-        x6 = F.interpolate(
-            x6, size=input_size, mode='bilinear', align_corners=True)
+        x6 = F.interpolate(x6,
+                           size=input_size,
+                           mode='bilinear',
+                           align_corners=True)
 
         return [x6, x_aug, x1, x2, x3, x4]
 
@@ -257,6 +271,6 @@ class ResNetMulti(nn.Layer):
 
 @manager.BACKBONES.add_component
 def ResNet101(**args):
-    model = ResNetMulti(
-        Bottleneck, num_layers=[3, 4, 23, 3], **args)  # add pretrain
+    model = ResNetMulti(Bottleneck, num_layers=[3, 4, 23, 3],
+                        **args)  # add pretrain
     return model

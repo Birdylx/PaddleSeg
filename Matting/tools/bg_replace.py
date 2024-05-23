@@ -37,49 +37,44 @@ from ppmatting.utils import get_image_list, estimate_foreground_ml, Config, MatB
 def parse_args():
     parser = argparse.ArgumentParser(
         description='PP-HumanSeg inference for video')
-    parser.add_argument(
-        "--config",
-        dest="cfg",
-        help="The config file.",
-        default=None,
-        type=str,
-        required=True)
-    parser.add_argument(
-        '--model_path',
-        dest='model_path',
-        help='The path of model for prediction',
-        type=str,
-        default=None)
-    parser.add_argument(
-        '--image_path',
-        dest='image_path',
-        help='Image including human',
-        type=str,
-        default=None)
-    parser.add_argument(
-        '--trimap_path',
-        dest='trimap_path',
-        help='The path of trimap',
-        type=str,
-        default=None)
+    parser.add_argument("--config",
+                        dest="cfg",
+                        help="The config file.",
+                        default=None,
+                        type=str,
+                        required=True)
+    parser.add_argument('--model_path',
+                        dest='model_path',
+                        help='The path of model for prediction',
+                        type=str,
+                        default=None)
+    parser.add_argument('--image_path',
+                        dest='image_path',
+                        help='Image including human',
+                        type=str,
+                        default=None)
+    parser.add_argument('--trimap_path',
+                        dest='trimap_path',
+                        help='The path of trimap',
+                        type=str,
+                        default=None)
     parser.add_argument(
         '--background',
         dest='background',
-        help='Background for replacing. It is a string which specifies the background color (r,g,b,w) or a path to background image. If not specified, a green background is used.',
+        help=
+        'Background for replacing. It is a string which specifies the background color (r,g,b,w) or a path to background image. If not specified, a green background is used.',
         type=str,
         default=None)
-    parser.add_argument(
-        '--save_dir',
-        dest='save_dir',
-        help='The directory for saving the inference results',
-        type=str,
-        default='./output')
-    parser.add_argument(
-        '--fg_estimate',
-        default=True,
-        type=eval,
-        choices=[True, False],
-        help='Whether to estimate foreground when predicting.')
+    parser.add_argument('--save_dir',
+                        dest='save_dir',
+                        help='The directory for saving the inference results',
+                        type=str,
+                        default='./output')
+    parser.add_argument('--fg_estimate',
+                        default=True,
+                        type=eval,
+                        choices=[True, False],
+                        help='Whether to estimate foreground when predicting.')
     parser.add_argument(
         '--device',
         dest='device',
@@ -103,14 +98,13 @@ def main(args):
     model = builder.model
     transforms = ppmatting.transforms.Compose(builder.val_transforms)
 
-    alpha, fg = predict(
-        model,
-        model_path=args.model_path,
-        transforms=transforms,
-        image_list=[args.image_path],
-        trimap_list=[args.trimap_path],
-        save_dir=args.save_dir,
-        fg_estimate=args.fg_estimate)
+    alpha, fg = predict(model,
+                        model_path=args.model_path,
+                        transforms=transforms,
+                        image_list=[args.image_path],
+                        trimap_list=[args.trimap_path],
+                        save_dir=args.save_dir,
+                        fg_estimate=args.fg_estimate)
 
     img_ori = cv2.imread(args.image_path)
     bg = get_bg(args.background, img_ori.shape)
@@ -135,8 +129,8 @@ def get_bg(background, img_shape):
         bg[:, :, :] = 255
 
     elif not os.path.exists(background):
-        raise Exception('The --background is not existed: {}'.format(
-            background))
+        raise Exception(
+            'The --background is not existed: {}'.format(background))
     else:
         bg = cv2.imread(background)
         bg = cv2.resize(bg, (img_shape[1], img_shape[0]))

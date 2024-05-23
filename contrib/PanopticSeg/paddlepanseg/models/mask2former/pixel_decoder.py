@@ -26,6 +26,7 @@ from ._ms_deform_attn import MSDeformAttn
 
 
 class MSDeformAttnTransformerEncoderOnly(nn.Layer, THLinearInitMixin):
+
     def __init__(self,
                  embed_dim=256,
                  num_heads=8,
@@ -73,8 +74,7 @@ class MSDeformAttnTransformerEncoderOnly(nn.Layer, THLinearInitMixin):
 
     def forward(self, srcs, pos_embeds):
         masks = [
-            paddle.zeros(
-                (x.shape[0], x.shape[2], x.shape[3]), dtype='bool')
+            paddle.zeros((x.shape[0], x.shape[2], x.shape[3]), dtype='bool')
             for x in srcs
         ]
         # Prepare input for encoder
@@ -100,8 +100,7 @@ class MSDeformAttnTransformerEncoderOnly(nn.Layer, THLinearInitMixin):
         lvl_pos_embed_flatten = paddle.concat(lvl_pos_embed_flatten, 1)
         spatial_shapes = paddle.to_tensor(spatial_shapes, dtype='int64')
         level_start_index = paddle.concat(
-            (paddle.zeros(
-                (1, ), dtype='int64'),
+            (paddle.zeros((1, ), dtype='int64'),
              spatial_shapes.prod(1).cumsum(0)[:-1])).astype('int64')
         valid_ratios = paddle.stack([self.get_valid_ratio(m) for m in masks], 1)
 
@@ -113,6 +112,7 @@ class MSDeformAttnTransformerEncoderOnly(nn.Layer, THLinearInitMixin):
 
 
 class MSDeformAttnTransformerEncoderLayer(nn.Layer):
+
     def __init__(self,
                  embed_dim=256,
                  ffn_dim=1024,
@@ -154,9 +154,9 @@ class MSDeformAttnTransformerEncoderLayer(nn.Layer):
                 level_start_index,
                 padding_mask=None):
         # Self attention
-        src2 = self.self_attn(
-            self.with_pos_embed(src, pos), reference_points, src,
-            spatial_shapes, level_start_index, padding_mask)
+        src2 = self.self_attn(self.with_pos_embed(src,
+                                                  pos), reference_points, src,
+                              spatial_shapes, level_start_index, padding_mask)
         src = src + self.dropout1(src2)
         src = self.norm1(src)
 
@@ -167,6 +167,7 @@ class MSDeformAttnTransformerEncoderLayer(nn.Layer):
 
 
 class MSDeformAttnTransformerEncoder(nn.Layer):
+
     def __init__(self, encoder_layer, num_layers):
         super().__init__()
         self.layers = nn.LayerList(
@@ -207,6 +208,7 @@ class MSDeformAttnTransformerEncoder(nn.Layer):
 
 
 class MSDeformAttnPixelDecoder(nn.Layer):
+
     def __init__(self, num_heads, ff_dim, num_enc_layers, conv_dim, mask_dim,
                  in_feat_strides, in_feat_chns, feat_indices, common_stride):
         super().__init__()
@@ -227,10 +229,9 @@ class MSDeformAttnPixelDecoder(nn.Layer):
         for in_channels in self.transformer_channels[::-1]:
             input_proj_list.append(
                 nn.Sequential(
-                    nn.Conv2D(
-                        in_channels, conv_dim, kernel_size=1),
-                    nn.GroupNorm(
-                        num_channels=conv_dim, num_groups=32), ))
+                    nn.Conv2D(in_channels, conv_dim, kernel_size=1),
+                    nn.GroupNorm(num_channels=conv_dim, num_groups=32),
+                ))
         self.input_proj = nn.LayerList(input_proj_list)
 
         for proj in self.input_proj:
@@ -244,7 +245,8 @@ class MSDeformAttnPixelDecoder(nn.Layer):
             num_heads=num_heads,
             ff_dim=ff_dim,
             num_encoder_layers=num_enc_layers,
-            num_feature_levels=self.num_feature_levels, )
+            num_feature_levels=self.num_feature_levels,
+        )
         num_steps = conv_dim // 2
         self.pe_layer = PositionEmbeddingSine(num_steps, normalize=True)
 
@@ -255,7 +257,8 @@ class MSDeformAttnPixelDecoder(nn.Layer):
             mask_dim,
             kernel_size=1,
             stride=1,
-            padding=0, )
+            padding=0,
+        )
         c2_xavier_fill(self.mask_conv)
 
         self.maskformer_num_feature_levels = 3  # always use 3 scales
@@ -273,12 +276,11 @@ class MSDeformAttnPixelDecoder(nn.Layer):
             lateral_norm = nn.GroupNorm(num_channels=conv_dim, num_groups=32)
             output_norm = nn.GroupNorm(num_channels=conv_dim, num_groups=32)
 
-            lateral_conv = Conv2D(
-                in_channels,
-                conv_dim,
-                kernel_size=1,
-                bias_attr=False,
-                norm=lateral_norm)
+            lateral_conv = Conv2D(in_channels,
+                                  conv_dim,
+                                  kernel_size=1,
+                                  bias_attr=False,
+                                  norm=lateral_norm)
             output_conv = Conv2D(
                 conv_dim,
                 conv_dim,
@@ -287,7 +289,8 @@ class MSDeformAttnPixelDecoder(nn.Layer):
                 padding=1,
                 bias_attr=False,
                 norm=output_norm,
-                activation=nn.ReLU(), )
+                activation=nn.ReLU(),
+            )
             c2_xavier_fill(lateral_conv)
             c2_xavier_fill(output_conv)
 
@@ -329,8 +332,8 @@ class MSDeformAttnPixelDecoder(nn.Layer):
         num_cur_levels = 0
         for i, z in enumerate(y):
             out.append(
-                z.transpose((0, 2, 1)).reshape((bs, -1, spatial_shapes[i][0],
-                                                spatial_shapes[i][1])))
+                z.transpose((0, 2, 1)).reshape(
+                    (bs, -1, spatial_shapes[i][0], spatial_shapes[i][1])))
 
         # Append `out` with extra FPN levels
         for idx, x in enumerate(features[:self.num_fpn_levels][::-1]):
@@ -339,11 +342,10 @@ class MSDeformAttnPixelDecoder(nn.Layer):
             output_conv = self.output_convs[idx]
             cur_fpn = lateral_conv(x)
             # Following FPN implementation, we use nearest upsampling here
-            y = cur_fpn + F.interpolate(
-                out[-1],
-                size=cur_fpn.shape[-2:],
-                mode='bilinear',
-                align_corners=False)
+            y = cur_fpn + F.interpolate(out[-1],
+                                        size=cur_fpn.shape[-2:],
+                                        mode='bilinear',
+                                        align_corners=False)
             y = output_conv(y)
             out.append(y)
 

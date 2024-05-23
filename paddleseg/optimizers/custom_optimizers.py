@@ -150,23 +150,23 @@ class AdamWDL(AdamW):
         self.n_layers = n_layers
         self.set_param_lr_fun = partial(set_param_lr_fun, layerwise_decay,
                                         name_dict, n_layers)
-        super(AdamWDL, self).__init__(
-            learning_rate=learning_rate,
-            parameters=parameters,
-            beta1=beta1,
-            beta2=beta2,
-            epsilon=epsilon,
-            grad_clip=grad_clip,
-            name=name,
-            apply_decay_param_fun=apply_decay_param_fun,
-            weight_decay=weight_decay,
-            lazy_mode=lazy_mode,
-            multi_precision=multi_precision)
+        super(AdamWDL,
+              self).__init__(learning_rate=learning_rate,
+                             parameters=parameters,
+                             beta1=beta1,
+                             beta2=beta2,
+                             epsilon=epsilon,
+                             grad_clip=grad_clip,
+                             name=name,
+                             apply_decay_param_fun=apply_decay_param_fun,
+                             weight_decay=weight_decay,
+                             lazy_mode=lazy_mode,
+                             multi_precision=multi_precision)
 
     def _append_optimize_op(self, block, param_and_grad):
         if self.set_param_lr_fun is None:
-            return super(AdamWDL, self)._append_optimize_op(block,
-                                                            param_and_grad)
+            return super(AdamWDL,
+                         self)._append_optimize_op(block, param_and_grad)
 
         prev_lr = param_and_grad[0].optimize_attr["learning_rate"]
         self.set_param_lr_fun(param_and_grad[0])

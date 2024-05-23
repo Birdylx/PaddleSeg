@@ -31,15 +31,15 @@ class MaskData:
 
     def __init__(self, **kwargs) -> None:
         for v in kwargs.values():
-            assert isinstance(v, (
-                list, np.ndarray, paddle.Tensor
-            )), "MaskData only supports list, numpy arrays, and paddle tensors."
+            assert isinstance(
+                v, (list, np.ndarray, paddle.Tensor)
+            ), "MaskData only supports list, numpy arrays, and paddle tensors."
         self._stats = dict(**kwargs)
 
     def __setitem__(self, key: str, item: Any) -> None:
-        assert isinstance(item, (
-            list, np.ndarray, paddle.Tensor
-        )), "MaskData only supports list, numpy arrays, and paddle tensors."
+        assert isinstance(
+            item, (list, np.ndarray, paddle.Tensor)
+        ), "MaskData only supports list, numpy arrays, and paddle tensors."
         self._stats[key] = item
 
     def __delitem__(self, key: str) -> None:
@@ -90,15 +90,19 @@ class MaskData:
 def is_box_near_crop_edge(boxes: paddle.Tensor,
                           crop_box: List[int],
                           orig_box: List[int],
-                          atol: float=20.0) -> paddle.Tensor:
+                          atol: float = 20.0) -> paddle.Tensor:
     """Filter masks at the edge of a crop, but not at the edge of the original image."""
     crop_box_paddle = paddle.to_tensor(crop_box, dtype=paddle.float32)
     orig_box_paddle = paddle.to_tensor(orig_box, dtype=paddle.float32)
     boxes = uncrop_boxes_xyxy(boxes, crop_box).astype(paddle.float32)
-    near_crop_edge = paddle.isclose(
-        boxes, crop_box_paddle[None, :].expand_as(boxes), atol=atol, rtol=0.0)
-    near_image_edge = paddle.isclose(
-        boxes, orig_box_paddle[None, :].expand_as(boxes), atol=atol, rtol=0.0)
+    near_crop_edge = paddle.isclose(boxes,
+                                    crop_box_paddle[None, :].expand_as(boxes),
+                                    atol=atol,
+                                    rtol=0.0)
+    near_image_edge = paddle.isclose(boxes,
+                                     orig_box_paddle[None, :].expand_as(boxes),
+                                     atol=atol,
+                                     rtol=0.0)
     near_crop_edge = paddle.logical_and(near_crop_edge, ~near_image_edge)
     return paddle.any(near_crop_edge, axis=1)
 
@@ -137,11 +141,9 @@ def mask_to_rle_paddle(tensor: paddle.Tensor) -> List[Dict[str, Any]]:
     for i in range(b):
         cur_idxs = change_indices[change_indices[:, 0] == i][:, 1]
         cur_idxs = paddle.concat([
-            paddle.to_tensor(
-                [0], dtype=cur_idxs.dtype),
+            paddle.to_tensor([0], dtype=cur_idxs.dtype),
             cur_idxs + 1,
-            paddle.to_tensor(
-                [h * w], dtype=cur_idxs.dtype),
+            paddle.to_tensor([h * w], dtype=cur_idxs.dtype),
         ])
         btw_idxs = cur_idxs[1:] - cur_idxs[:-1]
         counts = [] if tensor[i, 0] == 0 else [0]
@@ -168,8 +170,7 @@ def area_from_rle(rle: Dict[str, Any]) -> int:
     return sum(rle["counts"][1::2])
 
 
-def calculate_stability_score(masks: paddle.Tensor,
-                              mask_threshold: float,
+def calculate_stability_score(masks: paddle.Tensor, mask_threshold: float,
                               threshold_offset: float) -> paddle.Tensor:
     """
     Computes the stability score for a batch of masks. The stability
@@ -178,10 +179,12 @@ def calculate_stability_score(masks: paddle.Tensor,
     """
     # One mask is always contained inside the other.
     # Save memory by preventing unnecessary cast to paddle.int64
-    intersections = ((masks > (mask_threshold + threshold_offset)).cast('int16')
-                     .sum(-1).cast('int32').sum(-1))
-    unions = ((masks > (mask_threshold - threshold_offset)).cast('int16')
-              .sum(-1).cast('int32').sum(-1))
+    intersections = ((
+        masks > (mask_threshold +
+                 threshold_offset)).cast('int16').sum(-1).cast('int32').sum(-1))
+    unions = ((
+        masks > (mask_threshold -
+                 threshold_offset)).cast('int16').sum(-1).cast('int32').sum(-1))
     return intersections / unions
 
 
@@ -195,8 +198,7 @@ def build_point_grid(n_per_side: int) -> np.ndarray:
     return points
 
 
-def build_all_layer_point_grids(n_per_side: int,
-                                n_layers: int,
+def build_all_layer_point_grids(n_per_side: int, n_layers: int,
                                 scale_per_layer: int) -> List[np.ndarray]:
     """Generates point grids for all crop layers."""
     points_by_layer = []
@@ -268,9 +270,7 @@ def uncrop_points(points: paddle.Tensor, crop_box: List[int]) -> paddle.Tensor:
     return points + offset
 
 
-def uncrop_masks(masks: paddle.Tensor,
-                 crop_box: List[int],
-                 orig_h: int,
+def uncrop_masks(masks: paddle.Tensor, crop_box: List[int], orig_h: int,
                  orig_w: int) -> paddle.Tensor:
     x0, y0, x1, y1 = crop_box
     if x0 == 0 and y0 == 0 and x1 == orig_w and y1 == orig_h:
@@ -292,8 +292,8 @@ def remove_small_regions(mask: np.ndarray, area_thresh: float,
     assert mode in ["holes", "islands"]
     correct_holes = mode == "holes"
     working_mask = (correct_holes ^ mask).astype(np.uint8)
-    n_labels, regions, stats, _ = cv2.connectedComponentsWithStats(working_mask,
-                                                                   8)
+    n_labels, regions, stats, _ = cv2.connectedComponentsWithStats(
+        working_mask, 8)
     sizes = stats[:, -1][1:]  # Row 0 is background label
     small_regions = [i + 1 for i, s in enumerate(sizes) if s < area_thresh]
     if len(small_regions) == 0:
@@ -355,8 +355,8 @@ def batched_mask_to_box(masks: paddle.Tensor) -> paddle.Tensor:
     # If the mask is empty the right edge will be to the left of the left edge.
     # Replace these boxes with [0, 0, 0, 0]
     empty_filter = (right_edges < left_edges) | (bottom_edges < top_edges)
-    out = paddle.stack(
-        [left_edges, top_edges, right_edges, bottom_edges], axis=-1)
+    out = paddle.stack([left_edges, top_edges, right_edges, bottom_edges],
+                       axis=-1)
     out = out * (~empty_filter).unsqueeze(-1)
 
     # Return to original shape

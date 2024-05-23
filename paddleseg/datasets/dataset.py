@@ -96,8 +96,9 @@ class Dataset(paddle.io.Dataset):
                 "`num_classes` should be greater than 1, but got {}".format(
                     num_classes))
         if img_channels not in [1, 3]:
-            raise ValueError("`img_channels` should in [1, 3], but got {}".
-                             format(img_channels))
+            raise ValueError(
+                "`img_channels` should in [1, 3], but got {}".format(
+                    img_channels))
 
         if self.mode == 'train':
             if train_path is None:
@@ -105,8 +106,8 @@ class Dataset(paddle.io.Dataset):
                     'When `mode` is "train", `train_path` is necessary, but it is None.'
                 )
             elif not os.path.exists(train_path):
-                raise FileNotFoundError('`train_path` is not found: {}'.format(
-                    train_path))
+                raise FileNotFoundError(
+                    '`train_path` is not found: {}'.format(train_path))
             else:
                 file_path = train_path
         elif self.mode == 'val':
@@ -115,8 +116,8 @@ class Dataset(paddle.io.Dataset):
                     'When `mode` is "val", `val_path` is necessary, but it is None.'
                 )
             elif not os.path.exists(val_path):
-                raise FileNotFoundError('`val_path` is not found: {}'.format(
-                    val_path))
+                raise FileNotFoundError(
+                    '`val_path` is not found: {}'.format(val_path))
             else:
                 file_path = val_path
         else:
@@ -125,8 +126,8 @@ class Dataset(paddle.io.Dataset):
                     'When `mode` is "test", `test_path` is necessary, but it is None.'
                 )
             elif not os.path.exists(test_path):
-                raise FileNotFoundError('`test_path` is not found: {}'.format(
-                    test_path))
+                raise FileNotFoundError(
+                    '`test_path` is not found: {}'.format(test_path))
             else:
                 file_path = test_path
 
@@ -162,8 +163,9 @@ class Dataset(paddle.io.Dataset):
             data['gt_fields'].append('label')
             data = self.transforms(data)
             if self.edge:
-                edge_mask = F.mask_to_binary_edge(
-                    data['label'], radius=2, num_classes=self.num_classes)
+                edge_mask = F.mask_to_binary_edge(data['label'],
+                                                  radius=2,
+                                                  num_classes=self.num_classes)
                 data['edge'] = edge_mask
         return data
 

@@ -42,13 +42,12 @@ def resample_and_save(seg_map,
         if remove_seg:
             os.remove(del_file)
 
-    predicted_new_shape = resample_data_or_seg(
-        seg_map,
-        target_shape,
-        False,
-        order=interpolation_order,
-        do_separate_z=force_separate_z,
-        order_z=interpolation_order_z)
+    predicted_new_shape = resample_data_or_seg(seg_map,
+                                               target_shape,
+                                               False,
+                                               order=interpolation_order,
+                                               do_separate_z=force_separate_z,
+                                               order_z=interpolation_order_z)
     seg_new_shape = predicted_new_shape.argmax(0)
     np.savez_compressed(output_file, data=seg_new_shape.astype(np.uint8))
 
@@ -57,15 +56,15 @@ def save_segmentation_nifti_from_softmax(
         segmentation_softmax: Union[str, np.ndarray],
         out_fname: str,
         properties_dict: dict,
-        order: int=1,
-        region_class_order: Tuple[Tuple[int]]=None,
-        seg_postprogess_fn: callable=None,
-        seg_postprocess_args: tuple=None,
-        resampled_npz_fname: str=None,
-        non_postprocessed_fname: str=None,
-        force_separate_z: bool=None,
-        interpolation_order_z: int=0,
-        verbose: bool=False):
+        order: int = 1,
+        region_class_order: Tuple[Tuple[int]] = None,
+        seg_postprogess_fn: callable = None,
+        seg_postprocess_args: tuple = None,
+        resampled_npz_fname: str = None,
+        non_postprocessed_fname: str = None,
+        force_separate_z: bool = None,
+        interpolation_order_z: int = 0,
+        verbose: bool = False):
     if verbose:
         print("force_separate_z:", force_separate_z, "interpolation order:",
               order)
@@ -86,10 +85,8 @@ def save_segmentation_nifti_from_softmax(
         'original_size_of_raw_data')
 
     if np.any([
-            i != j
-            for i, j in zip(
-                np.array(current_shape[1:]),
-                np.array(shape_original_after_cropping))
+            i != j for i, j in zip(np.array(current_shape[1:]),
+                                   np.array(shape_original_after_cropping))
     ]):
         if force_separate_z is None:
             if get_do_separate_z(properties_dict.get('original_spacing')):
@@ -117,21 +114,20 @@ def save_segmentation_nifti_from_softmax(
 
         if verbose:
             print("separate z:", do_separate_z, "lowres axis", lowres_axis)
-        seg_old_spacing = resample_data_or_seg(
-            segmentation_softmax,
-            shape_original_after_cropping,
-            is_seg=False,
-            axis=lowres_axis,
-            order=order,
-            do_separate_z=do_separate_z,
-            order_z=interpolation_order_z)
+        seg_old_spacing = resample_data_or_seg(segmentation_softmax,
+                                               shape_original_after_cropping,
+                                               is_seg=False,
+                                               axis=lowres_axis,
+                                               order=order,
+                                               do_separate_z=do_separate_z,
+                                               order_z=interpolation_order_z)
     else:
         if verbose:
             print("no resampling necessary")
         seg_old_spacing = segmentation_softmax
     if resampled_npz_fname is not None:
-        np.savez_compressed(
-            resampled_npz_fname, softmax=seg_old_spacing.astype(np.float16))
+        np.savez_compressed(resampled_npz_fname,
+                            softmax=seg_old_spacing.astype(np.float16))
         # this is needed for ensembling if the nonlinearity is sigmoid
         if region_class_order is not None:
             properties_dict['regions_class_order'] = region_class_order
@@ -153,14 +149,14 @@ def save_segmentation_nifti_from_softmax(
         for c in range(3):
             bbox[c][1] = np.min((bbox[c][0] + seg_old_spacing.shape[c],
                                  shape_original_before_cropping[c]))
-        seg_old_size[bbox[0][0]:bbox[0][1], bbox[1][0]:bbox[1][1], bbox[2][0]:
-                     bbox[2][1]] = seg_old_spacing
+        seg_old_size[bbox[0][0]:bbox[0][1], bbox[1][0]:bbox[1][1],
+                     bbox[2][0]:bbox[2][1]] = seg_old_spacing
     else:
         seg_old_size = seg_old_spacing
 
     if seg_postprogess_fn is not None:
-        seg_old_size_postprocessed = seg_postprogess_fn(
-            np.copy(seg_old_size), *seg_postprocess_args)
+        seg_old_size_postprocessed = seg_postprogess_fn(np.copy(seg_old_size),
+                                                        *seg_postprocess_args)
     else:
         seg_old_size_postprocessed = seg_old_size
 
@@ -171,8 +167,8 @@ def save_segmentation_nifti_from_softmax(
     seg_resized_itk.SetDirection(properties_dict['itk_direction'])
     sitk.WriteImage(seg_resized_itk, out_fname)
 
-    if (non_postprocessed_fname is not None) and (
-            seg_postprogess_fn is not None):
+    if (non_postprocessed_fname is not None) and (seg_postprogess_fn
+                                                  is not None):
         seg_resized_itk = sitk.GetImageFromArray(seg_old_size.astype(np.uint8))
         seg_resized_itk.SetSpacing(properties_dict['itk_spacing'])
         seg_resized_itk.SetOrigin(properties_dict['itk_origin'])
@@ -229,8 +225,8 @@ def pad_nd_image(image,
     if shape_must_be_divisible_by is not None:
         if not isinstance(shape_must_be_divisible_by,
                           (list, tuple, np.ndarray)):
-            shape_must_be_divisible_by = [shape_must_be_divisible_by] * len(
-                new_shape)
+            shape_must_be_divisible_by = [shape_must_be_divisible_by
+                                          ] * len(new_shape)
         else:
             assert len(shape_must_be_divisible_by) == len(new_shape)
 
@@ -239,8 +235,9 @@ def pad_nd_image(image,
                 new_shape[i] -= shape_must_be_divisible_by[i]
 
         new_shape = np.array([
-            new_shape[i] + shape_must_be_divisible_by[i] - new_shape[i] %
-            shape_must_be_divisible_by[i] for i in range(len(new_shape))
+            new_shape[i] + shape_must_be_divisible_by[i] -
+            new_shape[i] % shape_must_be_divisible_by[i]
+            for i in range(len(new_shape))
         ])
 
     difference = new_shape - old_shape
@@ -249,8 +246,8 @@ def pad_nd_image(image,
     pad_list = [[0, 0]] * num_axes_nopad + list(
         [list(i) for i in zip(pad_below, pad_above)])
 
-    if not ((all([i == 0 for i in pad_below])) and
-            (all([i == 0 for i in pad_above]))):
+    if not ((all([i == 0
+                  for i in pad_below])) and (all([i == 0 for i in pad_above]))):
         res = np.pad(image, pad_list, mode, **kwargs)
     else:
         res = image
@@ -265,6 +262,7 @@ def pad_nd_image(image,
 
 
 class no_op(object):
+
     def __enter__(self):
         pass
 

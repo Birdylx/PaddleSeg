@@ -15,8 +15,7 @@
 from paddle.utils.cpp_extension import CUDAExtension, setup
 
 # Install CUDA only
-setup(
-    name='ms_deform_attn',
-    ext_modules=CUDAExtension(
-        sources=['ms_deform_attn.cc', 'ms_deform_attn.cu'],
-        extra_compile_args={'cxx': ['-DPADDLE_WITH_CUDA']}))
+setup(name='ms_deform_attn',
+      ext_modules=CUDAExtension(
+          sources=['ms_deform_attn.cc', 'ms_deform_attn.cu'],
+          extra_compile_args={'cxx': ['-DPADDLE_WITH_CUDA']}))

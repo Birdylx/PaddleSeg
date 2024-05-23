@@ -55,25 +55,27 @@ def evaluate(model,
     model.eval()
     nranks = paddle.distributed.ParallelEnv().nranks
     local_rank = paddle.distributed.ParallelEnv().local_rank
-    batch_sampler = paddle.io.BatchSampler(
-        eval_dataset, batch_size=1, shuffle=False, drop_last=False)
+    batch_sampler = paddle.io.BatchSampler(eval_dataset,
+                                           batch_size=1,
+                                           shuffle=False,
+                                           drop_last=False)
     loader = paddle.io.DataLoader(
         eval_dataset,
         batch_sampler=batch_sampler,
         num_workers=num_workers,
-        return_list=True, )
+        return_list=True,
+    )
 
     total_iters = len(loader)
-    semantic_metric = SemanticEvaluator(
-        eval_dataset.num_classes, ignore_index=eval_dataset.ignore_index)
-    instance_metric_AP50 = InstanceEvaluator(
-        eval_dataset.num_classes,
-        overlaps=0.5,
-        thing_list=eval_dataset.thing_list)
-    instance_metric_AP = InstanceEvaluator(
-        eval_dataset.num_classes,
-        overlaps=list(np.arange(0.5, 1.0, 0.05)),
-        thing_list=eval_dataset.thing_list)
+    semantic_metric = SemanticEvaluator(eval_dataset.num_classes,
+                                        ignore_index=eval_dataset.ignore_index)
+    instance_metric_AP50 = InstanceEvaluator(eval_dataset.num_classes,
+                                             overlaps=0.5,
+                                             thing_list=eval_dataset.thing_list)
+    instance_metric_AP = InstanceEvaluator(eval_dataset.num_classes,
+                                           overlaps=list(
+                                               np.arange(0.5, 1.0, 0.05)),
+                                           thing_list=eval_dataset.thing_list)
     panoptic_metric = PanopticEvaluator(
         num_classes=eval_dataset.num_classes,
         thing_list=eval_dataset.thing_list,
@@ -81,8 +83,9 @@ def evaluate(model,
         label_divisor=eval_dataset.label_divisor)
 
     if print_detail:
-        logger.info("Start evaluating (total_samples={}, total_iters={})...".
-                    format(len(eval_dataset), total_iters))
+        logger.info(
+            "Start evaluating (total_samples={}, total_iters={})...".format(
+                len(eval_dataset), total_iters))
     progbar_val = progbar.Progbar(target=total_iters, verbose=1)
     reader_cost_averager = TimeAverager()
     batch_cost_averager = TimeAverager()
@@ -132,8 +135,8 @@ def evaluate(model,
 
             panoptic_metric.update(panoptic, raw_panoptic_label)
 
-            batch_cost_averager.record(
-                time.time() - batch_start, num_samples=len(im))
+            batch_cost_averager.record(time.time() - batch_start,
+                                       num_samples=len(im))
             batch_cost = batch_cost_averager.get_average()
             reader_cost = reader_cost_averager.get_average()
 
@@ -167,7 +170,8 @@ def evaluate(model,
         miou = semantic_results['sem_seg']['mIoU']
         map = instance_results['ins_seg']['mAP']
         map50 = instance_results['ins_seg']['mAP50']
-        logger.info("PQ: {:.4f}, mIoU: {:.4f}, mAP: {:.4f}, mAP50: {:.4f}".
-                    format(pq, miou, map, map50))
+        logger.info(
+            "PQ: {:.4f}, mIoU: {:.4f}, mAP: {:.4f}, mAP50: {:.4f}".format(
+                pq, miou, map, map50))
 
     return panoptic_results, semantic_results, instance_results

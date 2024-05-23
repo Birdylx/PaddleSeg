@@ -38,12 +38,13 @@ if check_rasterio():
 
 
 class Raster:
+
     def __init__(self,
                  tif_path: str,
-                 show_band: Union[List[int], Tuple[int]]=[1, 1, 1],
-                 open_grid: bool=False,
-                 grid_size: Union[List[int], Tuple[int]]=[512, 512],
-                 overlap: Union[List[int], Tuple[int]]=[24, 24]) -> None:
+                 show_band: Union[List[int], Tuple[int]] = [1, 1, 1],
+                 open_grid: bool = False,
+                 grid_size: Union[List[int], Tuple[int]] = [512, 512],
+                 overlap: Union[List[int], Tuple[int]] = [24, 24]) -> None:
         """ 在EISeg中用于处理遥感栅格数据的类.
 
         参数:
@@ -157,8 +158,8 @@ class Raster:
     def saveMask(self,
                  img: np.array,
                  save_path: str,
-                 geoinfo: Union[Dict, None]=None,
-                 count: int=1) -> None:
+                 geoinfo: Union[Dict, None] = None,
+                 count: int = 1) -> None:
         if geoinfo is None:
             geoinfo = self.geoinfo
         new_meta = self.src_data.meta.copy()
@@ -182,8 +183,8 @@ class Raster:
 
     def saveMaskbyGrids(self,
                         img_list: List[List[np.ndarray]],
-                        save_path: Union[str, None]=None,
-                        geoinfo: Union[Dict, None]=None) -> np.ndarray:
+                        save_path: Union[str, None] = None,
+                        geoinfo: Union[Dict, None] = None) -> np.ndarray:
         if geoinfo is None:
             geoinfo = self.geoinfo
         raw_size = (geoinfo.ysize, geoinfo.xsize)

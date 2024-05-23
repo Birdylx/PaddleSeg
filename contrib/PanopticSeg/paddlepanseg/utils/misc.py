@@ -25,9 +25,10 @@ def set_digits(obj, digits):
     if isinstance(obj, Sequence):
         obj = type(obj)([set_digits(item, digits) for item in obj])
     elif isinstance(obj, Mapping):
-        obj = type(obj)(
-            {key: set_digits(val, digits)
-             for key, val in obj.items()})
+        obj = type(obj)({
+            key: set_digits(val, digits)
+            for key, val in obj.items()
+        })
     elif isinstance(obj, float):
         obj = round(obj, digits)
     return obj

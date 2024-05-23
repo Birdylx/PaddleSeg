@@ -61,12 +61,13 @@ def create_lists_from_splitted_dataset(base_folder_splitted,
         cur_pat = []
         for mod in range(num_modalities):
             cur_pat.append(
-                join_paths(base_folder_splitted, train_images_dir, tr[
-                    'image'].split("/")[-1].split('.')[0] + "_%04.0d.nii.gz" %
-                           mod))
+                join_paths(
+                    base_folder_splitted, train_images_dir,
+                    tr['image'].split("/")[-1].split('.')[0] +
+                    "_%04.0d.nii.gz" % mod))
         cur_pat.append(
-            join_paths(base_folder_splitted, train_labels_dir, tr['label']
-                       .split("/")[-1]))
+            join_paths(base_folder_splitted, train_labels_dir,
+                       tr['label'].split("/")[-1]))
         lists.append(cur_pat)
     return lists, {int(i): d['modality'][str(i)] for i in d['modality'].keys()}
 
@@ -122,10 +123,10 @@ def load_case_from_list_of_files(data_files, seg_file=None):
         type(data_files))
     properties = OrderedDict()
     data_itk = [sitk.ReadImage(f) for f in data_files]
-    properties["original_size_of_raw_data"] = np.array(data_itk[0].GetSize())[
-        [2, 1, 0]]
-    properties["original_spacing"] = np.array(data_itk[0].GetSpacing())[
-        [2, 1, 0]]
+    properties["original_size_of_raw_data"] = np.array(
+        data_itk[0].GetSize())[[2, 1, 0]]
+    properties["original_spacing"] = np.array(
+        data_itk[0].GetSpacing())[[2, 1, 0]]
     properties["list_of_data_files"] = data_files
     properties["seg_file"] = seg_file
     properties["itk_origin"] = data_itk[0].GetOrigin()
@@ -197,25 +198,25 @@ class ImageCropper:
 
     @staticmethod
     def crop_from_list_of_files(data_files, seg_file=None):
-        data, seg, properties = load_case_from_list_of_files(data_files,
-                                                             seg_file)
+        data, seg, properties = load_case_from_list_of_files(
+            data_files, seg_file)
         return ImageCropper.crop(data, properties, seg)
 
     def load_crop_save(self, case, case_identifier, overwrite_existing=False):
         try:
             if overwrite_existing or (not os.path.isfile(
-                    join_paths(self.output_folder, "%s.npz" % case_identifier)
-            ) or not os.path.isfile(
-                    join_paths(self.output_folder, "%s.pkl" % case_identifier))
-                                      ):
+                    join_paths(self.output_folder, "%s.npz" %
+                               case_identifier)) or not os.path.isfile(
+                                   join_paths(self.output_folder,
+                                              "%s.pkl" % case_identifier))):
 
-                data, seg, properties = self.crop_from_list_of_files(case[:-1],
-                                                                     case[-1])
+                data, seg, properties = self.crop_from_list_of_files(
+                    case[:-1], case[-1])
 
                 all_data = np.vstack((data, seg))
-                np.savez_compressed(
-                    join_paths(self.output_folder, "%s.npz" % case_identifier),
-                    data=all_data)
+                np.savez_compressed(join_paths(self.output_folder,
+                                               "%s.npz" % case_identifier),
+                                    data=all_data)
                 with open(
                         join_paths(self.output_folder,
                                    "%s.pkl" % case_identifier), 'wb') as f:

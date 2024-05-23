@@ -61,10 +61,14 @@ def _segMaskB2I(mask_path, save_path):
 
 
 parser = argparse.ArgumentParser(description='Label path and save path')
-parser.add_argument(
-    '--label_path', '-o', help='读取语义分割标签文件夹路径，必要参数', required=True)
-parser.add_argument(
-    '--save_path', '-d', help='实例分割标签保存文件夹路径，必要参数', required=True)
+parser.add_argument('--label_path',
+                    '-o',
+                    help='读取语义分割标签文件夹路径，必要参数',
+                    required=True)
+parser.add_argument('--save_path',
+                    '-d',
+                    help='实例分割标签保存文件夹路径，必要参数',
+                    required=True)
 args = parser.parse_args()
 
 if __name__ == "__main__":

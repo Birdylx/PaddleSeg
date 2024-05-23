@@ -34,6 +34,7 @@ CLASS_NAMES = textures + objects
 
 @register
 class MVTecDataset(Dataset):
+
     def __init__(self,
                  dataset_root_path='/root/data/mvtec',
                  class_name='bottle',
@@ -55,11 +56,15 @@ class MVTecDataset(Dataset):
 
         # set transforms
         self.transform_x = T.Compose([
-            T.Resize(resize), T.CenterCrop(cropsize), T.ToTensor(), T.Normalize(
-                mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+            T.Resize(resize),
+            T.CenterCrop(cropsize),
+            T.ToTensor(),
+            T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
         self.transform_mask = T.Compose(
-            [T.Resize(resize), T.CenterCrop(cropsize), T.ToTensor()])
+            [T.Resize(resize),
+             T.CenterCrop(cropsize),
+             T.ToTensor()])
 
     def __getitem__(self, idx):
         x, y, mask = self.x[idx], self.y[idx], self.mask[idx]
@@ -127,6 +132,7 @@ class MVTecDataset(Dataset):
 
 
 class MVTecDatasetSTFPM(Dataset):
+
     def __init__(self, image_list, transform=None):
         self.image_list = image_list
         self.transform = transform
@@ -151,10 +157,10 @@ def load_gt(root, cls, resize_shape):
     sub_dirs = sorted(os.listdir(gt_dir))
     for sb in sub_dirs:
         for fname in sorted(os.listdir(os.path.join(gt_dir, sb))):
-            temp = cv2.imread(
-                os.path.join(gt_dir, sb, fname), cv2.IMREAD_GRAYSCALE)
-            temp = cv2.resize(temp, (
-                resize_shape[0], resize_shape[1])).astype(np.bool)[None, ...]
+            temp = cv2.imread(os.path.join(gt_dir, sb, fname),
+                              cv2.IMREAD_GRAYSCALE)
+            temp = cv2.resize(temp, (resize_shape[0], resize_shape[1])).astype(
+                np.bool)[None, ...]
             gt.append(temp)
     gt = np.concatenate(gt, 0)
     return gt

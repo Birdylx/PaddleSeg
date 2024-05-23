@@ -16,6 +16,7 @@ import argparse
 import os
 import os.path as osp
 import sys
+
 parent_path = os.path.abspath(os.path.join(__file__, *(['..'] * 3)))
 sys.path.insert(0, parent_path)
 
@@ -29,35 +30,29 @@ def get_args():
     parser = argparse.ArgumentParser(
         description='Mask convert to RoI for Segmentation')
     # Parameters
-    parser.add_argument(
-        '--image_path',
-        type=str,
-        required=True,
-        help='The directory of images.')
-    parser.add_argument(
-        '--anno_path',
-        type=str,
-        required=True,
-        help='The directory of ground truth masks.')
-    parser.add_argument(
-        '--class_num',
-        type=int,
-        required=True,
-        help='Number of categories, without background.')
-    parser.add_argument(
-        '--to_binary',
-        action='store_true',
-        help='Whether or not to convert mask to binary RoI.')
-    parser.add_argument(
-        '--suffix',
-        type=str,
-        default='.png',
-        help='The suffix of filename between gt and image.')
-    parser.add_argument(
-        '--pad_scale',
-        type=float,
-        default=0.5,
-        help='The padding scale of box to crop image.')
+    parser.add_argument('--image_path',
+                        type=str,
+                        required=True,
+                        help='The directory of images.')
+    parser.add_argument('--anno_path',
+                        type=str,
+                        required=True,
+                        help='The directory of ground truth masks.')
+    parser.add_argument('--class_num',
+                        type=int,
+                        required=True,
+                        help='Number of categories, without background.')
+    parser.add_argument('--to_binary',
+                        action='store_true',
+                        help='Whether or not to convert mask to binary RoI.')
+    parser.add_argument('--suffix',
+                        type=str,
+                        default='.png',
+                        help='The suffix of filename between gt and image.')
+    parser.add_argument('--pad_scale',
+                        type=float,
+                        default=0.5,
+                        help='The padding scale of box to crop image.')
     parser.add_argument(
         '--output_path',
         type=str,

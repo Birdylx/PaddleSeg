@@ -39,7 +39,7 @@ def remove_all_but_the_largest_connected_component(
         image: np.ndarray,
         for_which_classes: list,
         volume_per_voxel: float,
-        minimum_valid_object_size: dict=None):
+        minimum_valid_object_size: dict = None):
     if for_which_classes is None:
         for_which_classes = np.unique(image)
         for_which_classes = for_which_classes[for_which_classes > 0]
@@ -58,8 +58,8 @@ def remove_all_but_the_largest_connected_component(
         lmap, num_objects = label(mask.astype(int))
         object_sizes = {}
         for object_id in range(1, num_objects + 1):
-            object_sizes[object_id] = (
-                lmap == object_id).sum() * volume_per_voxel
+            object_sizes[object_id] = (lmap
+                                       == object_id).sum() * volume_per_voxel
 
         largest_removed[c] = None
         kept_size[c] = None
@@ -86,7 +86,7 @@ def remove_all_but_the_largest_connected_component(
 def load_remove_save(input_file: str,
                      output_file: str,
                      for_which_classes: list,
-                     minimum_valid_object_size: dict=None):
+                     minimum_valid_object_size: dict = None):
     img_in = sitk.ReadImage(input_file)
     img_npy = sitk.GetArrayFromImage(img_in)
     volume_per_voxel = float(np.prod(img_in.GetSpacing(), dtype=np.float64))
@@ -110,10 +110,9 @@ def determine_postprocessing(base,
                              pp_filename="postprocessing.json"):
 
     classes = [
-        int(i)
-        for i in load_json(
-            os.path.join(base, raw_subfolder_name, "summary.json"))['results'][
-                'mean'].keys() if int(i) != 0
+        int(i) for i in load_json(
+            os.path.join(base, raw_subfolder_name, "summary.json"))['results']
+        ['mean'].keys() if int(i) != 0
     ]
 
     folder_all_classes_as_fg = os.path.join(base, temp_folder + "_allClasses")
@@ -125,10 +124,10 @@ def determine_postprocessing(base,
         shutil.rmtree(folder_per_class)
 
     p = Pool(processes)
-    assert os.path.isfile(
-        os.path.join(base, raw_subfolder_name, "summary.json")
-    ), "{} does not contain a summary.json.".format(
-        os.path.join(base, raw_subfolder_name))
+    assert os.path.isfile(os.path.join(
+        base, raw_subfolder_name,
+        "summary.json")), "{} does not contain a summary.json.".format(
+            os.path.join(base, raw_subfolder_name))
 
     fnames = []
     for f_name in os.listdir(os.path.join(base, raw_subfolder_name)):
@@ -158,8 +157,9 @@ def determine_postprocessing(base,
             predicted_segmentation = os.path.join(base, raw_subfolder_name, f)
             output_file = os.path.join(folder_all_classes_as_fg, f)
             results.append(
-                p.starmap_async(load_remove_save, ((
-                    predicted_segmentation, output_file, (classes, )), )))
+                p.starmap_async(load_remove_save,
+                                ((predicted_segmentation, output_file,
+                                  (classes, )), )))
         results = [i.get() for i in results]
 
         max_size_removed = {}
@@ -193,21 +193,21 @@ def determine_postprocessing(base,
         predicted_segmentation = os.path.join(base, raw_subfolder_name, f)
         output_file = os.path.join(folder_all_classes_as_fg, f)
         results.append(
-            p.starmap_async(load_remove_save, (
-                (predicted_segmentation, output_file, (classes, ), min_size_kept
-                 ), )))
+            p.starmap_async(load_remove_save,
+                            ((predicted_segmentation, output_file,
+                              (classes, ), min_size_kept), )))
         pred_gt_tuples.append([output_file, os.path.join(gt_labels_folder, f)])
 
     _ = [i.get() for i in results]
-    _ = aggregate_scores(
-        pred_gt_tuples,
-        labels=classes,
-        json_output_file=os.path.join(folder_all_classes_as_fg, "summary.json"),
-        json_author="medicalseg",
-        num_threads=processes)
+    _ = aggregate_scores(pred_gt_tuples,
+                         labels=classes,
+                         json_output_file=os.path.join(folder_all_classes_as_fg,
+                                                       "summary.json"),
+                         json_author="medicalseg",
+                         num_threads=processes)
     validation_result_PP_test = load_json(
-        os.path.join(folder_all_classes_as_fg, "summary.json"))['results'][
-            'mean']
+        os.path.join(folder_all_classes_as_fg,
+                     "summary.json"))['results']['mean']
 
     for c in classes:
         dc_raw = validation_result_raw[str(c)]['Dice']
@@ -217,8 +217,8 @@ def determine_postprocessing(base,
 
     do_fg_cc = False
     comp = [
-        pp_results['dc_per_class_pp_all'][str(cl)] >
-        (pp_results['dc_per_class_raw'][str(cl)] + dice_threshold)
+        pp_results['dc_per_class_pp_all'][str(cl)]
+        > (pp_results['dc_per_class_raw'][str(cl)] + dice_threshold)
         for cl in classes
     ]
     before = np.mean(
@@ -230,8 +230,8 @@ def determine_postprocessing(base,
     print("after: ", after)
     if any(comp):
         any_worse = any([
-            pp_results['dc_per_class_pp_all'][str(cl)] <
-            pp_results['dc_per_class_raw'][str(cl)] for cl in classes
+            pp_results['dc_per_class_pp_all'][str(cl)]
+            < pp_results['dc_per_class_raw'][str(cl)] for cl in classes
         ])
         if not any_worse:
             pp_results['for_which_classes'].append(classes)
@@ -259,8 +259,9 @@ def determine_postprocessing(base,
                 predicted_segmentation = os.path.join(source, f)
                 output_file = os.path.join(folder_per_class, f)
                 results.append(
-                    p.starmap_async(load_remove_save, ((
-                        predicted_segmentation, output_file, classes), )))
+                    p.starmap_async(
+                        load_remove_save,
+                        ((predicted_segmentation, output_file, classes), )))
             results = [i.get() for i in results]
 
             max_size_removed = {}
@@ -282,8 +283,8 @@ def determine_postprocessing(base,
                             min_size_kept[k] = min(min_size_kept[k],
                                                    min_kept[k])
             print(
-                "classes treated separately, smallest valid object sizes are {}, removing only objects smaller than that.".
-                format(min_size_kept))
+                "classes treated separately, smallest valid object sizes are {}, removing only objects smaller than that."
+                .format(min_size_kept))
         else:
             min_size_kept = None
 
@@ -293,19 +294,19 @@ def determine_postprocessing(base,
             predicted_segmentation = os.path.join(source, f)
             output_file = os.path.join(folder_per_class, f)
             results.append(
-                p.starmap_async(load_remove_save, (
-                    (predicted_segmentation, output_file, classes, min_size_kept
-                     ), )))
+                p.starmap_async(load_remove_save,
+                                ((predicted_segmentation, output_file, classes,
+                                  min_size_kept), )))
             pred_gt_tuples.append(
                 [output_file, os.path.join(gt_labels_folder, f)])
 
         _ = [i.get() for i in results]
-        _ = aggregate_scores(
-            pred_gt_tuples,
-            labels=classes,
-            json_output_file=os.path.join(folder_per_class, "summary.json"),
-            json_author="medicalseg",
-            num_threads=processes)
+        _ = aggregate_scores(pred_gt_tuples,
+                             labels=classes,
+                             json_output_file=os.path.join(
+                                 folder_per_class, "summary.json"),
+                             json_author="medicalseg",
+                             num_threads=processes)
 
         if do_fg_cc:
             old_res = deepcopy(validation_result_PP_test)
@@ -325,9 +326,8 @@ def determine_postprocessing(base,
             if dc_pp > (dc_raw + dice_threshold):
                 pp_results['for_which_classes'].append(int(c))
                 if min_size_kept is not None:
-                    pp_results['min_valid_object_sizes'].update({
-                        c: min_size_kept[c]
-                    })
+                    pp_results['min_valid_object_sizes'].update(
+                        {c: min_size_kept[c]})
                 print(
                     "Removing all but the largest region for class %d improved results!"
                     % c)
@@ -355,22 +355,22 @@ def determine_postprocessing(base,
         predicted_segmentation = os.path.join(base, raw_subfolder_name, f)
         output_file = os.path.join(base, final_subf_name, f)
         results.append(
-            p.starmap_async(load_remove_save, ((
-                predicted_segmentation, output_file, pp_results[
-                    'for_which_classes'], pp_results['min_valid_object_sizes']),
-                                               )))
+            p.starmap_async(load_remove_save,
+                            ((predicted_segmentation, output_file,
+                              pp_results['for_which_classes'],
+                              pp_results['min_valid_object_sizes']), )))
 
         pred_gt_tuples.append([output_file, os.path.join(gt_labels_folder, f)])
 
     _ = [i.get() for i in results]
-    _ = aggregate_scores(
-        pred_gt_tuples,
-        labels=classes,
-        json_output_file=os.path.join(base, final_subf_name, "summary.json"),
-        json_author="medicalseg",
-        num_threads=processes)
-    pp_results['min_valid_object_sizes'] = str(pp_results[
-        'min_valid_object_sizes'])
+    _ = aggregate_scores(pred_gt_tuples,
+                         labels=classes,
+                         json_output_file=os.path.join(base, final_subf_name,
+                                                       "summary.json"),
+                         json_author="medicalseg",
+                         num_threads=processes)
+    pp_results['min_valid_object_sizes'] = str(
+        pp_results['min_valid_object_sizes'])
     save_json(pp_results, os.path.join(base, pp_filename))
 
     if not debug:
@@ -388,6 +388,6 @@ def load_json(file: str):
     return data
 
 
-def save_json(obj, file: str, indent: int=4, sort_keys: bool=True) -> None:
+def save_json(obj, file: str, indent: int = 4, sort_keys: bool = True) -> None:
     with open(file, 'w') as f:
         json.dump(obj, f, sort_keys=sort_keys, indent=indent)

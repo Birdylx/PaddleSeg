@@ -28,14 +28,13 @@ def convert_to_decathlon(input_folder,
                          test_images_dir="imagesTs",
                          num_processes=8):
     crawl_and_remove_hidden_from_decathlon(input_folder)
-    split_4d(
-        input_folder,
-        output_folder=output_folder,
-        data_json=data_json,
-        train_images_dir=train_images_dir,
-        train_labels_dir=train_labels_dir,
-        test_images_dir=test_images_dir,
-        num_processes=num_processes)
+    split_4d(input_folder,
+             output_folder=output_folder,
+             data_json=data_json,
+             train_images_dir=train_images_dir,
+             train_labels_dir=train_labels_dir,
+             test_images_dir=test_images_dir,
+             num_processes=num_processes)
 
 
 def crawl_and_remove_hidden_from_decathlon(folder,
@@ -81,9 +80,10 @@ def split_4d_to_3d_and_save(img_itk: sitk.Image, output_folder, file_base_name):
     for i, slice_idx in enumerate(range(img_itk.GetSize()[-1])):
         slicer.SetIndex([0, 0, 0, slice_idx])
         sitk_volume = slicer.Execute(img_itk)
-        sitk.WriteImage(sitk_volume,
-                        join_paths(output_folder,
-                                   file_base_name[:-7] + "_%04.0d.nii.gz" % i))
+        sitk.WriteImage(
+            sitk_volume,
+            join_paths(output_folder,
+                       file_base_name[:-7] + "_%04.0d.nii.gz" % i))
 
 
 def split_4d_nifti(filename, output_folder):
@@ -114,9 +114,8 @@ def split_4d(input_folder,
         "{} and {} subdirs and the {} file.".format(train_images_dir, train_labels_dir, test_images_dir)
     if os.path.isdir(output_folder):
         shutil.rmtree(output_folder)
-    shutil.copytree(
-        join_paths(input_folder, train_labels_dir),
-        join_paths(output_folder, train_labels_dir))
+    shutil.copytree(join_paths(input_folder, train_labels_dir),
+                    join_paths(output_folder, train_labels_dir))
     shutil.copy(join_paths(input_folder, data_json), output_folder)
 
     files = []

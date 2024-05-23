@@ -27,6 +27,7 @@ from ppmatting.models.layers import GuidedCxtAtten
 
 @manager.MODELS.add_component
 class GCABaseline(nn.Layer):
+
     def __init__(self, backbone, pretrained=None):
         super().__init__()
         self.encoder = backbone
@@ -39,7 +40,9 @@ class GCABaseline(nn.Layer):
         alpha_pred = self.decoder(embedding, mid_fea)
 
         if self.training:
-            logit_dict = {'alpha_pred': alpha_pred, }
+            logit_dict = {
+                'alpha_pred': alpha_pred,
+            }
             loss_dict = {}
             alpha_gt = inputs['alpha']
             loss_dict["alpha"] = F.l1_loss(alpha_pred, alpha_gt)
@@ -51,6 +54,7 @@ class GCABaseline(nn.Layer):
 
 @manager.MODELS.add_component
 class GCA(GCABaseline):
+
     def __init__(self, backbone, pretrained=None):
         super().__init__(backbone, pretrained)
         self.decoder = ResGuidedCxtAtten_Dec([2, 3, 3, 2])
@@ -58,34 +62,35 @@ class GCA(GCABaseline):
 
 def conv5x5(in_planes, out_planes, stride=1, groups=1, dilation=1):
     """5x5 convolution with padding"""
-    return nn.Conv2D(
-        in_planes,
-        out_planes,
-        kernel_size=5,
-        stride=stride,
-        padding=2,
-        groups=groups,
-        bias_attr=False,
-        dilation=dilation)
+    return nn.Conv2D(in_planes,
+                     out_planes,
+                     kernel_size=5,
+                     stride=stride,
+                     padding=2,
+                     groups=groups,
+                     bias_attr=False,
+                     dilation=dilation)
 
 
 def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
     """3x3 convolution with padding"""
-    return nn.Conv2D(
-        in_planes,
-        out_planes,
-        kernel_size=3,
-        stride=stride,
-        padding=dilation,
-        groups=groups,
-        bias_attr=False,
-        dilation=dilation)
+    return nn.Conv2D(in_planes,
+                     out_planes,
+                     kernel_size=3,
+                     stride=stride,
+                     padding=dilation,
+                     groups=groups,
+                     bias_attr=False,
+                     dilation=dilation)
 
 
 def conv1x1(in_planes, out_planes, stride=1):
     """1x1 convolution"""
-    return nn.Conv2D(
-        in_planes, out_planes, kernel_size=1, stride=stride, bias_attr=False)
+    return nn.Conv2D(in_planes,
+                     out_planes,
+                     kernel_size=1,
+                     stride=stride,
+                     bias_attr=False)
 
 
 class BasicBlock(nn.Layer):
@@ -106,13 +111,12 @@ class BasicBlock(nn.Layer):
         # Both self.conv1 and self.downsample layers downsample the input when stride != 1
         if self.stride > 1:
             self.conv1 = nn.utils.spectral_norm(
-                nn.Conv2DTranspose(
-                    inplanes,
-                    inplanes,
-                    kernel_size=4,
-                    stride=2,
-                    padding=1,
-                    bias_attr=False))
+                nn.Conv2DTranspose(inplanes,
+                                   inplanes,
+                                   kernel_size=4,
+                                   stride=2,
+                                   padding=1,
+                                   bias_attr=False))
         else:
             self.conv1 = nn.utils.spectral_norm(conv(inplanes, inplanes))
         self.bn1 = norm_layer(inplanes)
@@ -141,6 +145,7 @@ class BasicBlock(nn.Layer):
 
 
 class ResNet_D_Dec(nn.Layer):
+
     def __init__(self,
                  layers=[3, 4, 4, 2],
                  norm_layer=None,
@@ -159,28 +164,28 @@ class ResNet_D_Dec(nn.Layer):
         self.midplanes = 64 if late_downsample else 32
 
         self.conv1 = nn.utils.spectral_norm(
-            nn.Conv2DTranspose(
-                self.midplanes,
-                32,
-                kernel_size=4,
-                stride=2,
-                padding=1,
-                bias_attr=False))
+            nn.Conv2DTranspose(self.midplanes,
+                               32,
+                               kernel_size=4,
+                               stride=2,
+                               padding=1,
+                               bias_attr=False))
         self.bn1 = norm_layer(32)
         self.leaky_relu = nn.LeakyReLU(0.2)
-        self.conv2 = nn.Conv2D(
-            32,
-            1,
-            kernel_size=self.kernel_size,
-            stride=1,
-            padding=self.kernel_size // 2)
+        self.conv2 = nn.Conv2D(32,
+                               1,
+                               kernel_size=self.kernel_size,
+                               stride=1,
+                               padding=self.kernel_size // 2)
         self.upsample = nn.UpsamplingNearest2D(scale_factor=2)
         self.tanh = nn.Tanh()
         self.layer1 = self._make_layer(BasicBlock, 256, layers[0], stride=2)
         self.layer2 = self._make_layer(BasicBlock, 128, layers[1], stride=2)
         self.layer3 = self._make_layer(BasicBlock, 64, layers[2], stride=2)
-        self.layer4 = self._make_layer(
-            BasicBlock, self.midplanes, layers[3], stride=2)
+        self.layer4 = self._make_layer(BasicBlock,
+                                       self.midplanes,
+                                       layers[3],
+                                       stride=2)
 
         self.init_weight()
 
@@ -194,12 +199,14 @@ class ResNet_D_Dec(nn.Layer):
                 nn.UpsamplingNearest2D(scale_factor=2),
                 nn.utils.spectral_norm(
                     conv1x1(self.inplanes, planes * block.expansion)),
-                norm_layer(planes * block.expansion), )
+                norm_layer(planes * block.expansion),
+            )
         elif self.inplanes != planes * block.expansion:
             upsample = nn.Sequential(
                 nn.utils.spectral_norm(
                     conv1x1(self.inplanes, planes * block.expansion)),
-                norm_layer(planes * block.expansion), )
+                norm_layer(planes * block.expansion),
+            )
 
         layers = [
             block(self.inplanes, planes, stride, upsample, norm_layer,
@@ -208,11 +215,10 @@ class ResNet_D_Dec(nn.Layer):
         self.inplanes = planes * block.expansion
         for _ in range(1, blocks):
             layers.append(
-                block(
-                    self.inplanes,
-                    planes,
-                    norm_layer=norm_layer,
-                    large_kernel=self.large_kernel))
+                block(self.inplanes,
+                      planes,
+                      norm_layer=norm_layer,
+                      large_kernel=self.large_kernel))
 
         return nn.Sequential(*layers)
 
@@ -253,13 +259,16 @@ class ResNet_D_Dec(nn.Layer):
 
 
 class ResShortCut_D_Dec(ResNet_D_Dec):
+
     def __init__(self,
                  layers,
                  norm_layer=None,
                  large_kernel=False,
                  late_downsample=False):
-        super().__init__(
-            layers, norm_layer, large_kernel, late_downsample=late_downsample)
+        super().__init__(layers,
+                         norm_layer,
+                         large_kernel,
+                         late_downsample=late_downsample)
 
     def forward(self, x, mid_fea):
         fea1, fea2, fea3, fea4, fea5 = mid_fea['shortcut']
@@ -278,13 +287,16 @@ class ResShortCut_D_Dec(ResNet_D_Dec):
 
 
 class ResGuidedCxtAtten_Dec(ResNet_D_Dec):
+
     def __init__(self,
                  layers,
                  norm_layer=None,
                  large_kernel=False,
                  late_downsample=False):
-        super().__init__(
-            layers, norm_layer, large_kernel, late_downsample=late_downsample)
+        super().__init__(layers,
+                         norm_layer,
+                         large_kernel,
+                         late_downsample=late_downsample)
         self.gca = GuidedCxtAtten(128, 128)
 
     def forward(self, x, mid_fea):

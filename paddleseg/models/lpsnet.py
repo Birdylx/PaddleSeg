@@ -22,7 +22,9 @@ from paddleseg.cvlibs import manager
 from paddleseg.models import layers
 from paddleseg.utils import utils
 
-__all__ = ["LPSNet", ]
+__all__ = [
+    "LPSNet",
+]
 
 _interpolate = partial(F.interpolate, mode="bilinear", align_corners=True)
 
@@ -46,13 +48,14 @@ class LPSNet(nn.Layer):
     """
 
     def __init__(
-            self,
-            depths,
-            channels,
-            scale_ratios,
-            num_classes,
-            in_channels=3,
-            pretrained=None, ):
+        self,
+        depths,
+        channels,
+        scale_ratios,
+        num_classes,
+        in_channels=3,
+        pretrained=None,
+    ):
         super().__init__()
 
         self.depths = depths
@@ -72,8 +75,10 @@ class LPSNet(nn.Layer):
         self.nets = nn.LayerList(
             [self._build_path() for _ in range(self.num_paths)])
 
-        self.head = nn.Conv2D(
-            channels[-1] * self.num_paths, num_classes, 1, bias_attr=True)
+        self.head = nn.Conv2D(channels[-1] * self.num_paths,
+                              num_classes,
+                              1,
+                              bias_attr=True)
 
         self._init_weight(pretrained)
 
@@ -93,9 +98,10 @@ class LPSNet(nn.Layer):
                         out_channels=c,
                         kernel_size=3,
                         padding=1,
-                        stride=2
-                        if (i == 0 and b != self.num_blocks - 1) else 1,
-                        bias_attr=False, ))
+                        stride=2 if
+                        (i == 0 and b != self.num_blocks - 1) else 1,
+                        bias_attr=False,
+                    ))
                 c_in = c
             path.append(nn.Sequential(*blocks))
         return nn.LayerList(path)

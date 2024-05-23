@@ -16,6 +16,7 @@ import abc
 
 
 class InferenceHelper(abc.ABC):
+
     @abc.abstractmethod
     def preprocess(self, cfg, imgs_path, batch_size, batch_id):
         """

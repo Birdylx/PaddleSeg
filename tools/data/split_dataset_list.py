@@ -22,33 +22,36 @@ import numpy as np
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='A tool for proportionally randomizing dataset to produce file lists.'
-    )
+        description=
+        'A tool for proportionally randomizing dataset to produce file lists.')
     parser.add_argument('dataset_root', help='the dataset root path', type=str)
-    parser.add_argument(
-        'images_dir_name', help='the directory name of images', type=str)
-    parser.add_argument(
-        'labels_dir_name', help='the directory name of labels', type=str)
-    parser.add_argument(
-        '--split', help='', nargs=3, type=float, default=[0.7, 0.3, 0])
-    parser.add_argument(
-        '--separator',
-        dest='separator',
-        help='file list separator',
-        default=" ",
-        type=str)
+    parser.add_argument('images_dir_name',
+                        help='the directory name of images',
+                        type=str)
+    parser.add_argument('labels_dir_name',
+                        help='the directory name of labels',
+                        type=str)
+    parser.add_argument('--split',
+                        help='',
+                        nargs=3,
+                        type=float,
+                        default=[0.7, 0.3, 0])
+    parser.add_argument('--separator',
+                        dest='separator',
+                        help='file list separator',
+                        default=" ",
+                        type=str)
     parser.add_argument(
         '--format',
         help='data format of images and labels, e.g. jpg, tif or png.',
         type=str,
         nargs=2,
         default=['jpg', 'png'])
-    parser.add_argument(
-        '--postfix',
-        help='postfix of images or labels',
-        type=str,
-        nargs=2,
-        default=['', ''])
+    parser.add_argument('--postfix',
+                        help='postfix of images or labels',
+                        type=str,
+                        nargs=2,
+                        default=['', ''])
 
     return parser.parse_args()
 
@@ -107,8 +110,8 @@ def generate_list(args):
         dataset_split = dataset_name[i]
         print("Creating {}.txt...".format(dataset_split))
         if args.split[i] > 1.0 or args.split[i] < 0:
-            raise ValueError("{} dataset percentage should be 0~1.".format(
-                dataset_split))
+            raise ValueError(
+                "{} dataset percentage should be 0~1.".format(dataset_split))
 
         file_list = os.path.join(dataset_root, dataset_split + '.txt')
         with open(file_list, "w") as f:

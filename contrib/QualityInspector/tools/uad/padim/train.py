@@ -35,7 +35,6 @@ from qinspector.uad.models.padim import ResNet_PaDiM
 from qinspector.cvlib.uad_configs import ConfigParser
 from val import val
 
-
 textures = ['carpet', 'grid', 'leather', 'tile', 'wood']
 objects = [
     'bottle', 'cable', 'capsule', 'hazelnut', 'metal_nut', 'pill', 'screw',
@@ -44,14 +43,14 @@ objects = [
 CLASS_NAMES = textures + objects
 fins = {"resnet18": 448, "resnet50": 1792, "wide_resnet50_2": 1792}
 
+
 def argsparser():
     parser = argparse.ArgumentParser('PaDiM')
-    parser.add_argument(
-        "--config",
-        type=str,
-        default=None,
-        help="Path of config",
-        required=True)
+    parser.add_argument("--config",
+                        type=str,
+                        default=None,
+                        help="Path of config",
+                        required=True)
     parser.add_argument("--device", type=str, default=None)
     parser.add_argument("--batch_size", type=int, default=None)
     parser.add_argument('--num_workers', type=int, default=None)
@@ -65,7 +64,8 @@ def argsparser():
         "--backbone",
         type=str,
         default=None,
-        help="backbone model arch, one of [resnet18, resnet50, wide_resnet50_2]")
+        help="backbone model arch, one of [resnet18, resnet50, wide_resnet50_2]"
+    )
     parser.add_argument("--do_eval", type=bool, default=None)
     parser.add_argument("--save_pic", type=bool, default=None)
 
@@ -103,35 +103,31 @@ def main():
     csv_name = os.path.join(args.save_path + args.backbone,
                             '{}_seed{}.csv'.format(args.category, args.seed))
     for i, class_name in enumerate(class_names):
-        print("Training model {}/{} for {}".format(
-            i + 1, len(class_names), class_name))
+        print("Training model {}/{} for {}".format(i + 1, len(class_names),
+                                                   class_name))
         # build datasets
-        train_dataset = mvtec.MVTecDataset(
-            args.data_path,
-            class_name=class_name,
-            is_train=True,
-            resize=args.resize,
-            cropsize=args.crop_size)
-        train_dataloader = DataLoader(
-            train_dataset,
-            batch_size=args.batch_size,
-            num_workers=args.num_workers)
+        train_dataset = mvtec.MVTecDataset(args.data_path,
+                                           class_name=class_name,
+                                           is_train=True,
+                                           resize=args.resize,
+                                           cropsize=args.crop_size)
+        train_dataloader = DataLoader(train_dataset,
+                                      batch_size=args.batch_size,
+                                      num_workers=args.num_workers)
         t_d, d = fins[
             args.
             backbone], 100  # "resnet18": {"orig_dims": 448, "reduced_dims": 100, "emb_scale": 4}
         idx = paddle.to_tensor(sample(range(0, t_d), d))
         train(args, model, train_dataloader, idx, class_name)
         if args.do_eval:
-            test_dataset = mvtec.MVTecDataset(
-                args.data_path,
-                class_name=class_name,
-                is_train=False,
-                resize=args.resize,
-                cropsize=args.crop_size)
-            test_dataloader = DataLoader(
-                test_dataset,
-                batch_size=args.batch_size,
-                num_workers=args.num_workers)
+            test_dataset = mvtec.MVTecDataset(args.data_path,
+                                              class_name=class_name,
+                                              is_train=False,
+                                              resize=args.resize,
+                                              cropsize=args.crop_size)
+            test_dataloader = DataLoader(test_dataset,
+                                         batch_size=args.batch_size,
+                                         num_workers=args.num_workers)
 
             result.append([
                 class_name, *val(args, model, test_dataloader, class_name, idx)
@@ -150,8 +146,8 @@ def main():
 
 
 def train(args, model, train_dataloader, idx, class_name):
-    train_outputs = OrderedDict(
-        [('layer1', []), ('layer2', []), ('layer3', [])])
+    train_outputs = OrderedDict([('layer1', []), ('layer2', []),
+                                 ('layer3', [])])
 
     # extract train set features
     epoch_begin = time.time()
@@ -175,10 +171,9 @@ def train(args, model, train_dataloader, idx, class_name):
         if index % args.print_freq == 0:
             print(
                 datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + '\t' +
-                "Epoch {}[{}/{}]: loss:{:.5f}, lr:{:.5f}, batch time:{:.4f}, data time:{:.4f}".
-                format(0, index + 1,
-                       len(train_dataloader), 0,
-                       float(0), float(batch_time), float(data_time)))
+                "Epoch {}[{}/{}]: loss:{:.5f}, lr:{:.5f}, batch time:{:.4f}, data time:{:.4f}"
+                .format(0, index + 1, len(train_dataloader), 0, float(0),
+                        float(batch_time), float(data_time)))
 
     for k, v in train_outputs.items():
         train_outputs[k] = paddle.concat(v, 0)
@@ -187,8 +182,9 @@ def train(args, model, train_dataloader, idx, class_name):
     embedding_vectors = train_outputs['layer1']
     for layer_name in ['layer2', 'layer3']:
         layer_embedding = train_outputs[layer_name]
-        layer_embedding = F.interpolate(
-            layer_embedding, size=embedding_vectors.shape[-2:], mode="nearest")
+        layer_embedding = F.interpolate(layer_embedding,
+                                        size=embedding_vectors.shape[-2:],
+                                        mode="nearest")
         embedding_vectors = paddle.concat((embedding_vectors, layer_embedding),
                                           1)
 

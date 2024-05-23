@@ -22,6 +22,7 @@ def prepare_distill_adaptor():
     """
 
     class StudentAdaptor(AdaptorBase):
+
         def mapping_layers(self):
             mapping_layers = {}
             # mapping_layers['hidden_0'] = 'layer_name'
@@ -31,6 +32,7 @@ def prepare_distill_adaptor():
             return mapping_layers
 
     class TeatherAdaptor(AdaptorBase):
+
         def mapping_layers(self):
             mapping_layers = {}
             # mapping_layers['hidden_0'] = 'layer_name'

@@ -92,8 +92,8 @@ def evaluate(model, eval_dataset, args):
             os.path.join(validation_raw_folder, fname + '.nii.gz'),
             os.path.join(gt_niftis_folder, fname + '.nii.gz'),
         ])
-        if os.path.exists(
-                os.path.join(validation_raw_folder, fname + '.nii.gz')):
+        if os.path.exists(os.path.join(validation_raw_folder,
+                                       fname + '.nii.gz')):
             print('{} already exists, skip.'.format(
                 os.path.join(validation_raw_folder, fname + '.nii.gz')))
             continue
@@ -112,8 +112,9 @@ def evaluate(model, eval_dataset, args):
                         seg_pre_path))
             seg_from_prev_stage = np.load(seg_pre_path)['data'][None]
             data = np.concatenate(
-                (data, to_one_hot(seg_from_prev_stage[0],
-                                  range(1, eval_dataset.num_classes))))
+                (data,
+                 to_one_hot(seg_from_prev_stage[0],
+                            range(1, eval_dataset.num_classes))))
 
         argmax_pred, softmax_pred = predictor.predict_3D(
             data,
@@ -134,14 +135,13 @@ def evaluate(model, eval_dataset, args):
         softmax_fname = os.path.join(validation_raw_folder, fname + '.npz')
 
         if np.prod(softmax_pred.shape) > (2e9 / 4 * 0.85):
-            np.save(
-                os.path.join(validation_raw_folder, fname + ".npy"),
-                softmax_pred)
+            np.save(os.path.join(validation_raw_folder, fname + ".npy"),
+                    softmax_pred)
             softmax_pred = os.path.join(validation_raw_folder, fname + ".npy")
 
         save_segmentation_nifti_from_softmax(
-            softmax_pred,
-            os.path.join(validation_raw_folder, fname + '.nii.gz'), properties,
+            softmax_pred, os.path.join(validation_raw_folder,
+                                       fname + '.nii.gz'), properties,
             interpolation_order, None, None, None, softmax_fname, None,
             force_separate_z, interpolation_order_z)
 
@@ -154,12 +154,12 @@ def evaluate(model, eval_dataset, args):
         json_task='task',
         num_threads=4)
 
-    determine_postprocessing(
-        output_folder,
-        gt_niftis_folder,
-        'validation_raw',
-        final_subf_name='validation_raw' + "_postprocessed",
-        debug=False)
+    determine_postprocessing(output_folder,
+                             gt_niftis_folder,
+                             'validation_raw',
+                             final_subf_name='validation_raw' +
+                             "_postprocessed",
+                             debug=False)
 
     gt_nifti_folder = os.path.join(output_base, "gt_niftis")
 
@@ -190,87 +190,85 @@ def evaluate(model, eval_dataset, args):
                 raise e
 
     if args.predict_next_stage:
-        predict_next_stage(
-            model,
-            plans,
-            eval_dataset,
-            eval_dataset.preprocessed_dir,
-            os.path.join(eval_dataset.preprocessed_dir,
-                         plans['data_identifier'] + "_stage%d" % 1),
-            args.precision == 'fp16',
-            num_threads=4)
+        predict_next_stage(model,
+                           plans,
+                           eval_dataset,
+                           eval_dataset.preprocessed_dir,
+                           os.path.join(
+                               eval_dataset.preprocessed_dir,
+                               plans['data_identifier'] + "_stage%d" % 1),
+                           args.precision == 'fp16',
+                           num_threads=4)
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Model evaluation')
 
     # params of evaluate
-    parser.add_argument(
-        "--config", dest="cfg", help="The config file.", default=None, type=str)
+    parser.add_argument("--config",
+                        dest="cfg",
+                        help="The config file.",
+                        default=None,
+                        type=str)
 
     parser.add_argument(
         '--model_path',
         dest='model_path',
         help='The path of model for evaluation',
         type=str,
-        default="saved_model/vnet_lung_coronavirus_128_128_128_15k/best_model/model.pdparams"
+        default=
+        "saved_model/vnet_lung_coronavirus_128_128_128_15k/best_model/model.pdparams"
     )
 
-    parser.add_argument(
-        '--predict_next_stage',
-        action='store_true',
-        default=False,
-        help='whether predict stage 2 training data.')
+    parser.add_argument('--predict_next_stage',
+                        action='store_true',
+                        default=False,
+                        help='whether predict stage 2 training data.')
 
-    parser.add_argument(
-        '--val_save_folder',
-        dest='val_save_folder',
-        help='The path to val data predicted result',
-        type=str,
-        default="val_save_folder")
+    parser.add_argument('--val_save_folder',
+                        dest='val_save_folder',
+                        help='The path to val data predicted result',
+                        type=str,
+                        default="val_save_folder")
 
     parser.add_argument(
         "--precision",
         default="fp32",
         type=str,
         choices=["fp32", "fp16"],
-        help="Use AMP (Auto mixed precision) if precision='fp16'. If precision='fp32', the training is normal."
+        help=
+        "Use AMP (Auto mixed precision) if precision='fp16'. If precision='fp32', the training is normal."
     )
 
-    parser.add_argument(
-        "--do_mirroring",
-        dest='do_mirroring',
-        type=bool,
-        default=True,
-        help="Whether use mirroring when inference.")
+    parser.add_argument("--do_mirroring",
+                        dest='do_mirroring',
+                        type=bool,
+                        default=True,
+                        help="Whether use mirroring when inference.")
 
-    parser.add_argument(
-        "--use_sliding_window",
-        dest='use_sliding_window',
-        type=bool,
-        default=True,
-        help="Whether use sliding window when inference.")
+    parser.add_argument("--use_sliding_window",
+                        dest='use_sliding_window',
+                        type=bool,
+                        default=True,
+                        help="Whether use sliding window when inference.")
 
-    parser.add_argument(
-        "--step_size",
-        dest='step_size',
-        type=float,
-        default=0.5,
-        help="step size when predict.")
+    parser.add_argument("--step_size",
+                        dest='step_size',
+                        type=float,
+                        default=0.5,
+                        help="step size when predict.")
 
-    parser.add_argument(
-        "--use_gaussian",
-        dest='use_gaussian',
-        type=bool,
-        default=True,
-        help="Whether use gaussian.")
+    parser.add_argument("--use_gaussian",
+                        dest='use_gaussian',
+                        type=bool,
+                        default=True,
+                        help="Whether use gaussian.")
 
-    parser.add_argument(
-        "--verbose",
-        dest='verbose',
-        type=bool,
-        default=True,
-        help="Whether print log.")
+    parser.add_argument("--verbose",
+                        dest='verbose',
+                        type=bool,
+                        default=True,
+                        help="Whether print log.")
 
     return parser.parse_args()
 

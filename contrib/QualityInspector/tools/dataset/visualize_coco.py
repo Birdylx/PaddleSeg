@@ -23,19 +23,20 @@ from pycocotools.coco import COCO
 def parse_args():
     """Parse arguments"""
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '--json_path', type=str, help="The path of coco format json file.")
+    parser.add_argument('--json_path',
+                        type=str,
+                        help="The path of coco format json file.")
     parser.add_argument(
         '--root_path',
         type=str,
         default="",
-        help="The directory of images, default None if the path of images is absolute path in json file."
+        help=
+        "The directory of images, default None if the path of images is absolute path in json file."
     )
-    parser.add_argument(
-        '--save_path',
-        type=str,
-        default="./show/",
-        help="The directory for saving visualization result.")
+    parser.add_argument('--save_path',
+                        type=str,
+                        default="./show/",
+                        help="The directory for saving visualization result.")
     return parser.parse_args()
 
 
@@ -53,16 +54,15 @@ def visualization_bbox(args):
         #coco.showAnns(annos)
         if len(annos) == 0:
             continue
-        image = Image.open(os.path.join(args.root_path, im_info[
-            'file_name'])).convert('RGB')
+        image = Image.open(os.path.join(args.root_path,
+                                        im_info['file_name'])).convert('RGB')
         draw = ImageDraw.Draw(image)
         for anno in annos:
             x, y, w, h = anno["bbox"]
-            draw.line(
-                [(x, y), (x, int(y + h)), (int(x + w), int(y + h)),
-                 (int(x + w), y), (x, y)],
-                width=2,
-                fill=(255, 0, 0))
+            draw.line([(x, y), (x, int(y + h)), (int(x + w), int(y + h)),
+                       (int(x + w), y), (x, y)],
+                      width=2,
+                      fill=(255, 0, 0))
             text = "class: {}".format(str(coco_classes[anno["category_id"]]))
             _, th = draw.textsize(text)
             draw.text((x, y - th), text)

@@ -53,7 +53,7 @@ If the precompiled libraries provided do not meet the requirements, you can comp
 
 This document takes CUDA=11.6, CUDNN=8.4.1.5, TensorRT=8.4.1.5 as an example to introduce.
 
-Paddle Inference directory structure: 
+Paddle Inference directory structure:
 ```shell
 D:\projects\paddle_inference
   ├── paddle
@@ -78,7 +78,7 @@ This example uses OpenCV to read pictures, so you need to install OpenCV. In oth
 You can download the prepared [inference model](https://paddleseg.bj.bcebos.com/dygraph/demo/pp_liteseg_infer_model.tar.gz) to the local for subsequent testing.
 If you need to test other models, please refer to the [document](../../model_export.md) to export the inference model.
 
-The inference model file format is as follows: 
+The inference model file format is as follows:
 ```shell
 pp_liteseg_infer_model
   ├── deploy.yaml            # Deployment related configuration file, mainly describing how data is preprocessed, etc.
@@ -88,12 +88,12 @@ pp_liteseg_infer_model
 ```
 
 `model.pdmodel` can be visualized by [Netron](https://netron.app/), click the input node to see the number of inputs and outputs and data types of the inference model (such as int32_t, int64_t, float, etc.).
-If the output data type of the inference model is not int32_t, an error will be reported after executing the default code. At this time, you need to manually modify codes as the corresponded output data type in `deploy/cpp/src/test_seg.cc` as follows: 
+If the output data type of the inference model is not int32_t, an error will be reported after executing the default code. At this time, you need to manually modify codes as the corresponded output data type in `deploy/cpp/src/test_seg.cc` as follows:
 ```
 std::vector<int32_t> out_data(out_num);
 ```
 
-Download an [image](https://paddleseg.bj.bcebos.com/dygraph/demo/cityscapes_demo.png) from the cityscapes validation set to the local for subsequent testing. 
+Download an [image](https://paddleseg.bj.bcebos.com/dygraph/demo/cityscapes_demo.png) from the cityscapes validation set to the local for subsequent testing.
 
 ## 4. Compile
 
@@ -108,7 +108,7 @@ D:\projects
 
 ### 4.1 Use CMake to generate project files
 
-The description of compilation parameters is as follows, where `*` indicates that it is only specified when using **GPU version** prediction library, and `#` indicates that it is only specified when using **TensorRT**. 
+The description of compilation parameters is as follows, where `*` indicates that it is only specified when using **GPU version** prediction library, and `#` indicates that it is only specified when using **TensorRT**.
 
 | Parameters       | Description                                                                                                   |
 |------------------|---------------------------------------------------------------------------------------------------------------|
@@ -123,12 +123,12 @@ The description of compilation parameters is as follows, where `*` indicates tha
 | PADDLE_LIB       | The installation path of Paddle Inference prediction library;                                                 |
 | DEMO_NAME        | Executable file name;                                                                                         |
 
-Enter the `cpp` directory: 
+Enter the `cpp` directory:
 ```
 cd D:\projects\PaddleSeg\deploy\cpp
 ```
 
-Create the `build` folder and enter its directory: 
+Create the `build` folder and enter its directory:
 ```commandline
 mkdir build
 cd build
@@ -190,6 +190,6 @@ CPU inference：
 test_seg.exe --model_dir=./pp_liteseg_infer_model --img_path=./cityscapes_demo.png --devices=CPU
 ```
 
-Save predicted result as `out_img.jpg`, this image uses histogram equalization to facilitate visualization, as shown below: 
+Save predicted result as `out_img.jpg`, this image uses histogram equalization to facilitate visualization, as shown below:
 
 ![out_img](https://user-images.githubusercontent.com/52520497/131456277-260352b5-4047-46d5-a38f-c50bbcfb6fd0.jpg)

@@ -15,6 +15,7 @@ import paddle
 
 
 class WrappedModel(paddle.nn.Layer):
+
     def __init__(self, model, output_op):
         super().__init__()
         self.model = model

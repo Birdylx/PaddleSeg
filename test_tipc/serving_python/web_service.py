@@ -31,21 +31,21 @@ def parse_args():
     parser.add_argument(
         "--config",
         help="The path of config file.",
-        type=str, )
+        type=str,
+    )
     parser.add_argument(
         "--opt",
         help="Use --opt op.seg.local_service_conf.devices=xx to set devices.",
-        type=str, )
-    parser.add_argument(
-        "--input_name",
-        help="The output name of inference model.",
         type=str,
-        default="x")
-    parser.add_argument(
-        "--output_name",
-        help="The output name of inference model.",
-        type=str,
-        default="argmax_0.tmp_0")
+    )
+    parser.add_argument("--input_name",
+                        help="The output name of inference model.",
+                        type=str,
+                        default="x")
+    parser.add_argument("--output_name",
+                        help="The output name of inference model.",
+                        type=str,
+                        default="argmax_0.tmp_0")
     return parser.parse_args()
 
 
@@ -65,10 +65,11 @@ def read_update_cfg(config_path, opt):
 
 
 class SegOp(Op):
+
     def init_op(self):
         self.seq = Compose([
-            NormalizeImage(
-                mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]), ToCHW()
+            NormalizeImage(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
+            ToCHW()
         ])
 
     def set_in_out_name(self, input_name, output_name):
@@ -101,6 +102,7 @@ class SegOp(Op):
 
 
 class SegService(WebService):
+
     def __init__(self, name, input_name, output_name):
         super().__init__(name)
         self.input_name = input_name

@@ -23,6 +23,7 @@ from copy import deepcopy
 
 
 class Clicker(object):
+
     def __init__(self,
                  gt_mask=None,
                  init_clicks=None,
@@ -52,19 +53,21 @@ class Clicker(object):
     def _get_next_click(self, pred_mask, padding=True):
         fn_mask = np.logical_and(
             np.logical_and(self.gt_mask, np.logical_not(pred_mask)),
-            self.not_ignore_mask, )
+            self.not_ignore_mask,
+        )
         fp_mask = np.logical_and(
             np.logical_and(np.logical_not(self.gt_mask), pred_mask),
-            self.not_ignore_mask, )
+            self.not_ignore_mask,
+        )
 
         if padding:
             fn_mask = np.pad(fn_mask, ((1, 1), (1, 1)), "constant")
             fp_mask = np.pad(fp_mask, ((1, 1), (1, 1)), "constant")
 
-        fn_mask_dt = cv2.distanceTransform(
-            fn_mask.astype(np.uint8), cv2.DIST_L2, 0)
-        fp_mask_dt = cv2.distanceTransform(
-            fp_mask.astype(np.uint8), cv2.DIST_L2, 0)
+        fn_mask_dt = cv2.distanceTransform(fn_mask.astype(np.uint8),
+                                           cv2.DIST_L2, 0)
+        fp_mask_dt = cv2.distanceTransform(fp_mask.astype(np.uint8),
+                                           cv2.DIST_L2, 0)
 
         if padding:
             fn_mask_dt = fn_mask_dt[1:-1, 1:-1]
@@ -133,6 +136,7 @@ class Clicker(object):
 
 
 class Click:
+
     def __init__(self, is_positive, coords, indx=None):
         self.is_positive = is_positive
         self.coords = coords

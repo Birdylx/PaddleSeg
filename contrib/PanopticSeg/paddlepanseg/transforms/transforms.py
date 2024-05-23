@@ -28,6 +28,7 @@ __all__ = ['Collect', 'ConvertRGBToID', 'DecodeLabels', 'PadToDivisible']
 
 @manager.TRANSFORMS.add_component
 class Collect(object):
+
     def __init__(self, keys):
         super().__init__()
         self.keys = keys
@@ -41,6 +42,7 @@ class Collect(object):
 @manager.TRANSFORMS.add_component
 @trim_for_test
 class ConvertRGBToID(object):
+
     def __call__(self, data):
         # Save a copy
         data['label_rgb'] = data['label']
@@ -51,6 +53,7 @@ class ConvertRGBToID(object):
 @manager.TRANSFORMS.add_component
 @trim_for_test
 class DecodeLabels(object):
+
     def __init__(self, label_divisor, ignore_index):
         self.label_divisor = label_divisor
         self.ignore_index = ignore_index
@@ -78,8 +81,9 @@ class DecodeLabels(object):
                     ins_label[mask] = ins_id
                 # Re-encode `pan_id` using `cat_id` and tracked class instance id
                 class_id_tracker[cat_id] += 1
-                pan_id = encode_pan_id(
-                    cat_id, self.label_divisor, ins_id=class_id_tracker[cat_id])
+                pan_id = encode_pan_id(cat_id,
+                                       self.label_divisor,
+                                       ins_id=class_id_tracker[cat_id])
                 pan_label[mask] = pan_id
             else:
                 pan_id = encode_pan_id(cat_id, self.label_divisor)
@@ -96,6 +100,7 @@ class DecodeLabels(object):
 
 @manager.TRANSFORMS.add_component
 class PadToDivisible(object):
+
     def __init__(self, size_divisor):
         self.size_divisor = size_divisor
 

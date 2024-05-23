@@ -1,15 +1,15 @@
-# Copyright (c) 2023 PaddlePaddle Authors. All Rights Reserved. 
-#   
-# Licensed under the Apache License, Version 2.0 (the "License");   
-# you may not use this file except in compliance with the License.  
-# You may obtain a copy of the License at   
-#   
-#     http://www.apache.org/licenses/LICENSE-2.0    
-#   
-# Unless required by applicable law or agreed to in writing, software   
-# distributed under the License is distributed on an "AS IS" BASIS, 
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  
-# See the License for the specific language governing permissions and   
+# Copyright (c) 2023 PaddlePaddle Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
 # limitations under the License.
 
 import os
@@ -40,11 +40,10 @@ def draw_bboxes(path, annos, clsid_to_name, output_dir=None):
     draw = ImageDraw.Draw(image)
     for anno in annos:
         x, y, w, h = anno["bbox"]
-        draw.line(
-            [(x, y), (x, int(y + h)), (int(x + w), int(y + h)), (int(x + w), y),
-             (x, y)],
-            width=2,
-            fill=(255, 0, 0))
+        draw.line([(x, y), (x, int(y + h)), (int(x + w), int(y + h)),
+                   (int(x + w), y), (x, y)],
+                  width=2,
+                  fill=(255, 0, 0))
         text = "class: {}".format(
             str(clsid_to_name[anno["category_id"]]['name']))
         _, th = draw.textsize(text)
@@ -77,11 +76,10 @@ def show_result(results, output_dir=None, class_name=None):
                 xmin, ymin, w, h = bbox
                 xmax = xmin + w
                 ymax = ymin + h
-                draw.line(
-                    [(xmin, ymin), (xmin, ymax), (xmax, ymax), (xmax, ymin),
-                     (xmin, ymin)],
-                    width=2,
-                    fill=color)
+                draw.line([(xmin, ymin), (xmin, ymax), (xmax, ymax),
+                           (xmax, ymin), (xmin, ymin)],
+                          width=2,
+                          fill=color)
 
                 isNG = pred['isNG']
                 if class_name:
@@ -90,21 +88,21 @@ def show_result(results, output_dir=None, class_name=None):
                     cate_name = pred.get('category_name', str(cate_id))
                 if 'score' in pred:
                     score = pred['score']
-                    text = "{} {:.2f} {}".format(cate_name, score, 'NG'
-                                                 if isNG else 'OK')
+                    text = "{} {:.2f} {}".format(cate_name, score,
+                                                 'NG' if isNG else 'OK')
                 else:
                     text = "{} {}".format(cate_name, 'NG' if isNG else 'OK')
 
                 tw, th = draw.textsize(text)
                 if ymin - th >= 1:
-                    draw.rectangle(
-                        [(xmin + 1, ymin - th), (xmin + tw + 1, ymin)],
-                        fill=color)
+                    draw.rectangle([(xmin + 1, ymin - th),
+                                    (xmin + tw + 1, ymin)],
+                                   fill=color)
                     draw.text((xmin + 1, ymin - th), text, fill=(255, 255, 255))
                 else:
-                    draw.rectangle(
-                        [(xmin + 1, ymax), (xmin + tw + 1, ymax + th)],
-                        fill=color)
+                    draw.rectangle([(xmin + 1, ymax),
+                                    (xmin + tw + 1, ymax + th)],
+                                   fill=color)
                     draw.text((xmin + 1, ymax + 1), text, fill=(255, 255, 255))
 
             if 'polygon' in pred:

@@ -21,6 +21,7 @@ from medpy import metric
 
 
 class ConfusionMatrix:
+
     def __init__(self, test=None, reference=None):
         self.tp = None
         self.fp = None

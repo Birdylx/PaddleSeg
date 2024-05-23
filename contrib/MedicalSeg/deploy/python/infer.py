@@ -40,13 +40,12 @@ from tools import Prep
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Test')
-    parser.add_argument(
-        "--config",
-        dest="cfg",
-        help="The config file.",
-        default=None,
-        type=str,
-        required=True)
+    parser.add_argument("--config",
+                        dest="cfg",
+                        help="The config file.",
+                        default=None,
+                        type=str,
+                        required=True)
     parser.add_argument(
         '--image_path',
         dest='image_path',
@@ -54,18 +53,16 @@ def parse_args():
         type=str,
         default=None,
         required=True)
-    parser.add_argument(
-        '--batch_size',
-        dest='batch_size',
-        help='Mini batch size of one gpu or cpu.',
-        type=int,
-        default=1)
-    parser.add_argument(
-        '--save_dir',
-        dest='save_dir',
-        help='The directory for saving the predict result.',
-        type=str,
-        default='./output')
+    parser.add_argument('--batch_size',
+                        dest='batch_size',
+                        help='Mini batch size of one gpu or cpu.',
+                        type=int,
+                        default=1)
+    parser.add_argument('--save_dir',
+                        dest='save_dir',
+                        help='The directory for saving the predict result.',
+                        type=str,
+                        default='./output')
     parser.add_argument(
         '--device',
         choices=['cpu', 'gpu'],
@@ -78,43 +75,41 @@ def parse_args():
         type=eval,
         choices=[True, False],
         help='Whether to use Nvidia TensorRT to accelerate prediction.')
-    parser.add_argument(
-        "--precision",
-        default="fp32",
-        type=str,
-        choices=["fp32", "fp16", "int8"],
-        help='The tensorrt precision.')
+    parser.add_argument("--precision",
+                        default="fp32",
+                        type=str,
+                        choices=["fp32", "fp16", "int8"],
+                        help='The tensorrt precision.')
     parser.add_argument(
         '--enable_auto_tune',
         default=False,
         type=eval,
         choices=[True, False],
-        help='Whether to enable tuned dynamic shape. We uses some images to collect '
+        help=
+        'Whether to enable tuned dynamic shape. We uses some images to collect '
         'the dynamic shape for trt sub graph, which avoids setting dynamic shape manually.'
     )
-    parser.add_argument(
-        '--auto_tuned_shape_file',
-        type=str,
-        default="auto_tune_tmp.pbtxt",
-        help='The temp file to save tuned dynamic shape.')
+    parser.add_argument('--auto_tuned_shape_file',
+                        type=str,
+                        default="auto_tune_tmp.pbtxt",
+                        help='The temp file to save tuned dynamic shape.')
 
-    parser.add_argument(
-        '--cpu_threads',
-        default=10,
-        type=int,
-        help='Number of threads to predict when using cpu.')
-    parser.add_argument(
-        '--enable_mkldnn',
-        default=False,
-        type=eval,
-        choices=[True, False],
-        help='Enable to use mkldnn to speed up when using cpu.')
+    parser.add_argument('--cpu_threads',
+                        default=10,
+                        type=int,
+                        help='Number of threads to predict when using cpu.')
+    parser.add_argument('--enable_mkldnn',
+                        default=False,
+                        type=eval,
+                        choices=[True, False],
+                        help='Enable to use mkldnn to speed up when using cpu.')
 
     parser.add_argument(
         "--benchmark",
         type=eval,
         default=False,
-        help="Whether to log some information about environment, model, configuration and performance."
+        help=
+        "Whether to log some information about environment, model, configuration and performance."
     )
     parser.add_argument(
         "--model_name",
@@ -123,23 +118,20 @@ def parse_args():
         help='When `--benchmark` is True, the specified model name is displayed.'
     )
 
-    parser.add_argument(
-        '--with_argmax',
-        dest='with_argmax',
-        help='Perform argmax operation on the predict result.',
-        action='store_true')
-    parser.add_argument(
-        '--print_detail',
-        default=True,
-        type=eval,
-        choices=[True, False],
-        help='Print GLOG information of Paddle Inference.')
+    parser.add_argument('--with_argmax',
+                        dest='with_argmax',
+                        help='Perform argmax operation on the predict result.',
+                        action='store_true')
+    parser.add_argument('--print_detail',
+                        default=True,
+                        type=eval,
+                        choices=[True, False],
+                        help='Print GLOG information of Paddle Inference.')
 
-    parser.add_argument(
-        '--use_swl',
-        default=False,
-        type=eval,
-        help='use sliding_window_inference')
+    parser.add_argument('--use_swl',
+                        default=False,
+                        type=eval,
+                        help='use sliding_window_inference')
 
     parser.add_argument('--use_warmup', default=True, type=eval, help='warmup')
 
@@ -147,7 +139,8 @@ def parse_args():
         '--img_shape',
         default=[128],
         nargs='+',
-        help='"A single value or three values to specify the size in each dimension."'
+        help=
+        '"A single value or three values to specify the size in each dimension."'
     )
 
     parser.add_argument('--is_nhwd', default=True, type=eval, help='is_nhwd')
@@ -161,15 +154,16 @@ def use_auto_tune(args):
 
 
 class DeployConfig:
+
     def __init__(self, path):
         with codecs.open(path, 'r', 'utf-8') as file:
             self.dic = yaml.load(file, Loader=yaml.FullLoader)
 
-        self._transforms = self.load_transforms(self.dic['Deploy'][
-            'transforms'])
+        self._transforms = self.load_transforms(
+            self.dic['Deploy']['transforms'])
         if self.dic['Deploy']['inference_helper'] is not None:
-            self._inference_helper = self.load_inference_helper(self.dic[
-                'Deploy']['inference_helper'])
+            self._inference_helper = self.load_inference_helper(
+                self.dic['Deploy']['inference_helper'])
         else:
             self._inference_helper = None
         self._dir = os.path.dirname(path)
@@ -261,6 +255,7 @@ def auto_tune(args, imgs, img_nums):
 
 
 class ModelLikeInfer:
+
     def __init__(self, input_handle, output_handle, predictor):
         self.input_handle = input_handle
         self.output_handle = output_handle
@@ -278,6 +273,7 @@ class ModelLikeInfer:
 
 
 class Predictor:
+
     def __init__(self, args):
         """
         Prepare for prediction.
@@ -299,21 +295,22 @@ class Predictor:
         if hasattr(args, 'benchmark') and args.benchmark:
             import auto_log
             pid = os.getpid()
-            self.autolog = auto_log.AutoLogger(
-                model_name=args.model_name,
-                model_precision=args.precision,
-                batch_size=args.batch_size,
-                data_shape="dynamic",
-                save_path=None,
-                inference_config=self.pred_cfg,
-                pids=pid,
-                process_name=None,
-                gpu_ids=0,
-                time_keys=[
-                    'preprocess_time', 'inference_time', 'postprocess_time'
-                ],
-                warmup=0,
-                logger=logger)
+            self.autolog = auto_log.AutoLogger(model_name=args.model_name,
+                                               model_precision=args.precision,
+                                               batch_size=args.batch_size,
+                                               data_shape="dynamic",
+                                               save_path=None,
+                                               inference_config=self.pred_cfg,
+                                               pids=pid,
+                                               process_name=None,
+                                               gpu_ids=0,
+                                               time_keys=[
+                                                   'preprocess_time',
+                                                   'inference_time',
+                                                   'postprocess_time'
+                                               ],
+                                               warmup=0,
+                                               logger=logger)
 
     def _init_base_config(self):
         "初始化基础配置"
@@ -351,13 +348,12 @@ class Predictor:
 
         if self.args.use_trt:
             logger.info("Use TRT")
-            self.pred_cfg.enable_tensorrt_engine(
-                workspace_size=1 << 30,
-                max_batch_size=1,
-                min_subgraph_size=300,
-                precision_mode=precision_mode,
-                use_static=False,
-                use_calib_mode=False)
+            self.pred_cfg.enable_tensorrt_engine(workspace_size=1 << 30,
+                                                 max_batch_size=1,
+                                                 min_subgraph_size=300,
+                                                 precision_mode=precision_mode,
+                                                 use_static=False,
+                                                 use_calib_mode=False)
 
             if use_auto_tune(self.args) and \
                     os.path.exists(self.args.auto_tuned_shape_file):
@@ -411,8 +407,8 @@ class Predictor:
             if args.benchmark:
                 self.autolog.times.start()
             if self.cfg.inference_helper is not None:
-                data = self.cfg.inference_helper.preprocess(self.cfg, imgs_path,
-                                                            args.batch_size, i)
+                data = self.cfg.inference_helper.preprocess(
+                    self.cfg, imgs_path, args.batch_size, i)
             else:
                 data = np.array([
                     self._preprocess(p)
@@ -432,13 +428,13 @@ class Predictor:
 
                 if len(args.img_shape) == 1:
                     results = sliding_window_inference(
-                        data, (int(args.img_shape[0]), int(args.img_shape[0]),
-                               int(args.img_shape[0])), 1,
+                        data, (int(args.img_shape[0]), int(
+                            args.img_shape[0]), int(args.img_shape[0])), 1,
                         infer_like_model.infer_model)
                 else:
                     results = sliding_window_inference(
-                        data, (int(args.img_shape[0]), int(args.img_shape[1]),
-                               int(args.img_shape[2])), 1,
+                        data, (int(args.img_shape[0]), int(
+                            args.img_shape[1]), int(args.img_shape[2])), 1,
                         infer_like_model.infer_model, "NCDHW")
 
                 results = results[0]
@@ -471,8 +467,8 @@ class Predictor:
         if not "npy" in img:
             image_files = get_image_list(img, None, None)
             warnings.warn(
-                "The image path is {}, please make sure this is the images you want to infer".
-                format(image_files))
+                "The image path is {}, please make sure this is the images you want to infer"
+                .format(image_files))
             savepath = os.path.dirname(img)
             pre = [
                 HUnorm,
@@ -495,10 +491,9 @@ class Predictor:
                     f_np = f_np.astype("float32")
 
                     np.save(
-                        os.path.join(
-                            savepath,
-                            f.split("/")[-1].split(
-                                ".", maxsplit=1)[0]),
+                        os.path.join(savepath,
+                                     f.split("/")[-1].split(".",
+                                                            maxsplit=1)[0]),
                         f_np)
 
             img = img.split(".", maxsplit=1)[0] + ".npy"

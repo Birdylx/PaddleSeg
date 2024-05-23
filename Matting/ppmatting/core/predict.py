@@ -183,13 +183,12 @@ def predict(model,
 
             save_path = os.path.join(save_dir, im_file)
             mkdir(save_path)
-            fg = save_result(
-                alpha,
-                save_path,
-                im_path=im_path,
-                trimap=trimap,
-                fg_estimate=fg_estimate,
-                fg=fg)
+            fg = save_result(alpha,
+                             save_path,
+                             im_path=im_path,
+                             trimap=trimap,
+                             fg_estimate=fg_estimate,
+                             fg=fg)
 
             # rvm have member which need to reset.
             if hasattr(model, 'reset'):

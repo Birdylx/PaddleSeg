@@ -53,25 +53,21 @@ class NonLocal2D(nn.Layer):
 
         self.inter_channels = max(in_channels // reduction, 1)
 
-        self.g = nn.Conv2D(
-            in_channels=self.in_channels,
-            out_channels=self.inter_channels,
-            kernel_size=1)
-        self.conv_out = layers.ConvBNReLU(
-            in_channels=self.inter_channels,
-            out_channels=self.in_channels,
-            kernel_size=1,
-            bias_attr=False)
+        self.g = nn.Conv2D(in_channels=self.in_channels,
+                           out_channels=self.inter_channels,
+                           kernel_size=1)
+        self.conv_out = layers.ConvBNReLU(in_channels=self.inter_channels,
+                                          out_channels=self.in_channels,
+                                          kernel_size=1,
+                                          bias_attr=False)
 
         if self.mode != "gaussian":
-            self.theta = nn.Conv2D(
-                in_channels=self.in_channels,
-                out_channels=self.inter_channels,
-                kernel_size=1)
-            self.phi = nn.Conv2D(
-                in_channels=self.in_channels,
-                out_channels=self.inter_channels,
-                kernel_size=1)
+            self.theta = nn.Conv2D(in_channels=self.in_channels,
+                                   out_channels=self.inter_channels,
+                                   kernel_size=1)
+            self.phi = nn.Conv2D(in_channels=self.in_channels,
+                                 out_channels=self.inter_channels,
+                                 kernel_size=1)
 
         if self.mode == "concatenation":
             self.concat_project = layers.ConvBNReLU(
@@ -127,19 +123,19 @@ class NonLocal2D(nn.Layer):
             theta_x = paddle.reshape(x, [n, self.inter_channels, -1])
             theta_x = paddle.transpose(theta_x, [0, 2, 1])
             if self.sub_sample:
-                phi_x = paddle.reshape(
-                    self.phi(x), [n, self.inter_channels, -1])
+                phi_x = paddle.reshape(self.phi(x),
+                                       [n, self.inter_channels, -1])
             else:
                 phi_x = paddle.reshape(x, [n, self.in_channels, -1])
 
         elif self.mode == 'concatenation':
-            theta_x = paddle.reshape(
-                self.theta(x), [n, self.inter_channels, -1, 1])
+            theta_x = paddle.reshape(self.theta(x),
+                                     [n, self.inter_channels, -1, 1])
             phi_x = paddle.reshape(self.phi(x), [n, self.inter_channels, 1, -1])
 
         else:
-            theta_x = paddle.reshape(
-                self.theta(x), [n, self.inter_channels, -1])
+            theta_x = paddle.reshape(self.theta(x),
+                                     [n, self.inter_channels, -1])
             theta_x = paddle.transpose(theta_x, [0, 2, 1])
             phi_x = paddle.reshape(self.phi(x), [n, self.inter_channels, -1])
 

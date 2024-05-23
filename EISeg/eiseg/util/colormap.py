@@ -19,6 +19,7 @@ from eiseg import pjpath
 
 
 class ColorMap(object):
+
     def __init__(self, color_path, shuffle=False):
         self.colors = []
         self.index = 0

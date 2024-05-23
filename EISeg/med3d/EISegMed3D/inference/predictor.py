@@ -19,6 +19,7 @@ from inference.ops import DistMaps3D, ScaleLayer, BatchImageNormalize3D, Sigmoid
 
 
 class Click:
+
     def __init__(self, is_positive, coords, indx=None):
         if coords is None or is_positive is None:
             raise ValueError(
@@ -40,6 +41,7 @@ class Click:
 
 
 class BasePredictor(object):
+
     def __init__(self,
                  model_path,
                  param_path,
@@ -63,17 +65,21 @@ class BasePredictor(object):
         if not paddle.in_dynamic_mode():
             paddle.disable_static()
         self.normalization = BatchImageNormalize3D(
-            [0.00040428873, ],
-            [0.00059983705, ], )
+            [
+                0.00040428873,
+            ],
+            [
+                0.00059983705,
+            ],
+        )
 
         self.transforms = [SigmoidForPred()]  # apply sigmoid after pred
 
         # !! Todo Set the radius and spatial_scale here
-        self.dist_maps = DistMaps3D(
-            norm_radius=norm_radius,
-            spatial_scale=spatial_scale,
-            cpu_mode=False,
-            use_disks=True)
+        self.dist_maps = DistMaps3D(norm_radius=norm_radius,
+                                    spatial_scale=spatial_scale,
+                                    cpu_mode=False,
+                                    use_disks=True)
 
         # init predictor config
         self.pred_cfg = Config(model_path, param_path)
@@ -119,8 +125,8 @@ class BasePredictor(object):
             self.original_image[:, :1, :, :, :])
 
         if not self.with_prev_mask:
-            self.prev_edge = paddle.zeros_like(self.original_image[:, :
-                                                                   1, :, :, :])
+            self.prev_edge = paddle.zeros_like(
+                self.original_image[:, :1, :, :, :])
 
     def get_prediction_noclicker(self, clicker, prev_mask=None):
         clicks_list = clicker.get_clicks()  # one click a time todo：累计多个点
@@ -131,8 +137,8 @@ class BasePredictor(object):
                 prev_mask = self.prev_edge
             else:
                 prev_mask = self.prev_prediction
-        input_image = paddle.concat(
-            [input_image, prev_mask], axis=1)  # [1, 2, 512, 512, 12]
+        input_image = paddle.concat([input_image, prev_mask],
+                                    axis=1)  # [1, 2, 512, 512, 12]
 
         image_nd, clicks_lists, is_image_changed = self.apply_transforms(
             input_image, [clicks_list])
@@ -165,12 +171,11 @@ class BasePredictor(object):
 
         pred_logits = paddle.to_tensor(pred_logits)
 
-        prediction = F.interpolate(
-            pred_logits,
-            mode="trilinear",
-            align_corners=True,
-            size=image_nd.shape[2:],
-            data_format="NCDHW")
+        prediction = F.interpolate(pred_logits,
+                                   mode="trilinear",
+                                   align_corners=True,
+                                   size=image_nd.shape[2:],
+                                   data_format="NCDHW")
 
         for t in reversed(self.transforms):
             if pred_edges is not None:
@@ -191,8 +196,8 @@ class BasePredictor(object):
         coord_features = self.dist_maps(image, points)  # [1, 2, 512, 512, 12]
 
         if prev_mask is not None:
-            coord_features = paddle.concat(
-                (prev_mask, coord_features), axis=1)  # [1, 3, 512, 512, 12]
+            coord_features = paddle.concat((prev_mask, coord_features),
+                                           axis=1)  # [1, 3, 512, 512, 12]
 
         return coord_features
 
@@ -242,7 +247,8 @@ class BasePredictor(object):
         total_clicks = []
         logging.info(
             "check_list",
-            clicks_lists, )
+            clicks_lists,
+        )
         num_pos_clicks = [
             sum(x.is_positive for x in clicks_list)
             for clicks_list in clicks_lists
@@ -264,15 +270,17 @@ class BasePredictor(object):
                 click.coords_and_indx for click in clicks_list
                 if click.is_positive
             ]
-            pos_clicks = pos_clicks + (num_max_points - len(pos_clicks)
-                                       ) * [(-1, -1, -1, -1)]
+            pos_clicks = pos_clicks + (num_max_points - len(pos_clicks)) * [
+                (-1, -1, -1, -1)
+            ]
 
             neg_clicks = [
                 click.coords_and_indx for click in clicks_list
                 if not click.is_positive
             ]
-            neg_clicks = neg_clicks + (num_max_points - len(neg_clicks)
-                                       ) * [(-1, -1, -1, -1)]
+            neg_clicks = neg_clicks + (num_max_points - len(neg_clicks)) * [
+                (-1, -1, -1, -1)
+            ]
             total_clicks.append(pos_clicks + neg_clicks)
 
         return paddle.to_tensor(total_clicks)

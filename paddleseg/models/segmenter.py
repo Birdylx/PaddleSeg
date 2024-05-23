@@ -56,8 +56,8 @@ class LinearSegmenter(nn.Layer):
         logits = self.head(feats[-1], shape[2:])
 
         logit_list = [
-            F.interpolate(
-                logit, x_shape[2:], mode='bilinear') for logit in logits
+            F.interpolate(logit, x_shape[2:], mode='bilinear')
+            for logit in logits
         ]
 
         return logit_list
@@ -99,10 +99,11 @@ class MaskSegmenter(nn.Layer):
                  pretrained=None):
         super().__init__()
         self.backbone = backbone
-        self.head = SegmenterMaskHead(
-            num_classes, backbone.embed_dim, h_embed_dim, h_depth, h_num_heads,
-            h_mlp_ratio, h_drop_rate, h_drop_path_rate, h_attn_drop_rate,
-            h_qkv_bias)
+        self.head = SegmenterMaskHead(num_classes, backbone.embed_dim,
+                                      h_embed_dim, h_depth, h_num_heads,
+                                      h_mlp_ratio, h_drop_rate,
+                                      h_drop_path_rate, h_attn_drop_rate,
+                                      h_qkv_bias)
         self.pretrained = pretrained
         self.init_weight()
 
@@ -117,8 +118,8 @@ class MaskSegmenter(nn.Layer):
         logits = self.head(feats[-1], shape[2:])
 
         logit_list = [
-            F.interpolate(
-                logit, x_shape[2:], mode='bilinear') for logit in logits
+            F.interpolate(logit, x_shape[2:], mode='bilinear')
+            for logit in logits
         ]
 
         return logit_list
@@ -193,14 +194,13 @@ class SegmenterMaskHead(nn.Layer):
 
         dpr = [x for x in np.linspace(0, drop_path_rate, depth)]
         self.blocks = nn.LayerList([
-            vision_transformer.Block(
-                dim=embed_dim,
-                num_heads=num_heads,
-                mlp_ratio=mlp_ratio,
-                drop=drop_rate,
-                drop_path=dpr[i],
-                attn_drop=attn_drop_rate,
-                qkv_bias=qkv_bias) for i in range(depth)
+            vision_transformer.Block(dim=embed_dim,
+                                     num_heads=num_heads,
+                                     mlp_ratio=mlp_ratio,
+                                     drop=drop_rate,
+                                     drop_path=dpr[i],
+                                     attn_drop=attn_drop_rate,
+                                     qkv_bias=qkv_bias) for i in range(depth)
         ])
 
         initializer = paddle.nn.initializer.TruncatedNormal(std=0.02)
@@ -243,9 +243,9 @@ class SegmenterMaskHead(nn.Layer):
         patches = patches / paddle.norm(patches, axis=-1, keepdim=True)
         masks = masks / paddle.norm(masks, axis=-1, keepdim=True)
 
-        masks = patches @masks.transpose((0, 2, 1))
-        masks = masks.reshape((0, 0,
-                               self.num_classes))  # For export inference model
+        masks = patches @ masks.transpose((0, 2, 1))
+        masks = masks.reshape(
+            (0, 0, self.num_classes))  # For export inference model
         masks = self.mask_norm(masks)
 
         #[b, (h w), c] -> [b, c, h, w]

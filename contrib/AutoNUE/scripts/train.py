@@ -104,18 +104,22 @@ def train(model,
         paddle.distributed.init_parallel_env()
         ddp_model = paddle.DataParallel(model)
 
+
 #         for item in ddp_model.named_parameters():
 #             if item[0].find('scale_attn')==-1:
 #                 item[1].stop_gradient=True
 
-    batch_sampler = paddle.io.DistributedBatchSampler(
-        train_dataset, batch_size=batch_size, shuffle=True, drop_last=True)
+    batch_sampler = paddle.io.DistributedBatchSampler(train_dataset,
+                                                      batch_size=batch_size,
+                                                      shuffle=True,
+                                                      drop_last=True)
 
     loader = paddle.io.DataLoader(
         train_dataset,
         batch_sampler=batch_sampler,
         num_workers=num_workers,
-        return_list=True, )
+        return_list=True,
+    )
 
     if use_vdl:
         from visualdl import LogWriter
@@ -153,11 +157,10 @@ def train(model,
                 logits_list = ddp_model(images)
             else:
                 logits_list = model(images)
-            loss_list = loss_computation(
-                logits_list=logits_list,
-                labels=labels,
-                losses=losses,
-                edges=edges)
+            loss_list = loss_computation(logits_list=logits_list,
+                                         labels=labels,
+                                         losses=losses,
+                                         edges=edges)
             loss = sum(loss_list)
             loss.backward()
 
@@ -173,8 +176,8 @@ def train(model,
             else:
                 for i in range(len(loss_list)):
                     avg_loss_list[i] += loss_list[i].numpy()
-            batch_cost_averager.record(
-                time.time() - batch_start, num_samples=batch_size)
+            batch_cost_averager.record(time.time() - batch_start,
+                                       num_samples=batch_size)
 
             if (iter) % log_iters == 0 and local_rank == 0:
                 avg_loss /= log_iters
@@ -185,9 +188,9 @@ def train(model,
                 eta = calculate_eta(remain_iters, avg_train_batch_cost)
                 logger.info(
                     "[TRAIN] epoch={}, iter={}/{}, loss={:.4f}, lr={:.6f}, batch_cost={:.4f}, reader_cost={:.5f}, ips={:.4f} samples/sec | ETA {}"
-                    .format((iter - 1
-                             ) // iters_per_epoch + 1, iter, iters, avg_loss,
-                            lr, avg_train_batch_cost, avg_train_reader_cost,
+                    .format((iter - 1) // iters_per_epoch + 1, iter, iters,
+                            avg_loss, lr, avg_train_batch_cost,
+                            avg_train_reader_cost,
                             batch_cost_averager.get_ips_average(), eta))
                 if use_vdl:
                     log_writer.add_scalar('Train/loss', avg_loss, iter)
@@ -210,20 +213,19 @@ def train(model,
                 reader_cost_averager.reset()
                 batch_cost_averager.reset()
 
-            if (iter % save_interval == 0 or
-                    iter == iters) and (val_dataset is not None):
+            if (iter % save_interval == 0 or iter == iters) and (val_dataset
+                                                                 is not None):
                 num_workers = 1 if num_workers > 0 else 0
-                mean_iou, acc = evaluate(
-                    model,
-                    val_dataset,
-                    aug_eval=aug_eval,
-                    scales=1.0,
-                    flip_horizontal=False,
-                    flip_vertical=False,
-                    is_slide=False,
-                    stride=None,
-                    crop_size=None,
-                    num_workers=num_workers)
+                mean_iou, acc = evaluate(model,
+                                         val_dataset,
+                                         aug_eval=aug_eval,
+                                         scales=1.0,
+                                         flip_horizontal=False,
+                                         flip_vertical=False,
+                                         is_slide=False,
+                                         stride=None,
+                                         crop_size=None,
+                                         num_workers=num_workers)
                 model.train()
 
             if (iter % save_interval == 0 or iter == iters) and local_rank == 0:
@@ -266,9 +268,8 @@ def train(model,
             m.total_ops += int(2 * nelements)
 
         _, c, h, w = images.shape
-        flops = paddle.flops(
-            model, [1, c, h, w],
-            custom_ops={paddle.nn.SyncBatchNorm: count_syncbn})
+        flops = paddle.flops(model, [1, c, h, w],
+                             custom_ops={paddle.nn.SyncBatchNorm: count_syncbn})
         logger.info(flops)
 
     # Sleep for half a second to let dataloader release resources.

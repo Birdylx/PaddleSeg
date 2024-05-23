@@ -12,14 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 import os
 import os.path as osp
 import shutil
 import random
 from tqdm import tqdm
 import argparse
-
 
 # 参考paddlex数据准备文档
 # https://github.com/PaddlePaddle/PaddleX/blob/release/2.1/docs/data/format/README.md
@@ -32,16 +30,17 @@ FORMATS = ['.bmp', '.cur', '.gif', '.icns', '.ico', \
            '.dcm']
 # print(FORMATS)
 
+
 def mkdirp(path):
     if not osp.exists(path):
         os.mkdir(path)
 
 
 # 语义分割
-def Eiseg2paddlex(save_folder, 
-                  imgs_folder, 
-                  lab_folder=None, 
-                  mode="seg", 
+def Eiseg2paddlex(save_folder,
+                  imgs_folder,
+                  lab_folder=None,
+                  mode="seg",
                   split_rate=0.9):
     """Convert the data marked by eiseg into the semantic segmentation or detection data of paddlex.
     Args:
@@ -52,6 +51,7 @@ def Eiseg2paddlex(save_folder,
         mode (str, optional): Semantic segmentation or detection data. Defaults to "seg".
         split_rate (float, optional): Proportion of training data and validation data. Defaults to 0.9.
     """
+
     def get_label_path(lab_folder, name, ext, mode):
         if mode == "seg":
             lab_path = osp.join(lab_folder, name.replace(ext, ".png"))
@@ -60,7 +60,7 @@ def Eiseg2paddlex(save_folder,
         else:
             lab_path = osp.join(lab_folder, "VOC", name.replace(ext, ".xml"))
         return lab_path
-    
+
     # move
     save_img_folder = osp.join(save_folder, "JPEGImages")
     save_lab_folder = osp.join(save_folder, "Annotations")
@@ -76,7 +76,8 @@ def Eiseg2paddlex(save_folder,
             img_path = osp.join(imgs_folder, name)
             lab_path = get_label_path(lab_folder, name, ext, mode)
             save_img_path = osp.join(save_img_folder, name)
-            save_lab_path = osp.join(save_lab_folder, os.path.split(lab_path)[-1])
+            save_lab_path = osp.join(save_lab_folder,
+                                     os.path.split(lab_path)[-1])
             if osp.exists(img_path) and osp.exists(lab_path):
                 shutil.copy(img_path, save_img_path)
                 shutil.copy(lab_path, save_lab_path)
@@ -103,8 +104,9 @@ def Eiseg2paddlex(save_folder,
             for idx, name in tqdm(enumerate(new_imgs_name, start=1)):
                 new_img_path = osp.join("JPEGImages", name)
                 ext = "." + name.split(".")[-1]
-                new_lab_path = osp.join("Annotations", name.replace(
-                    ext, ".png" if mode == "seg" else ".xml"))
+                new_lab_path = osp.join(
+                    "Annotations",
+                    name.replace(ext, ".png" if mode == "seg" else ".xml"))
                 if not osp.exists(osp.join(save_folder, new_lab_path)):
                     new_lab_path = osp.join("Annotations", name)
                 new_img_path = new_img_path.replace("\\", "/")
@@ -117,12 +119,28 @@ def Eiseg2paddlex(save_folder,
     print("===== all done! =====")
 
 
-parser = argparse.ArgumentParser(description='Save path, image path, label path and split rate')
-parser.add_argument('--save_path', '-d', help='Path to save folder, Required', required=True)
-parser.add_argument('--image_path', '-o', help='Path of image folder, Required', required=True)
-parser.add_argument('--label_path', '-l', help='Path of label folder', default=None)
-parser.add_argument('--mode', '-m', help='Mode of dataset, seg/det', default="seg")
-parser.add_argument('--split_rate', '-s', help='Proportion of training data and evaluation data', default=0.9)
+parser = argparse.ArgumentParser(
+    description='Save path, image path, label path and split rate')
+parser.add_argument('--save_path',
+                    '-d',
+                    help='Path to save folder, Required',
+                    required=True)
+parser.add_argument('--image_path',
+                    '-o',
+                    help='Path of image folder, Required',
+                    required=True)
+parser.add_argument('--label_path',
+                    '-l',
+                    help='Path of label folder',
+                    default=None)
+parser.add_argument('--mode',
+                    '-m',
+                    help='Mode of dataset, seg/det',
+                    default="seg")
+parser.add_argument('--split_rate',
+                    '-s',
+                    help='Proportion of training data and evaluation data',
+                    default=0.9)
 args = parser.parse_args()
 
 if __name__ == "__main__":

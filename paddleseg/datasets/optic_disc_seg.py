@@ -68,8 +68,8 @@ class OpticDiscSeg(Dataset):
                 extrapath=seg_env.DATA_HOME)
         elif not os.path.exists(self.dataset_root):
             self.dataset_root = os.path.normpath(self.dataset_root)
-            savepath, extraname = self.dataset_root.rsplit(
-                sep=os.path.sep, maxsplit=1)
+            savepath, extraname = self.dataset_root.rsplit(sep=os.path.sep,
+                                                           maxsplit=1)
             self.dataset_root = download_file_and_uncompress(
                 url=URL,
                 savepath=savepath,

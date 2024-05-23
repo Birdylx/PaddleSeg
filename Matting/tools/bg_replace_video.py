@@ -34,39 +34,39 @@ from ppmatting.utils import Config, MatBuilder
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Model training')
-    parser.add_argument(
-        "--config", dest="cfg", help="The config file.", default=None, type=str)
+    parser.add_argument("--config",
+                        dest="cfg",
+                        help="The config file.",
+                        default=None,
+                        type=str)
 
-    parser.add_argument(
-        '--model_path',
-        dest='model_path',
-        help='The path of model for prediction',
-        type=str,
-        default=None)
-    parser.add_argument(
-        '--video_path',
-        dest='video_path',
-        help='The path of video',
-        default=None)
+    parser.add_argument('--model_path',
+                        dest='model_path',
+                        help='The path of model for prediction',
+                        type=str,
+                        default=None)
+    parser.add_argument('--video_path',
+                        dest='video_path',
+                        help='The path of video',
+                        default=None)
     parser.add_argument(
         '--background',
         dest='background',
-        help='Background for replacing. It is a string which specifies the background color (r,g,b,w) or a path to background image or video.'
+        help=
+        'Background for replacing. It is a string which specifies the background color (r,g,b,w) or a path to background image or video.'
         'If not specified, a green background is used.',
         type=str,
         default='g')
-    parser.add_argument(
-        '--save_dir',
-        dest='save_dir',
-        help='The directory for saving the model snapshot',
-        type=str,
-        default='./output/results')
-    parser.add_argument(
-        '--fg_estimate',
-        default=True,
-        type=eval,
-        choices=[True, False],
-        help='Whether to estimate foreground when predicting.')
+    parser.add_argument('--save_dir',
+                        dest='save_dir',
+                        help='The directory for saving the model snapshot',
+                        type=str,
+                        default='./output/results')
+    parser.add_argument('--fg_estimate',
+                        default=True,
+                        type=eval,
+                        choices=[True, False],
+                        help='Whether to estimate foreground when predicting.')
     parser.add_argument(
         '--device',
         dest='device',
@@ -90,14 +90,13 @@ def main(args):
     model = builder.model
     transforms = ppmatting.transforms.Compose(builder.val_transforms)
 
-    bg_replace_video(
-        model,
-        model_path=args.model_path,
-        transforms=transforms,
-        video_path=args.video_path,
-        bg_path=args.background,
-        save_dir=args.save_dir,
-        fg_estimate=args.fg_estimate)
+    bg_replace_video(model,
+                     model_path=args.model_path,
+                     transforms=transforms,
+                     video_path=args.video_path,
+                     bg_path=args.background,
+                     save_dir=args.save_dir,
+                     fg_estimate=args.fg_estimate)
 
 
 if __name__ == '__main__':

@@ -29,6 +29,7 @@ from util.coco.detlabel import COCO_CLASS_DICT
 
 
 class LabelCorresWidget(QWidget):
+
     def __init__(self, param_path):
         super(LabelCorresWidget, self).__init__()
         self.tr = partial(QCoreApplication.translate, "APP_EISeg")
@@ -63,7 +64,8 @@ class LabelCorresWidget(QWidget):
             self,
             "btnCOCOFind",
             self.tr("查找"),
-            osp.join(pjpath, "resource/Find.png"), )
+            osp.join(pjpath, "resource/Find.png"),
+        )
         self.btnCOCOFind.setMinimumSize(QSize(0, 32))
         self.btnCOCOFind.setMaximumWidth(68)
         findHorizontalLayout.addWidget(self.btnCOCOFind)
@@ -89,7 +91,9 @@ class LabelCorresWidget(QWidget):
         self.labelCorrespondenceTable.setColumnCount(3)
         self.labelCorrespondenceTable.setRowCount(self.classLen)
         self.labelCorrespondenceTable.setHorizontalHeaderLabels(
-            [self.tr("预标注模型标签"), self.tr("自定义标签"), self.tr("是否启用")])
+            [self.tr("预标注模型标签"),
+             self.tr("自定义标签"),
+             self.tr("是否启用")])
         self.labelCorrespondenceTable.horizontalHeader().setSectionResizeMode(
             QHeaderView.Stretch)
         self.labelCorrespondenceTable.verticalHeader().setHidden(True)
@@ -179,8 +183,8 @@ class LabelCorresWidget(QWidget):
         for row in range(self.labelCorrespondenceTable.rowCount()):
             for col in range(self.labelCorrespondenceTable.colorCount() - 1):
                 if self.labelCorrespondenceTable.item(row, col) is not None:
-                    self.labelCorrespondenceTable.item(
-                        row, col).setBackground(QBrush(QColor(255, 255, 255)))
+                    self.labelCorrespondenceTable.item(row, col).setBackground(
+                        QBrush(QColor(255, 255, 255)))
 
     def center(self):
         qr = self.frameGeometry()
@@ -218,8 +222,8 @@ class LabelCorresWidget(QWidget):
         for row in range(self.labelCorrespondenceTable.rowCount()):
             for col in range(self.labelCorrespondenceTable.colorCount() - 1):
                 if self.labelCorrespondenceTable.item(row, col) is not None:
-                    self.labelCorrespondenceTable.item(
-                        row, col).setBackground(QBrush(QColor(255, 255, 255)))
+                    self.labelCorrespondenceTable.item(row, col).setBackground(
+                        QBrush(QColor(255, 255, 255)))
 
         ctext = self.cbbCOCOFind.currentText()
         self.cbbCOCOFind.clear()
@@ -229,8 +233,8 @@ class LabelCorresWidget(QWidget):
                 self.cbbCOCOFind.addItem(clab)
                 for cl in range(self.labelCorrespondenceTable.columnCount() -
                                 1):
-                    self.labelCorrespondenceTable.item(
-                        i, cl).setBackground(QBrush(QColor(48, 140, 198)))
+                    self.labelCorrespondenceTable.item(i, cl).setBackground(
+                        QBrush(QColor(48, 140, 198)))
                 self.labelCorrespondenceTable.verticalScrollBar(
                 ).setSliderPosition(i)
 
@@ -241,7 +245,7 @@ class LabelCorresWidget(QWidget):
             if ctext == clab:
                 for cl in range(self.labelCorrespondenceTable.columnCount() -
                                 1):
-                    self.labelCorrespondenceTable.item(
-                        i, cl).setBackground(QBrush(QColor(48, 140, 198)))
+                    self.labelCorrespondenceTable.item(i, cl).setBackground(
+                        QBrush(QColor(48, 140, 198)))
                 self.labelCorrespondenceTable.verticalScrollBar(
                 ).setSliderPosition(i)

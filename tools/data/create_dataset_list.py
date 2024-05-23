@@ -21,31 +21,30 @@ import warnings
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='PaddleSeg generate file list on cityscapes or your customized dataset.'
+        description=
+        'PaddleSeg generate file list on cityscapes or your customized dataset.'
     )
     parser.add_argument('dataset_root', help='dataset root directory', type=str)
-    parser.add_argument(
-        '--type',
-        help='dataset type: \n'
-        '- cityscapes \n'
-        '- custom(default)',
-        default="custom",
-        type=str)
-    parser.add_argument(
-        '--separator',
-        dest='separator',
-        help='file list separator',
-        default=" ",
-        type=str)
-    parser.add_argument(
-        '--folder',
-        help='the folder names of images and labels',
-        type=str,
-        nargs=2,
-        default=['images', 'annotations'])
+    parser.add_argument('--type',
+                        help='dataset type: \n'
+                        '- cityscapes \n'
+                        '- custom(default)',
+                        default="custom",
+                        type=str)
+    parser.add_argument('--separator',
+                        dest='separator',
+                        help='file list separator',
+                        default=" ",
+                        type=str)
+    parser.add_argument('--folder',
+                        help='the folder names of images and labels',
+                        type=str,
+                        nargs=2,
+                        default=['images', 'annotations'])
     parser.add_argument(
         '--second_folder',
-        help='the second-level folder names of train set, validation set, test set',
+        help=
+        'the second-level folder names of train set, validation set, test set',
         type=str,
         nargs='*',
         default=['train', 'val', 'test'])
@@ -55,12 +54,11 @@ def parse_args():
         type=str,
         nargs=2,
         default=['jpg', 'png'])
-    parser.add_argument(
-        '--postfix',
-        help='postfix of images or labels',
-        type=str,
-        nargs=2,
-        default=['', ''])
+    parser.add_argument('--postfix',
+                        help='postfix of images or labels',
+                        type=str,
+                        nargs=2,
+                        default=['', ''])
 
     return parser.parse_args()
 

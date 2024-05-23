@@ -26,6 +26,7 @@ from .ops import DistMaps, ScaleLayer, BatchImageNormalize
 
 
 class BasePredictor(object):
+
     def __init__(self,
                  model,
                  net_clicks_limit=None,
@@ -56,8 +57,10 @@ class BasePredictor(object):
         self.transforms.append(SigmoidForPred())
         if with_flip:
             self.transforms.append(AddHorizontalFlip())
-        self.dist_maps = DistMaps(
-            norm_radius=5, spatial_scale=1.0, cpu_mode=False, use_disks=True)
+        self.dist_maps = DistMaps(norm_radius=5,
+                                  spatial_scale=1.0,
+                                  cpu_mode=False,
+                                  use_disks=True)
 
     def to_tensor(self, x):
         if isinstance(x, np.ndarray):
@@ -74,8 +77,8 @@ class BasePredictor(object):
         self.original_image = image_nd
         if len(self.original_image.shape) == 3:
             self.original_image = self.original_image.unsqueeze(0)
-        self.prev_prediction = paddle.zeros_like(self.original_image[:, :
-                                                                     1, :, :])
+        self.prev_prediction = paddle.zeros_like(
+            self.original_image[:, :1, :, :])
         if not self.with_prev_mask:
             self.prev_edge = paddle.zeros_like(self.original_image[:, :1, :, :])
 
@@ -99,18 +102,16 @@ class BasePredictor(object):
 
         pred_logits = paddle.to_tensor(pred_logits)
 
-        prediction = F.interpolate(
-            pred_logits,
-            mode="bilinear",
-            align_corners=True,
-            size=image_nd.shape[2:])
+        prediction = F.interpolate(pred_logits,
+                                   mode="bilinear",
+                                   align_corners=True,
+                                   size=image_nd.shape[2:])
         if pred_edges is not None:
             pred_edge = paddle.to_tensor(pred_edges)
-            edge_prediction = F.interpolate(
-                pred_edge,
-                mode="bilinear",
-                align_corners=True,
-                size=image_nd.shape[2:])
+            edge_prediction = F.interpolate(pred_edge,
+                                            mode="bilinear",
+                                            align_corners=True,
+                                            size=image_nd.shape[2:])
 
         for t in reversed(self.transforms):
             if pred_edges is not None:
@@ -239,8 +240,7 @@ def split_points_by_order(tpoints, groups):
 
     groups = [x if x > 0 else num_points for x in groups]
     group_points = [
-        np.full(
-            (bs, 2 * x, 3), -1, dtype=np.float32) for x in groups
+        np.full((bs, 2 * x, 3), -1, dtype=np.float32) for x in groups
     ]
 
     last_point_indx_group = np.zeros((bs, num_groups, 2), dtype=np.int)
@@ -255,9 +255,8 @@ def split_points_by_order(tpoints, groups):
                 continue
 
             is_negative = int(pindx >= num_points)
-            if group_id >= num_groups or (
-                    group_id == 0 and
-                    is_negative):  # disable negative first click
+            if group_id >= num_groups or (group_id == 0 and is_negative
+                                          ):  # disable negative first click
                 group_id = num_groups - 1
 
             new_point_indx = last_point_indx_group[bindx, group_id, is_negative]
@@ -266,8 +265,7 @@ def split_points_by_order(tpoints, groups):
             group_points[group_id][bindx, new_point_indx, :] = point
 
     group_points = [
-        paddle.to_tensor(
-            x, dtype=tpoints.dtype) for x in group_points
+        paddle.to_tensor(x, dtype=tpoints.dtype) for x in group_points
     ]
 
     return group_points

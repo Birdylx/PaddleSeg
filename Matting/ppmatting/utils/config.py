@@ -29,6 +29,7 @@ from paddleseg.utils.utils import CachedProperty as cached_property
 
 
 class Config(paddleseg.cvlibs.Config):
+
     @classmethod
     def _build_default_checker(cls):
         rules = []

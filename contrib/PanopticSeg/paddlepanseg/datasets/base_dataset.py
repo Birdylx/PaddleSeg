@@ -125,17 +125,16 @@ class COCOStylePanopticDataset(PanopticDataset):
                  separator=' ',
                  no_collation_keys=None):
         self.json_path = json_path
-        super().__init__(
-            mode=mode,
-            dataset_root=dataset_root,
-            transforms=transforms,
-            file_list=file_list,
-            label_divisor=label_divisor,
-            thing_ids=thing_ids,
-            num_classes=num_classes,
-            ignore_index=ignore_index,
-            separator=separator,
-            no_collation_keys=no_collation_keys)
+        super().__init__(mode=mode,
+                         dataset_root=dataset_root,
+                         transforms=transforms,
+                         file_list=file_list,
+                         label_divisor=label_divisor,
+                         thing_ids=thing_ids,
+                         num_classes=num_classes,
+                         ignore_index=ignore_index,
+                         separator=separator,
+                         no_collation_keys=no_collation_keys)
         if self.num_classes is None:
             self.num_classes = self._get_num_classes()
         if self.thing_ids is None:
@@ -168,19 +167,18 @@ class COCOStylePanopticDataset(PanopticDataset):
                 image_id = self._get_image_id(image_path)
                 ann_info = ann_dict[image_id]
                 img_info = img_dict[image_id]
-                sample = build_info_dict(
-                    _type_='sample',
-                    img=image_path,
-                    label=label_path,
-                    img_path=image_path,
-                    lab_path=label_path)
+                sample = build_info_dict(_type_='sample',
+                                         img=image_path,
+                                         label=label_path,
+                                         img_path=image_path,
+                                         lab_path=label_path)
                 sample['img_h'] = img_info['height']
                 sample['img_w'] = img_info['width']
                 sample['image_id'] = image_id
                 seg_info = ann_info['segments_info']
                 for item in seg_info:
-                    item['category_id'] = self.convert_id_for_train(item[
-                        'category_id'])
+                    item['category_id'] = self.convert_id_for_train(
+                        item['category_id'])
                 seg_info = [
                     item for item in seg_info
                     if item['category_id'] != self.ignore_index

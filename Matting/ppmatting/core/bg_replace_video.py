@@ -36,11 +36,10 @@ def build_loader_writter(video_path, transforms, save_dir):
     name = os.path.splitext(base_name)[0]
     save_path = os.path.join(save_dir, name + '.avi')
 
-    writer = VideoWriter(
-        save_path,
-        reader.fps,
-        frame_size=(reader.width, reader.height),
-        is_color=True)
+    writer = VideoWriter(save_path,
+                         reader.fps,
+                         frame_size=(reader.width, reader.height),
+                         is_color=True)
 
     return loader, writer
 
@@ -149,11 +148,12 @@ def bg_replace_video(model,
     model.eval()
 
     # Build loader and writer for video
-    loader, writer = build_loader_writter(
-        video_path, transforms, save_dir=save_dir)
+    loader, writer = build_loader_writter(video_path,
+                                          transforms,
+                                          save_dir=save_dir)
     # Get bg
-    bg_reader = get_bg(
-        bg_path, shape=(loader.dataset.height, loader.dataset.width))
+    bg_reader = get_bg(bg_path,
+                       shape=(loader.dataset.height, loader.dataset.width))
 
     logger.info("Start to predict...")
     progbar_pred = progbar.Progbar(target=len(loader), verbose=1)
@@ -181,22 +181,21 @@ def bg_replace_video(model,
                 try:
                     bg = next(bg_reader)
                 except StopIteration:
-                    bg_reader = get_bg(
-                        bg_path,
-                        shape=(loader.dataset.height, loader.dataset.width))
+                    bg_reader = get_bg(bg_path,
+                                       shape=(loader.dataset.height,
+                                              loader.dataset.width))
                     bg = next(bg_reader)
                 finally:
                     bg = bg['ori_img']
             else:
                 bg = bg_reader
-            postprocess(
-                fg,
-                alpha,
-                data['ori_img'],
-                bg=bg,
-                trans_info=data['trans_info'],
-                writer=writer,
-                fg_estimate=fg_estimate)
+            postprocess(fg,
+                        alpha,
+                        data['ori_img'],
+                        bg=bg,
+                        trans_info=data['trans_info'],
+                        writer=writer,
+                        fg_estimate=fg_estimate)
             postprocess_cost_averager.record(time.time() - postprocess_start)
 
             preprocess_cost = preprocess_cost_averager.get_average()

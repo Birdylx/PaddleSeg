@@ -5,7 +5,7 @@ English | [简体中文](distributed_train_cn.md)
 
 Distributed training refers to splitting the training task into multiple computing nodes for calculation according to a certain method, then aggregating and updating the gradient and other information calculated after splitting using some methods. Distributed training is able to accelerate the training speed.
 
-Paddle distributed training technology is derived from Baidu's business practice and has been applied in the fields of natural language processing, computer vision, search and recommendation through large-scale businesses. High performance of distributed training is one of the core advantages of PaddlePaddle. 
+Paddle distributed training technology is derived from Baidu's business practice and has been applied in the fields of natural language processing, computer vision, search and recommendation through large-scale businesses. High performance of distributed training is one of the core advantages of PaddlePaddle.
 
 PaddleSeg supports both single machine training and multi machine training. For more methods and documents about distributed training, please refer to: [Quick Start Tutorial for Distributed Training](https://fleet-x.readthedocs.io/en/latest/paddle_fleet_rst/parameter_server/ps_quick_start.html)。
 

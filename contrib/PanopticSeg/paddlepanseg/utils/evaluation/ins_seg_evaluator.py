@@ -22,6 +22,7 @@ from .evaluator import Evaluator
 
 
 class InsSegEvaluator(Evaluator):
+
     def __init__(self,
                  num_classes,
                  overlaps=0.5,
@@ -69,8 +70,9 @@ class InsSegEvaluator(Evaluator):
                     found_match = False
                     for pred_instance in gt_instance['matched_pred']:
                         overlap = float(pred_instance['intersection']) / (
-                            gt_instance['pixel_count'] + pred_instance[
-                                'pixel_count'] - pred_instance['intersection'])
+                            gt_instance['pixel_count'] +
+                            pred_instance['pixel_count'] -
+                            pred_instance['intersection'])
                         if overlap > oth:
                             confidence = pred_instance['confidence']
 
@@ -101,8 +103,9 @@ class InsSegEvaluator(Evaluator):
                     found_gt = False
                     for gt_instance in pred_instance['matched_gt']:
                         overlap = float(gt_instance['intersection']) / (
-                            gt_instance['pixel_count'] + pred_instance[
-                                'pixel_count'] - gt_instance['intersection'])
+                            gt_instance['pixel_count'] +
+                            pred_instance['pixel_count'] -
+                            gt_instance['intersection'])
                         if overlap > oth:
                             found_gt = True
                             break
@@ -153,8 +156,8 @@ class InsSegEvaluator(Evaluator):
                 y_true_sorted_cumsum = np.cumsum(y_true_sorted)
 
                 # Unique thresholds
-                thresholds, unique_indices = np.unique(
-                    y_score_sorted, return_index=True)
+                thresholds, unique_indices = np.unique(y_score_sorted,
+                                                       return_index=True)
 
                 # Since we need to add an artificial point to the precision-recall curve
                 # increase its length by 1

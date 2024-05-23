@@ -59,12 +59,12 @@ class Config(object):
 
     def __init__(self,
                  path: str,
-                 learning_rate: Optional[float]=None,
-                 batch_size: Optional[int]=None,
-                 iters: Optional[int]=None,
-                 to_static_training: Optional[bool]=None,
-                 opts: Optional[list]=None,
-                 checker: Optional[checker.ConfigChecker]=None):
+                 learning_rate: Optional[float] = None,
+                 batch_size: Optional[int] = None,
+                 iters: Optional[int] = None,
+                 to_static_training: Optional[bool] = None,
+                 opts: Optional[list] = None,
+                 checker: Optional[checker.ConfigChecker] = None):
         assert os.path.exists(path), \
             'Config path ({}) does not exist'.format(path)
         assert path.endswith('yml') or path.endswith('yaml'), \
@@ -152,7 +152,7 @@ class Config(object):
         return checker.ConfigChecker(rules, allow_update=True)
 
     def __str__(self) -> str:
-        # Use NoAliasDumper to avoid yml anchor 
+        # Use NoAliasDumper to avoid yml anchor
         return yaml.dump(self.dic, Dumper=utils.NoAliasDumper)
 
 
@@ -192,11 +192,11 @@ def merge_config_dicts(dic, base_dic):
 
 
 def update_config_dict(dic: dict,
-                       learning_rate: Optional[float]=None,
-                       batch_size: Optional[int]=None,
-                       iters: Optional[int]=None,
-                       to_static_training: Optional[bool]=None,
-                       opts: Optional[list]=None):
+                       learning_rate: Optional[float] = None,
+                       batch_size: Optional[int] = None,
+                       iters: Optional[int] = None,
+                       to_static_training: Optional[bool] = None,
+                       opts: Optional[list] = None):
     """Update config"""
     # TODO: If the items to update are marked as anchors in the yaml file,
     # we should synchronize the references.

@@ -20,6 +20,7 @@ Warp the functon api, so the normal and quantization training can use the same n
 
 
 class Add(nn.Layer):
+
     def __init__(self):
         super().__init__()
 
@@ -28,6 +29,7 @@ class Add(nn.Layer):
 
 
 class Subtract(nn.Layer):
+
     def __init__(self):
         super().__init__()
 
@@ -36,6 +38,7 @@ class Subtract(nn.Layer):
 
 
 class Multiply(nn.Layer):
+
     def __init__(self):
         super().__init__()
 
@@ -44,6 +47,7 @@ class Multiply(nn.Layer):
 
 
 class Divide(nn.Layer):
+
     def __init__(self):
         super().__init__()
 
@@ -52,6 +56,7 @@ class Divide(nn.Layer):
 
 
 class Reshape(nn.Layer):
+
     def __init__(self):
         super().__init__()
 
@@ -60,6 +65,7 @@ class Reshape(nn.Layer):
 
 
 class Transpose(nn.Layer):
+
     def __init__(self):
         super().__init__()
 
@@ -68,6 +74,7 @@ class Transpose(nn.Layer):
 
 
 class Concat(nn.Layer):
+
     def __init__(self):
         super().__init__()
 
@@ -76,6 +83,7 @@ class Concat(nn.Layer):
 
 
 class Flatten(nn.Layer):
+
     def __init__(self):
         super().__init__()
 

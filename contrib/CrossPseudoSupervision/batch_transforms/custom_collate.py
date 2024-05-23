@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import paddle
+
 paddle_version = paddle.__version__[:3]
 # paddle version < 2.5.0 and not develop
 if paddle_version not in ["2.5", "0.0"]:
@@ -23,6 +24,7 @@ else:
 
 
 class SegCollate(object):
+
     def __init__(self, batch_aug_fn=None):
         self.batch_aug_fn = batch_aug_fn
 

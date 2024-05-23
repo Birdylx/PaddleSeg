@@ -66,17 +66,18 @@ class Compose:
         elif isinstance(data['img'], str):
             img = cv2.imread(data['img'], self.read_flag)
             if img is None:
-                raise ValueError('Can\'t read The image file {}!'.format(data['img']))
+                raise ValueError('Can\'t read The image file {}!'.format(
+                    data['img']))
             data['img'] = img.astype('float32')
         if not isinstance(data['img'], np.ndarray):
-            raise TypeError(
-                "Expect image to be np.ndarray, but got {}".format(type(data['img'])))
+            raise TypeError("Expect image to be np.ndarray, but got {}".format(
+                type(data['img'])))
 
         img_channels = 1 if data['img'].ndim == 2 else data['img'].shape[2]
         if img_channels != self.img_channels:
             raise ValueError(
-                'The img_channels ({}) is not equal to the channel of loaded image ({})'.
-                format(self.img_channels, img_channels))
+                'The img_channels ({}) is not equal to the channel of loaded image ({})'
+                .format(self.img_channels, img_channels))
         if self.to_rgb and img_channels == 3:
             data['img'] = cv2.cvtColor(data['img'], cv2.COLOR_BGR2RGB)
 
@@ -84,9 +85,11 @@ class Compose:
             data['label'] = np.asarray(Image.open(data['label']))
             img_h, img_w = data['img'].shape[:2]
             if data['label'].shape[0] != img_h:
-                data['label'] = data['label'].reshape([-1, img_h, img_w]).transpose([1, 2, 0])
+                data['label'] = data['label'].reshape([-1, img_h, img_w
+                                                       ]).transpose([1, 2, 0])
             elif data['label'].shape[1] != img_w:
-                data['label'] = data['label'].reshape([img_h, -1, img_w]).transpose([0, 2, 1])
+                data['label'] = data['label'].reshape([img_h, -1, img_w
+                                                       ]).transpose([0, 2, 1])
 
         # the `trans_info` will save the process of image shape, and will be used in evaluation and prediction.
         if 'trans_info' not in data.keys():
@@ -347,8 +350,8 @@ class ResizeRangeScaling:
     def __init__(self, min_value=400, max_value=600):
         if min_value > max_value:
             raise ValueError('min_value must be less than max_value, '
-                             'but they are {} and {}.'.format(min_value,
-                                                              max_value))
+                             'but they are {} and {}.'.format(
+                                 min_value, max_value))
         self.min_value = min_value
         self.max_value = max_value
 
@@ -439,8 +442,8 @@ class Normalize:
         if not (isinstance(mean, (list, tuple)) and isinstance(std, (list, tuple))) \
             and (len(mean) not in [1, 3]) and (len(std) not in [1, 3]):
             raise ValueError(
-                "{}: input type is invalid. It should be list or tuple with the lenght of 1 or 3".
-                format(self))
+                "{}: input type is invalid. It should be list or tuple with the lenght of 1 or 3"
+                .format(self))
         self.mean = np.array(mean)
         self.std = np.array(std)
 
@@ -503,23 +506,22 @@ class Padding:
                 .format(im_width, im_height, target_width, target_height))
         else:
             img_channels = 1 if data['img'].ndim == 2 else data['img'].shape[2]
-            data['img'] = cv2.copyMakeBorder(
-                data['img'],
-                0,
-                pad_height,
-                0,
-                pad_width,
-                cv2.BORDER_CONSTANT,
-                value=(self.im_padding_value, ) * img_channels)
+            data['img'] = cv2.copyMakeBorder(data['img'],
+                                             0,
+                                             pad_height,
+                                             0,
+                                             pad_width,
+                                             cv2.BORDER_CONSTANT,
+                                             value=(self.im_padding_value, ) *
+                                             img_channels)
             for key in data.get('gt_fields', []):
-                data[key] = cv2.copyMakeBorder(
-                    data[key],
-                    0,
-                    pad_height,
-                    0,
-                    pad_width,
-                    cv2.BORDER_CONSTANT,
-                    value=self.label_padding_value)
+                data[key] = cv2.copyMakeBorder(data[key],
+                                               0,
+                                               pad_height,
+                                               0,
+                                               pad_width,
+                                               cv2.BORDER_CONSTANT,
+                                               value=self.label_padding_value)
         return data
 
 
@@ -552,10 +554,9 @@ class PaddingByAspectRatio:
             img_height = int(img_width / self.aspect_ratio)
         else:
             img_width = int(img_height * self.aspect_ratio)
-        padding = Padding(
-            (img_width, img_height),
-            im_padding_value=self.im_padding_value,
-            label_padding_value=self.label_padding_value)
+        padding = Padding((img_width, img_height),
+                          im_padding_value=self.im_padding_value,
+                          label_padding_value=self.label_padding_value)
         return padding(data)
 
 
@@ -598,8 +599,8 @@ class RandomPaddingCrop:
                 .format(type(crop_size)))
         if category_max_ratio <= 0:
             raise ValueError(
-                "The value of `category_max_ratio` must be greater than 0, but got {}.".
-                format(category_max_ratio))
+                "The value of `category_max_ratio` must be greater than 0, but got {}."
+                .format(category_max_ratio))
         if loop_times <= 0:
             raise ValueError(
                 "The value of `loop_times` must be greater than 0, but got {}.".
@@ -628,23 +629,22 @@ class RandomPaddingCrop:
         pad_width = max(self.crop_size[1] - img_shape[1], 0)
         img_channels = 1 if data['img'].ndim == 2 else data['img'].shape[2]
         if (pad_height > 0 or pad_width > 0):
-            data['img'] = cv2.copyMakeBorder(
-                data['img'],
-                0,
-                pad_height,
-                0,
-                pad_width,
-                cv2.BORDER_CONSTANT,
-                value=(self.im_padding_value, ) * img_channels)
+            data['img'] = cv2.copyMakeBorder(data['img'],
+                                             0,
+                                             pad_height,
+                                             0,
+                                             pad_width,
+                                             cv2.BORDER_CONSTANT,
+                                             value=(self.im_padding_value, ) *
+                                             img_channels)
             for key in data.get('gt_fields', []):
-                data[key] = cv2.copyMakeBorder(
-                    data[key],
-                    0,
-                    pad_height,
-                    0,
-                    pad_width,
-                    cv2.BORDER_CONSTANT,
-                    value=self.label_padding_value)
+                data[key] = cv2.copyMakeBorder(data[key],
+                                               0,
+                                               pad_height,
+                                               0,
+                                               pad_width,
+                                               cv2.BORDER_CONSTANT,
+                                               value=self.label_padding_value)
         return data
 
     def __call__(self, data):
@@ -770,14 +770,14 @@ class ScalePadding:
 
         img_channels = 1 if data['img'].ndim == 2 else data['img'].shape[2]
         if data['img'].ndim == 2:
-            new_im = np.zeros((max(height, width), max(height, width)
-                               )) + self.im_padding_value
+            new_im = np.zeros((max(height, width), max(
+                height, width))) + self.im_padding_value
         else:
-            new_im = np.zeros((max(height, width), max(height, width),
-                               img_channels)) + self.im_padding_value
+            new_im = np.zeros((max(height, width), max(
+                height, width), img_channels)) + self.im_padding_value
         if 'label' in data['gt_fields']:
-            new_label = np.zeros((max(height, width), max(height, width)
-                                  )) + self.label_padding_value
+            new_label = np.zeros((max(height, width), max(
+                height, width))) + self.label_padding_value
 
         if height > width:
             padding = int((height - width) / 2)
@@ -794,12 +794,14 @@ class ScalePadding:
                 new_label[padding:padding + height, :] = data['label']
 
         data['img'] = np.uint8(new_im)
-        data['img'] = functional.resize(
-            data['img'], self.target_size, interp=cv2.INTER_CUBIC)
+        data['img'] = functional.resize(data['img'],
+                                        self.target_size,
+                                        interp=cv2.INTER_CUBIC)
         if 'label' in data['gt_fields']:
             data['label'] = np.uint8(new_label)
-            data['label'] = functional.resize(
-                data['label'], self.target_size, interp=cv2.INTER_CUBIC)
+            data['label'] = functional.resize(data['label'],
+                                              self.target_size,
+                                              interp=cv2.INTER_CUBIC)
         return data
 
 
@@ -926,21 +928,20 @@ class RandomRotation:
             r[0, 2] += (nw / 2) - cx
             r[1, 2] += (nh / 2) - cy
             dsize = (nw, nh)
-            data['img'] = cv2.warpAffine(
-                data['img'],
-                r,
-                dsize=dsize,
-                flags=cv2.INTER_LINEAR,
-                borderMode=cv2.BORDER_CONSTANT,
-                borderValue=(self.im_padding_value, ) * img_channels)
+            data['img'] = cv2.warpAffine(data['img'],
+                                         r,
+                                         dsize=dsize,
+                                         flags=cv2.INTER_LINEAR,
+                                         borderMode=cv2.BORDER_CONSTANT,
+                                         borderValue=(self.im_padding_value, ) *
+                                         img_channels)
             for key in data.get('gt_fields', []):
-                data[key] = cv2.warpAffine(
-                    data[key],
-                    r,
-                    dsize=dsize,
-                    flags=cv2.INTER_NEAREST,
-                    borderMode=cv2.BORDER_CONSTANT,
-                    borderValue=self.label_padding_value)
+                data[key] = cv2.warpAffine(data[key],
+                                           r,
+                                           dsize=dsize,
+                                           flags=cv2.INTER_NEAREST,
+                                           borderMode=cv2.BORDER_CONSTANT,
+                                           borderValue=self.label_padding_value)
 
         return data
 
@@ -986,14 +987,14 @@ class RandomScaleAspect:
                         data['img'] = data['img'][h1:(h1 + dh), w1:(w1 + dw)]
                     else:
                         data['img'] = data['img'][h1:(h1 + dh), w1:(w1 + dw), :]
-                    data['img'] = cv2.resize(
-                        data['img'], (img_width, img_height),
-                        interpolation=cv2.INTER_LINEAR)
+                    data['img'] = cv2.resize(data['img'],
+                                             (img_width, img_height),
+                                             interpolation=cv2.INTER_LINEAR)
                     for key in data.get('gt_fields', []):
                         data[key] = data[key][h1:(h1 + dh), w1:(w1 + dw)]
-                        data[key] = cv2.resize(
-                            data[key], (img_width, img_height),
-                            interpolation=cv2.INTER_NEAREST)
+                        data[key] = cv2.resize(data[key],
+                                               (img_width, img_height),
+                                               interpolation=cv2.INTER_NEAREST)
                     break
         return data
 
@@ -1144,7 +1145,8 @@ class RandomAffine:
         scale = random.random() * (self.max_scale_factor - self.min_scale_factor
                                    ) + self.min_scale_factor
         scale *= np.mean(
-            [float(w) / (bbox[2] - bbox[0]), float(h) / (bbox[3] - bbox[1])])
+            [float(w) / (bbox[2] - bbox[0]),
+             float(h) / (bbox[3] - bbox[1])])
         alpha = scale * math.cos(angle / 180.0 * math.pi)
         beta = scale * math.sin(angle / 180.0 * math.pi)
 
@@ -1157,21 +1159,20 @@ class RandomAffine:
 
         matrix = matrix.dot(matrix_trans)[0:2, :]
         img_channels = 1 if data['img'].ndim == 2 else data['img'].shape[2]
-        data['img'] = cv2.warpAffine(
-            np.uint8(data['img']),
-            matrix,
-            tuple(self.size),
-            flags=cv2.INTER_LINEAR,
-            borderMode=cv2.BORDER_CONSTANT,
-            borderValue=(self.im_padding_value, ) * img_channels)
+        data['img'] = cv2.warpAffine(np.uint8(data['img']),
+                                     matrix,
+                                     tuple(self.size),
+                                     flags=cv2.INTER_LINEAR,
+                                     borderMode=cv2.BORDER_CONSTANT,
+                                     borderValue=(self.im_padding_value, ) *
+                                     img_channels)
         for key in data.get('gt_fields', []):
-            data[key] = cv2.warpAffine(
-                np.uint8(data[key]),
-                matrix,
-                tuple(self.size),
-                flags=cv2.INTER_NEAREST,
-                borderMode=cv2.BORDER_CONSTANT,
-                borderValue=self.label_padding_value)
+            data[key] = cv2.warpAffine(np.uint8(data[key]),
+                                       matrix,
+                                       tuple(self.size),
+                                       flags=cv2.INTER_NEAREST,
+                                       borderMode=cv2.BORDER_CONSTANT,
+                                       borderValue=self.label_padding_value)
         return data
 
 
@@ -1206,7 +1207,7 @@ class GenerateInstanceTargets:
 
             masks = []
             for cid in classes:
-                masks.append(sem_seg_gt == cid)  # [C, H, W] 
+                masks.append(sem_seg_gt == cid)  # [C, H, W]
 
             shape = [self.num_classes - len(masks)] + list(data['label'].shape)
             masks_cpt = np.zeros(shape, dtype='int64')
@@ -1219,14 +1220,12 @@ class GenerateInstanceTargets:
                     dtype='int64')
 
             else:
-                instances['gt_masks'] = np.concatenate(
-                    [
-                        np.stack([
-                            np.ascontiguousarray(x).astype('float32')
-                            for x in masks
-                        ]), masks_cpt
-                    ],
-                    axis=0)
+                instances['gt_masks'] = np.concatenate([
+                    np.stack([
+                        np.ascontiguousarray(x).astype('float32') for x in masks
+                    ]), masks_cpt
+                ],
+                                                       axis=0)
 
             data['instances'] = instances
 
@@ -1241,7 +1240,8 @@ class AddMultiLabelAuxiliaryCategory:
 
     def __call__(self, data):
         if 'label' in data:
-            aux_label = (data['label'].sum(axis=-1, keepdims=True) == 0).astype('uint8')
+            aux_label = (data['label'].sum(axis=-1,
+                                           keepdims=True) == 0).astype('uint8')
             data['label'] = np.concatenate([aux_label, data['label']], axis=-1)
 
         return data

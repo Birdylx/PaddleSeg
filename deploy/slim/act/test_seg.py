@@ -67,8 +67,8 @@ def load_predictor(args):
         # To collect the dynamic shapes of inputs for TensorRT engine
         dynamic_shape_file = os.path.join(args.model_path, "dynamic_shape.txt")
         if os.path.exists(dynamic_shape_file):
-            pred_cfg.enable_tuned_tensorrt_dynamic_shape(dynamic_shape_file,
-                                                         True)
+            pred_cfg.enable_tuned_tensorrt_dynamic_shape(
+                dynamic_shape_file, True)
             # pred_cfg.exp_disable_tensorrt_ops(["reshape2"])
             print("trt set dynamic shape done!")
             precision_map = {
@@ -82,7 +82,8 @@ def load_predictor(args):
                 min_subgraph_size=4,
                 precision_mode=precision_map[args.precision],
                 use_static=True,
-                use_calib_mode=False, )
+                use_calib_mode=False,
+            )
         else:
             pred_cfg.disable_gpu()
             pred_cfg.set_cpu_math_library_num_threads(10)
@@ -144,8 +145,10 @@ def predict_image(args):
 
     # Step4: Post process
     if args.dataset == "human":
-        results = reverse_transform(
-            paddle.to_tensor(results), im.shape, transforms, mode="bilinear")
+        results = reverse_transform(paddle.to_tensor(results),
+                                    im.shape,
+                                    transforms,
+                                    mode="bilinear")
         results = np.argmax(results, axis=1)
     result = get_pseudo_color_map(results[0])
 
@@ -167,13 +170,14 @@ def eval(args):
 
     eval_dataset = builder.val_dataset
 
-    batch_sampler = paddle.io.BatchSampler(
-        eval_dataset, batch_size=1, shuffle=False, drop_last=False)
-    loader = paddle.io.DataLoader(
-        eval_dataset,
-        batch_sampler=batch_sampler,
-        num_workers=0,
-        return_list=True)
+    batch_sampler = paddle.io.BatchSampler(eval_dataset,
+                                           batch_size=1,
+                                           shuffle=False,
+                                           drop_last=False)
+    loader = paddle.io.DataLoader(eval_dataset,
+                                  batch_sampler=batch_sampler,
+                                  num_workers=0,
+                                  return_list=True)
 
     predictor, rerun_flag = load_predictor(args)
 
@@ -212,8 +216,9 @@ def eval(args):
             )
             return
 
-        logit = reverse_transform(
-            paddle.to_tensor(results), data['trans_info'], mode="bilinear")
+        logit = reverse_transform(paddle.to_tensor(results),
+                                  data['trans_info'],
+                                  mode="bilinear")
         pred = paddle.to_tensor(logit)
         if len(
                 pred.shape
@@ -241,9 +246,8 @@ def eval(args):
     time_avg = predict_time / sample_nums
     print(
         "[Benchmark]Batch size: {}, Inference time(ms): min={}, max={}, avg={}".
-        format(batch_size,
-               round(time_min * 1000, 2),
-               round(time_max * 1000, 1), round(time_avg * 1000, 1)))
+        format(batch_size, round(time_min * 1000, 2), round(time_max * 1000, 1),
+               round(time_avg * 1000, 1)))
     infor = "[Benchmark] #Images: {} mIoU: {:.4f} Acc: {:.4f} Kappa: {:.4f} Dice: {:.4f}".format(
         total_samples, miou, acc, kappa, mdice)
     print(infor)
@@ -253,67 +257,68 @@ def eval(args):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--model_path", type=str, help="inference model filepath")
-    parser.add_argument(
-        "--model_filename",
-        type=str,
-        default="model.pdmodel",
-        help="model file name")
-    parser.add_argument(
-        "--params_filename",
-        type=str,
-        default="model.pdiparams",
-        help="params file name")
-    parser.add_argument(
-        "--image_file",
-        type=str,
-        default=None,
-        help="Image path to be processed.")
-    parser.add_argument(
-        "--save_file",
-        type=str,
-        default=None,
-        help="The path to save the processed image.")
+    parser.add_argument("--model_path",
+                        type=str,
+                        help="inference model filepath")
+    parser.add_argument("--model_filename",
+                        type=str,
+                        default="model.pdmodel",
+                        help="model file name")
+    parser.add_argument("--params_filename",
+                        type=str,
+                        default="model.pdiparams",
+                        help="params file name")
+    parser.add_argument("--image_file",
+                        type=str,
+                        default=None,
+                        help="Image path to be processed.")
+    parser.add_argument("--save_file",
+                        type=str,
+                        default=None,
+                        help="The path to save the processed image.")
     parser.add_argument(
         "--dataset",
         type=str,
         default="human",
         choices=["human", "cityscapes", 'ade'],
-        help="The type of given image which can be 'human' or 'cityscapes'.", )
-    parser.add_argument(
-        "--config", type=str, default=None, help="path to config.")
-    parser.add_argument(
-        "--benchmark",
-        type=bool,
-        default=False,
-        help="Whether to run benchmark or not.")
-    parser.add_argument(
-        "--use_trt",
-        type=bool,
-        default=False,
-        help="Whether to use tensorrt engine or not.")
+        help="The type of given image which can be 'human' or 'cityscapes'.",
+    )
+    parser.add_argument("--config",
+                        type=str,
+                        default=None,
+                        help="path to config.")
+    parser.add_argument("--benchmark",
+                        type=bool,
+                        default=False,
+                        help="Whether to run benchmark or not.")
+    parser.add_argument("--use_trt",
+                        type=bool,
+                        default=False,
+                        help="Whether to use tensorrt engine or not.")
     parser.add_argument(
         "--device",
         type=str,
         default="GPU",
         choices=["CPU", "GPU"],
-        help="Choose the device you want to run, it can be: CPU/GPU, default is GPU",
+        help=
+        "Choose the device you want to run, it can be: CPU/GPU, default is GPU",
     )
     parser.add_argument(
         "--precision",
         type=str,
         default="fp32",
         choices=["fp32", "fp16", "int8"],
-        help="The precision of inference. It can be 'fp32', 'fp16' or 'int8'. Default is 'fp16'.",
+        help=
+        "The precision of inference. It can be 'fp32', 'fp16' or 'int8'. Default is 'fp16'.",
     )
-    parser.add_argument(
-        "--use_mkldnn",
-        type=bool,
-        default=False,
-        help="Whether use mkldnn or not.")
-    parser.add_argument(
-        "--cpu_threads", type=int, default=1, help="Num of cpu threads.")
+    parser.add_argument("--use_mkldnn",
+                        type=bool,
+                        default=False,
+                        help="Whether use mkldnn or not.")
+    parser.add_argument("--cpu_threads",
+                        type=int,
+                        default=1,
+                        help="Num of cpu threads.")
     args = parser.parse_args()
     if args.image_file:
         predict_image(args)

@@ -13,8 +13,8 @@
 # limitations under the License.
 
 # Adapted from https://github.com/facebookresearch/Mask2Former/blob/main/mask2former/maskformer_model.py
-# 
-# Original copyright info: 
+#
+# Original copyright info:
 
 # Copyright (c) Facebook, Inc. and its affiliates.
 
@@ -30,6 +30,7 @@ from paddlepanseg.postprocessors.base_pp import Postprocessor
 
 @manager.POSTPROCESSORS.add_component
 class MaskFormerPostprocessor(Postprocessor):
+
     def __init__(self,
                  num_classes,
                  thing_ids,
@@ -37,11 +38,10 @@ class MaskFormerPostprocessor(Postprocessor):
                  overlap_threshold=0.5,
                  label_divisor=1000,
                  ignore_index=255):
-        super().__init__(
-            num_classes=num_classes,
-            thing_ids=thing_ids,
-            label_divisor=label_divisor,
-            ignore_index=ignore_index)
+        super().__init__(num_classes=num_classes,
+                         thing_ids=thing_ids,
+                         label_divisor=label_divisor,
+                         ignore_index=ignore_index)
         self.object_mask_threshold = object_mask_threshold
         self.overlap_threshold = overlap_threshold
 
@@ -55,11 +55,10 @@ class MaskFormerPostprocessor(Postprocessor):
         sem_pred = sem_pred.unsqueeze_([0, 1])
         pan_pred = pan_pred.unsqueeze_([0, 1])
         sem_prob = sem_prob.unsqueeze_(0)
-        pp_out = build_info_dict(
-            _type_='pp_out',
-            pan_pred=pan_pred,
-            sem_prob=sem_prob,
-            sem_pred=sem_pred)
+        pp_out = build_info_dict(_type_='pp_out',
+                                 pan_pred=pan_pred,
+                                 sem_prob=sem_prob,
+                                 sem_pred=sem_pred)
         return pp_out
 
     def _panoptic_inference(self, mask_cls, mask_pred):
@@ -72,8 +71,8 @@ class MaskFormerPostprocessor(Postprocessor):
         ins_id_map = paddle.zeros((h, w), dtype='int64')
         pan_pred = paddle.zeros((h, w), dtype='int64')
 
-        keep = (labels != self.num_classes) & (
-            scores > self.object_mask_threshold)
+        keep = (labels != self.num_classes) & (scores
+                                               > self.object_mask_threshold)
         keep = paddle.nonzero(keep)
 
         if keep.shape[0] == 0:
@@ -115,10 +114,9 @@ class MaskFormerPostprocessor(Postprocessor):
                     class_id_tracker[pred_class] += 1
                     pan_pred[mask] = paddle.full(
                         [1],
-                        encode_pan_id(
-                            pred_class,
-                            self.label_divisor,
-                            ins_id=class_id_tracker[pred_class]),
+                        encode_pan_id(pred_class,
+                                      self.label_divisor,
+                                      ins_id=class_id_tracker[pred_class]),
                         dtype='int64')
 
                 current_segment_id += 1

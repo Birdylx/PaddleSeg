@@ -7,26 +7,27 @@ def parse_arguments():
     import argparse
     import ast
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--model", required=True, help="Path of PaddleSeg model.")
-    parser.add_argument(
-        "--image", type=str, required=True, help="Path of test image file.")
-    parser.add_argument(
-        "--bg",
-        type=str,
-        required=True,
-        default=None,
-        help="Path of test background image file.")
+    parser.add_argument("--model",
+                        required=True,
+                        help="Path of PaddleSeg model.")
+    parser.add_argument("--image",
+                        type=str,
+                        required=True,
+                        help="Path of test image file.")
+    parser.add_argument("--bg",
+                        type=str,
+                        required=True,
+                        default=None,
+                        help="Path of test background image file.")
     parser.add_argument(
         "--device",
         type=str,
         default='cpu',
         help="Type of inference device, support 'cpu', 'kunlunxin' or 'gpu'.")
-    parser.add_argument(
-        "--use_trt",
-        type=ast.literal_eval,
-        default=False,
-        help="Wether to use tensorrt.")
+    parser.add_argument("--use_trt",
+                        type=ast.literal_eval,
+                        default=False,
+                        help="Wether to use tensorrt.")
     return parser.parse_args()
 
 
@@ -56,8 +57,10 @@ runtime_option = build_option(args)
 model_file = os.path.join(args.model, "model.pdmodel")
 params_file = os.path.join(args.model, "model.pdiparams")
 config_file = os.path.join(args.model, "deploy.yaml")
-model = fd.vision.matting.PPMatting(
-    model_file, params_file, config_file, runtime_option=runtime_option)
+model = fd.vision.matting.PPMatting(model_file,
+                                    params_file,
+                                    config_file,
+                                    runtime_option=runtime_option)
 
 # predict
 im = cv2.imread(args.image)

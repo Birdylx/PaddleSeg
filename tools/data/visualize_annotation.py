@@ -35,13 +35,13 @@ def parse_args():
         '--file_path',
         help='The file contains the path of origin and annotated images',
         type=str)
-    parser.add_argument(
-        '--pred_dir', help='the dir of predicted images', type=str)
-    parser.add_argument(
-        '--save_dir',
-        help='The directory for saving the visualized images',
-        type=str,
-        default='./output/visualize_annotation')
+    parser.add_argument('--pred_dir',
+                        help='the dir of predicted images',
+                        type=str)
+    parser.add_argument('--save_dir',
+                        help='The directory for saving the visualized images',
+                        type=str,
+                        default='./output/visualize_annotation')
     return parser.parse_args()
 
 
@@ -93,8 +93,10 @@ def visualize_imgs(args):
         color_map = visualize.get_color_map_list(256)
 
         # weighted annoted image
-        wt_annot_img = utils.visualize.visualize(
-            origin_path, annot_img, color_map, weight=weight)
+        wt_annot_img = utils.visualize.visualize(origin_path,
+                                                 annot_img,
+                                                 color_map,
+                                                 weight=weight)
         wt_annot_img = Image.fromarray(
             cv2.cvtColor(wt_annot_img, cv2.COLOR_BGR2RGB))
 
@@ -105,8 +107,10 @@ def visualize_imgs(args):
             pred_path = os.path.join(pred_dir, tmp_name)
             if os.path.exists(pred_path):
                 pred_img = np.array(Image.open(pred_path))
-                wt_pred_img = utils.visualize.visualize(
-                    origin_path, pred_img, color_map, weight=weight)
+                wt_pred_img = utils.visualize.visualize(origin_path,
+                                                        pred_img,
+                                                        color_map,
+                                                        weight=weight)
                 wt_pred_img = Image.fromarray(
                     cv2.cvtColor(wt_pred_img, cv2.COLOR_BGR2RGB))
 

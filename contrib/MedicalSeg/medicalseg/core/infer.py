@@ -80,8 +80,11 @@ def inference(model, im, ori_shape=None, transforms=None, sw_num=None):
     if sw_num:
         if hasattr(model, 'data_format') and model.data_format == 'NCDHW':
             data_format = model.data_format
-            logits = sliding_window_inference(
-                im, model.img_shape, sw_num, model, data_format=data_format)
+            logits = sliding_window_inference(im,
+                                              model.img_shape,
+                                              sw_num,
+                                              model,
+                                              data_format=data_format)
         else:
             logits = sliding_window_inference(im, model.img_shape, sw_num,
                                               model)
@@ -124,8 +127,9 @@ def dense_patch_slices(image_size, patch_size, scan_interval):
         raise ValueError('image_size should has 2 or 3 elements')
 
     scan_num = [
-        int(math.ceil(float(image_size[i]) / scan_interval[i]))
-        if scan_interval[i] != 0 else 1 for i in range(num_spatial_dims)
+        int(math.ceil(float(image_size[i]) /
+                      scan_interval[i])) if scan_interval[i] != 0 else 1
+        for i in range(num_spatial_dims)
     ]
     slices = []
     if num_spatial_dims == 3:
@@ -196,8 +200,7 @@ def sliding_window_inference(inputs,
     image_size = tuple(
         max(image_size[i], roi_size[i]) for i in range(num_spatial_dims))
     pad_size = [
-        i
-        for k in range(len(inputs.shape) - 1, 1, -1)
+        i for k in range(len(inputs.shape) - 1, 1, -1)
         for i in (0, max(roi_size[k - 2] - inputs.shape[k], 0))
     ]
     inputs = F.pad(inputs,
@@ -241,8 +244,8 @@ def sliding_window_inference(inputs,
     output_image = torch.zeros(output_shape, dtype=torch.float32).numpy()
     count_map = torch.zeros(output_shape, dtype=torch.float32).numpy()
 
-    for window_id, slice_index in enumerate(
-            range(0, len(slices), sw_batch_size)):
+    for window_id, slice_index in enumerate(range(0, len(slices),
+                                                  sw_batch_size)):
         slice_index_range = range(slice_index,
                                   min(slice_index + sw_batch_size, len(slices)))
         # store the result in the proper location of the full output
@@ -256,8 +259,9 @@ def sliding_window_inference(inputs,
                 count_map[0, :, slice_i, slice_j, slice_k] += 1.
             else:
                 slice_i, slice_j = slices[curr_index]
-                output_image[0, :, slice_i, slice_j] += output_rois[window_id][
-                    curr_index - slice_index, :]
+                output_image[0, :, slice_i,
+                             slice_j] += output_rois[window_id][curr_index -
+                                                                slice_index, :]
                 count_map[0, :, slice_i, slice_j] += 1.
 
     # account for any overlapping sections
@@ -266,8 +270,8 @@ def sliding_window_inference(inputs,
     output_image = paddle.to_tensor(output_image)
 
     if num_spatial_dims == 3:
-        return (output_image[..., :original_image_size[0], :original_image_size[
-            1], :original_image_size[2]], )
+        return (output_image[..., :original_image_size[0], :
+                             original_image_size[1], :original_image_size[2]], )
     return (output_image[..., :original_image_size[0], :original_image_size[1]],
             )  # 2D
 

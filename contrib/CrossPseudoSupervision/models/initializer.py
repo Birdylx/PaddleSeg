@@ -42,8 +42,8 @@ __all__ = [
 def _no_grad_uniform_(tensor, a, b):
     with paddle.no_grad():
         tensor.set_value(
-            paddle.uniform(
-                shape=tensor.shape, dtype=tensor.dtype, min=a, max=b))
+            paddle.uniform(shape=tensor.shape, dtype=tensor.dtype, min=a,
+                           max=b))
     return tensor
 
 
@@ -211,8 +211,8 @@ def _calculate_gain(nonlinearity, param=None):
             # True/False are instances of int, hence check above
             negative_slope = param
         else:
-            raise ValueError("negative_slope {} not a valid number".format(
-                param))
+            raise ValueError(
+                "negative_slope {} not a valid number".format(param))
         return math.sqrt(2.0 / (1 + negative_slope**2))
     elif nonlinearity == 'selu':
         return 3.0 / 4

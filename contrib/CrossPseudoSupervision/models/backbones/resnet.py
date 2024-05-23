@@ -22,13 +22,12 @@ __all__ = ['ResNet18', 'ResNet34', 'ResNet50', 'ResNet101', 'ResNet152']
 
 def conv3x3(in_planes, out_planes, stride=1):
     """3x3 convolution with padding"""
-    return nn.Conv2D(
-        in_planes,
-        out_planes,
-        kernel_size=3,
-        stride=stride,
-        padding=1,
-        bias_attr=False)
+    return nn.Conv2D(in_planes,
+                     out_planes,
+                     kernel_size=3,
+                     stride=stride,
+                     padding=1,
+                     bias_attr=False)
 
 
 class BasicBlock(nn.Layer):
@@ -88,28 +87,29 @@ class Bottleneck(nn.Layer):
         self.bn1 = norm_layer(planes, epsilon=bn_eps, momentum=bn_momentum)
 
         if dilate is not None:
-            self.conv2 = nn.Conv2D(
-                planes,
-                planes,
-                kernel_size=3,
-                stride=stride,
-                padding=dilate,
-                dilation=dilate,
-                bias_attr=False)
+            self.conv2 = nn.Conv2D(planes,
+                                   planes,
+                                   kernel_size=3,
+                                   stride=stride,
+                                   padding=dilate,
+                                   dilation=dilate,
+                                   bias_attr=False)
         else:
-            self.conv2 = nn.Conv2D(
-                planes,
-                planes,
-                kernel_size=3,
-                stride=stride,
-                padding=1,
-                bias_attr=False)
+            self.conv2 = nn.Conv2D(planes,
+                                   planes,
+                                   kernel_size=3,
+                                   stride=stride,
+                                   padding=1,
+                                   bias_attr=False)
 
         self.bn2 = norm_layer(planes, epsilon=bn_eps, momentum=bn_momentum)
-        self.conv3 = nn.Conv2D(
-            planes, planes * self.expansion, kernel_size=1, bias_attr=False)
-        self.bn3 = norm_layer(
-            planes * self.expansion, epsilon=bn_eps, momentum=bn_momentum)
+        self.conv3 = nn.Conv2D(planes,
+                               planes * self.expansion,
+                               kernel_size=1,
+                               bias_attr=False)
+        self.bn3 = norm_layer(planes * self.expansion,
+                              epsilon=bn_eps,
+                              momentum=bn_momentum)
         self.relu = nn.ReLU()
         self.relu_inplace = nn.ReLU()
         self.downsample = downsample
@@ -139,6 +139,7 @@ class Bottleneck(nn.Layer):
 
 
 class ResNet(nn.Layer):
+
     def __init__(self,
                  layer,
                  block,
@@ -154,41 +155,36 @@ class ResNet(nn.Layer):
         super(ResNet, self).__init__()
         if deep_stem:
             self.conv1 = nn.Sequential(
-                nn.Conv2D(
-                    in_channels,
-                    stem_width,
-                    kernel_size=3,
-                    stride=2,
-                    padding=1,
-                    bias_attr=False),
-                norm_layer(
-                    stem_width, epsilon=bn_eps, momentum=bn_momentum),
+                nn.Conv2D(in_channels,
+                          stem_width,
+                          kernel_size=3,
+                          stride=2,
+                          padding=1,
+                          bias_attr=False),
+                norm_layer(stem_width, epsilon=bn_eps, momentum=bn_momentum),
                 nn.ReLU(),
-                nn.Conv2D(
-                    stem_width,
-                    stem_width,
-                    kernel_size=3,
-                    stride=1,
-                    padding=1,
-                    bias_attr=False),
-                norm_layer(
-                    stem_width, epsilon=bn_eps, momentum=bn_momentum),
+                nn.Conv2D(stem_width,
+                          stem_width,
+                          kernel_size=3,
+                          stride=1,
+                          padding=1,
+                          bias_attr=False),
+                norm_layer(stem_width, epsilon=bn_eps, momentum=bn_momentum),
                 nn.ReLU(),
-                nn.Conv2D(
-                    stem_width,
-                    stem_width * 2,
-                    kernel_size=3,
-                    stride=1,
-                    padding=1,
-                    bias_attr=False), )
+                nn.Conv2D(stem_width,
+                          stem_width * 2,
+                          kernel_size=3,
+                          stride=1,
+                          padding=1,
+                          bias_attr=False),
+            )
         else:
-            self.conv1 = nn.Conv2D(
-                in_channels,
-                64,
-                kernel_size=7,
-                stride=2,
-                padding=3,
-                bias_attr=False)
+            self.conv1 = nn.Conv2D(in_channels,
+                                   64,
+                                   kernel_size=7,
+                                   stride=2,
+                                   padding=3,
+                                   bias_attr=False)
 
         num_filters = [64, 128, 256, 512]
 
@@ -207,35 +203,31 @@ class ResNet(nn.Layer):
         self.feat_channels = [c * 4 for c in num_filters
                               ] if layer >= 50 else num_filters
 
-        self.bn1 = norm_layer(
-            stem_width * 2 if deep_stem else 64,
-            epsilon=bn_eps,
-            momentum=bn_momentum)
+        self.bn1 = norm_layer(stem_width * 2 if deep_stem else 64,
+                              epsilon=bn_eps,
+                              momentum=bn_momentum)
         self.relu = nn.ReLU()
         self.maxpool = nn.MaxPool2D(kernel_size=3, stride=2, padding=1)
-        self.layer1 = self._make_layer(
-            block,
-            norm_layer,
-            64,
-            depth[0],
-            bn_eps=bn_eps,
-            bn_momentum=bn_momentum)
-        self.layer2 = self._make_layer(
-            block,
-            norm_layer,
-            128,
-            depth[1],
-            stride=2,
-            bn_eps=bn_eps,
-            bn_momentum=bn_momentum)
-        self.layer3 = self._make_layer(
-            block,
-            norm_layer,
-            256,
-            depth[2],
-            stride=2,
-            bn_eps=bn_eps,
-            bn_momentum=bn_momentum)
+        self.layer1 = self._make_layer(block,
+                                       norm_layer,
+                                       64,
+                                       depth[0],
+                                       bn_eps=bn_eps,
+                                       bn_momentum=bn_momentum)
+        self.layer2 = self._make_layer(block,
+                                       norm_layer,
+                                       128,
+                                       depth[1],
+                                       stride=2,
+                                       bn_eps=bn_eps,
+                                       bn_momentum=bn_momentum)
+        self.layer3 = self._make_layer(block,
+                                       norm_layer,
+                                       256,
+                                       depth[2],
+                                       stride=2,
+                                       bn_eps=bn_eps,
+                                       bn_momentum=bn_momentum)
 
         if as_backbone:
             self.layer4 = self._make_layer__nostride_dilate(
@@ -247,14 +239,13 @@ class ResNet(nn.Layer):
                 bn_eps=bn_eps,
                 bn_momentum=bn_momentum)
         else:
-            self.layer4 = self._make_layer(
-                block,
-                norm_layer,
-                512,
-                depth[3],
-                stride=2,
-                bn_eps=bn_eps,
-                bn_momentum=bn_momentum)
+            self.layer4 = self._make_layer(block,
+                                           norm_layer,
+                                           512,
+                                           depth[3],
+                                           stride=2,
+                                           bn_eps=bn_eps,
+                                           bn_momentum=bn_momentum)
 
         self.pretrained = pretrained
         self.init_weight()
@@ -270,16 +261,15 @@ class ResNet(nn.Layer):
         downsample = None
         if stride != 1 or self.inplanes != planes * block.expansion:
             downsample = nn.Sequential(
-                nn.Conv2D(
-                    self.inplanes,
-                    planes * block.expansion,
-                    kernel_size=1,
-                    stride=stride,
-                    bias_attr=False),
-                norm_layer(
-                    planes * block.expansion,
-                    epsilon=bn_eps,
-                    momentum=bn_momentum), )
+                nn.Conv2D(self.inplanes,
+                          planes * block.expansion,
+                          kernel_size=1,
+                          stride=stride,
+                          bias_attr=False),
+                norm_layer(planes * block.expansion,
+                           epsilon=bn_eps,
+                           momentum=bn_momentum),
+            )
 
         layers = []
         layers.append(
@@ -288,12 +278,11 @@ class ResNet(nn.Layer):
         self.inplanes = planes * block.expansion
         for i in range(1, blocks):
             layers.append(
-                block(
-                    self.inplanes,
-                    planes,
-                    norm_layer=norm_layer,
-                    bn_eps=bn_eps,
-                    bn_momentum=bn_momentum))
+                block(self.inplanes,
+                      planes,
+                      norm_layer=norm_layer,
+                      bn_eps=bn_eps,
+                      bn_momentum=bn_momentum))
 
         return nn.Sequential(*layers)
 
@@ -306,14 +295,14 @@ class ResNet(nn.Layer):
                                      bn_eps=1e-5,
                                      bn_momentum=0.1):
         downsample = nn.Sequential(
-            nn.Conv2D(
-                self.inplanes,
-                planes * block.expansion,
-                kernel_size=1,
-                stride=1,
-                bias_attr=False),
-            norm_layer(
-                planes * block.expansion, epsilon=bn_eps, momentum=bn_momentum),
+            nn.Conv2D(self.inplanes,
+                      planes * block.expansion,
+                      kernel_size=1,
+                      stride=1,
+                      bias_attr=False),
+            norm_layer(planes * block.expansion,
+                       epsilon=bn_eps,
+                       momentum=bn_momentum),
         )
 
         dilate = 2
@@ -326,13 +315,12 @@ class ResNet(nn.Layer):
         for i in range(1, blocks):
             dilate *= 2
             layers.append(
-                block(
-                    self.inplanes,
-                    planes,
-                    norm_layer=norm_layer,
-                    bn_eps=bn_eps,
-                    bn_momentum=bn_momentum,
-                    dilate=dilate))
+                block(self.inplanes,
+                      planes,
+                      norm_layer=norm_layer,
+                      bn_eps=bn_eps,
+                      bn_momentum=bn_momentum,
+                      dilate=dilate))
 
         return nn.Sequential(*layers)
 

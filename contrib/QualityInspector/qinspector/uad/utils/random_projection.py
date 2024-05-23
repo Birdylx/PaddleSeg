@@ -25,7 +25,7 @@ class NotFittedError(ValueError, AttributeError):
     """Raise Exception if estimator is used before fitting."""
 
 
-def johnson_lindenstrauss_min_dim(n_samples: int, eps: float=0.1):
+def johnson_lindenstrauss_min_dim(n_samples: int, eps: float = 0.1):
     """Find a 'safe' number of components to randomly project to.
 
     Ref eqn 2.1 https://cseweb.ucsd.edu/~dasgupta/papers/jl.pdf
@@ -51,8 +51,8 @@ class BaseRandomProjection:
 
     def __init__(self,
                  n_components="auto",
-                 eps: float=0.1,
-                 random_state: Optional[int]=None) -> None:
+                 eps: float = 0.1,
+                 random_state: Optional[int] = None) -> None:
         self.n_components = n_components
         self.n_components_: int
         self.random_matrix: Tensor
@@ -136,7 +136,7 @@ class BaseRandomProjection:
             raise NotFittedError(
                 "`fit()` has not been called on RandomProjection yet.")
 
-        projected_embedding = embedding @self.random_matrix.T
+        projected_embedding = embedding @ self.random_matrix.T
         return projected_embedding
 
 
@@ -178,21 +178,21 @@ class SparseRandomProjection(BaseRandomProjection):
 
         else:
             # Sparse matrix is not being generated here as it is stored as dense anyways
-            components = paddle.zeros(
-                (n_components, n_features), dtype=paddle.float64)
+            components = paddle.zeros((n_components, n_features),
+                                      dtype=paddle.float64)
             for i in range(n_components):
                 # find the indices of the non-zero components for row i
                 nnz_idx = np.random.binomial(n_features, density)
                 # get nnz_idx column indices
                 # pylint: disable=not-callable
                 c_idx = paddle.to_tensor(
-                    sample_without_replacement(
-                        n_population=n_features,
-                        n_samples=nnz_idx,
-                        random_state=self.random_state),
-                    dtype='int64', )
-                data = paddle.to_tensor(
-                    np.random.binomial(1, 0.5, c_idx.size)) * 2 - 1
+                    sample_without_replacement(n_population=n_features,
+                                               n_samples=nnz_idx,
+                                               random_state=self.random_state),
+                    dtype='int64',
+                )
+                data = paddle.to_tensor(np.random.binomial(1, 0.5,
+                                                           c_idx.size)) * 2 - 1
                 # assign data to only those columns
                 components[i, c_idx] = data
 

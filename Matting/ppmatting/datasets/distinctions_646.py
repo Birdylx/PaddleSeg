@@ -27,5 +27,6 @@ from ppmatting.datasets.matting_dataset import MattingDataset
 
 @manager.DATASETS.add_component
 class Distinctions646(MattingDataset):
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

@@ -16,6 +16,7 @@ import abc
 
 
 class Evaluator(metaclass=abc.ABCMeta):
+
     @abc.abstractmethod
     def update(self, sample_dict, pp_out_dict):
         pass

@@ -19,7 +19,12 @@ import numpy as np
 from PIL import Image as PILImage
 
 
-def visualize(image, result, color_map, save_dir=None, weight=0.6, use_multilabel=False):
+def visualize(image,
+              result,
+              color_map,
+              save_dir=None,
+              weight=0.6,
+              use_multilabel=False):
     """
     Convert predict result to color image, and save added image.
 
@@ -56,10 +61,14 @@ def visualize(image, result, color_map, save_dir=None, weight=0.6, use_multilabe
             c3 = np.where(mask, color_map[i, 2], vis_result[..., 2])
             pseudo_img = np.dstack((c3, c2, c1)).astype('uint8')
 
-            contour, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-            vis_result = cv2.addWeighted(vis_result, weight, pseudo_img, 1 - weight, 0)
-            contour_color = (int(color_map[i, 0]), int(color_map[i, 1]), int(color_map[i, 2]))
-            vis_result = cv2.drawContours(vis_result, contour, -1, contour_color, 1)
+            contour, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL,
+                                          cv2.CHAIN_APPROX_SIMPLE)
+            vis_result = cv2.addWeighted(vis_result, weight, pseudo_img,
+                                         1 - weight, 0)
+            contour_color = (int(color_map[i, 0]), int(color_map[i, 1]),
+                             int(color_map[i, 2]))
+            vis_result = cv2.drawContours(vis_result, contour, -1,
+                                          contour_color, 1)
 
     if save_dir is not None:
         if not os.path.exists(save_dir):

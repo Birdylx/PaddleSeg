@@ -30,29 +30,26 @@ from paddlepanseg.transforms.functional import id2rgb
 
 def parse_infer_args(*args, **kwargs):
     parser = argparse.ArgumentParser(description="Model inference")
-    parser.add_argument(
-        '--config',
-        dest='cfg',
-        help="Config file.",
-        default=None,
-        type=str,
-        required=True)
+    parser.add_argument('--config',
+                        dest='cfg',
+                        help="Config file.",
+                        default=None,
+                        type=str,
+                        required=True)
     parser.add_argument(
         '--image_path',
         help="Directory or path or file list of the images to be predicted.",
         type=str,
         default=None,
         required=True)
-    parser.add_argument(
-        '--batch_size',
-        help="Mini batch size on each GPU (or on CPU).",
-        type=int,
-        default=1)
-    parser.add_argument(
-        '--save_dir',
-        help="Directory to save the predicted results.",
-        type=str,
-        default="./output")
+    parser.add_argument('--batch_size',
+                        help="Mini batch size on each GPU (or on CPU).",
+                        type=int,
+                        default=1)
+    parser.add_argument('--save_dir',
+                        help="Directory to save the predicted results.",
+                        type=str,
+                        default="./output")
     parser.add_argument(
         '--device',
         choices=['cpu', 'gpu', 'xpu', 'npu'],
@@ -64,23 +61,22 @@ def parse_infer_args(*args, **kwargs):
         type=literal_eval,
         choices=[True, False],
         help="Whether or not to use NVIDIA TensorRT to accelerate prediction.")
-    parser.add_argument(
-        '--precision',
-        default='fp32',
-        type=str,
-        choices=['fp32', 'fp16', 'int8'],
-        help="TensorRT precision.")
-    parser.add_argument(
-        '--min_subgraph_size',
-        default=3,
-        type=int,
-        help="Minimum subgraph size in TensorRT optimization.")
+    parser.add_argument('--precision',
+                        default='fp32',
+                        type=str,
+                        choices=['fp32', 'fp16', 'int8'],
+                        help="TensorRT precision.")
+    parser.add_argument('--min_subgraph_size',
+                        default=3,
+                        type=int,
+                        help="Minimum subgraph size in TensorRT optimization.")
     parser.add_argument(
         '--enable_auto_tune',
         default=False,
         type=literal_eval,
         choices=[True, False],
-        help="Whether or not to enable tuned dynamic shape. We uses some images to collect "
+        help=
+        "Whether or not to enable tuned dynamic shape. We uses some images to collect "
         "the dynamic shape for trt sub graph, which avoids setting dynamic shape manually."
     )
     parser.add_argument(
@@ -89,11 +85,10 @@ def parse_infer_args(*args, **kwargs):
         default='auto_tune_tmp.pbtxt',
         help="Path of the temp file to save tuned dynamic shape.")
 
-    parser.add_argument(
-        '--cpu_threads',
-        default=10,
-        type=int,
-        help="Number of threads to use when using CPU.")
+    parser.add_argument('--cpu_threads',
+                        default=10,
+                        type=int,
+                        help="Number of threads to use when using CPU.")
     parser.add_argument(
         '--enable_mkldnn',
         default=False,
@@ -106,7 +101,8 @@ def parse_infer_args(*args, **kwargs):
         type=literal_eval,
         default=False,
         choices=[True, False],
-        help="Whether or not to print information about environment, model, configuration and performance."
+        help=
+        "Whether or not to print information about environment, model, configuration and performance."
     )
     parser.add_argument(
         '--model_name',
@@ -185,6 +181,7 @@ def auto_tune(args, imgs, img_nums):
 
 
 class Predictor:
+
     def __init__(self, args):
         """
         Prepare for prediction.
@@ -219,21 +216,22 @@ class Predictor:
         if hasattr(args, 'benchmark') and args.benchmark:
             import auto_log
             pid = os.getpid()
-            self.autolog = auto_log.AutoLogger(
-                model_name=args.model_name,
-                model_precision=args.precision,
-                batch_size=args.batch_size,
-                data_shape="dynamic",
-                save_path=None,
-                inference_config=self.pred_cfg,
-                pids=pid,
-                process_name=None,
-                gpu_ids=0,
-                time_keys=[
-                    'preprocess_time', 'inference_time', 'postprocess_time'
-                ],
-                warmup=0,
-                logger=logger)
+            self.autolog = auto_log.AutoLogger(model_name=args.model_name,
+                                               model_precision=args.precision,
+                                               batch_size=args.batch_size,
+                                               data_shape="dynamic",
+                                               save_path=None,
+                                               inference_config=self.pred_cfg,
+                                               pids=pid,
+                                               process_name=None,
+                                               gpu_ids=0,
+                                               time_keys=[
+                                                   'preprocess_time',
+                                                   'inference_time',
+                                                   'postprocess_time'
+                                               ],
+                                               warmup=0,
+                                               logger=logger)
 
     def _init_base_config(self):
         self.pred_cfg = PredictConfig(self.cfg.model, self.cfg.params)
@@ -324,9 +322,8 @@ class Predictor:
             if args.benchmark:
                 self.autolog.times.start()
 
-            data = np.array([
-                self._preprocess(p) for p in imgs_path[i:i + args.batch_size]
-            ])
+            data = np.array(
+                [self._preprocess(p) for p in imgs_path[i:i + args.batch_size]])
             input_handle.reshape(data.shape)
             input_handle.copy_from_cpu(data)
 

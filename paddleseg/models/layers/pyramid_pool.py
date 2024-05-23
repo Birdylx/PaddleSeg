@@ -18,12 +18,15 @@ from paddle import nn
 
 from paddleseg.models import layers
 
+
 class CustomAvgPool2D(nn.Layer):
+
     def __init__(self):
         super().__init__()
-    
+
     def forward(self, x):
         return paddle.mean(x, axis=[2, 3], keepdim=True)
+
 
 class ASPPModule(nn.Layer):
     """
@@ -59,13 +62,12 @@ class ASPPModule(nn.Layer):
             else:
                 conv_func = layers.ConvBNReLU
 
-            block = conv_func(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                kernel_size=1 if ratio == 1 else 3,
-                dilation=ratio,
-                padding=0 if ratio == 1 else ratio,
-                data_format=data_format)
+            block = conv_func(in_channels=in_channels,
+                              out_channels=out_channels,
+                              kernel_size=1 if ratio == 1 else 3,
+                              dilation=ratio,
+                              padding=0 if ratio == 1 else ratio,
+                              data_format=data_format)
             self.aspp_blocks.append(block)
 
         out_size = len(self.aspp_blocks)
@@ -75,20 +77,19 @@ class ASPPModule(nn.Layer):
                 # nn.AdaptiveAvgPool2D(
                 #     output_size=(1, 1), data_format=data_format),
                 CustomAvgPool2D(),
-                layers.ConvBNReLU(
-                    in_channels,
-                    out_channels,
-                    kernel_size=1,
-                    bias_attr=False,
-                    data_format=data_format))
+                layers.ConvBNReLU(in_channels,
+                                  out_channels,
+                                  kernel_size=1,
+                                  bias_attr=False,
+                                  data_format=data_format))
             out_size += 1
         self.image_pooling = image_pooling
 
-        self.conv_bn_relu = layers.ConvBNReLU(
-            in_channels=out_channels * out_size,
-            out_channels=out_channels,
-            kernel_size=1,
-            data_format=data_format)
+        self.conv_bn_relu = layers.ConvBNReLU(in_channels=out_channels *
+                                              out_size,
+                                              out_channels=out_channels,
+                                              kernel_size=1,
+                                              data_format=data_format)
 
         self.dropout = nn.Dropout(p=0.1)  # drop rate
 
@@ -106,12 +107,11 @@ class ASPPModule(nn.Layer):
 
         if self.image_pooling:
             img_avg = self.global_avg_pool(x)
-            img_avg = F.interpolate(
-                img_avg,
-                interpolate_shape,
-                mode='bilinear',
-                align_corners=self.align_corners,
-                data_format=self.data_format)
+            img_avg = F.interpolate(img_avg,
+                                    interpolate_shape,
+                                    mode='bilinear',
+                                    align_corners=self.align_corners,
+                                    data_format=self.data_format)
             outputs.append(img_avg)
 
         x = paddle.concat(outputs, axis=axis)
@@ -150,11 +150,11 @@ class PPModule(nn.Layer):
             for size in bin_sizes
         ])
 
-        self.conv_bn_relu2 = layers.ConvBNReLU(
-            in_channels=in_channels + inter_channels * len(bin_sizes),
-            out_channels=out_channels,
-            kernel_size=3,
-            padding=1)
+        self.conv_bn_relu2 = layers.ConvBNReLU(in_channels=in_channels +
+                                               inter_channels * len(bin_sizes),
+                                               out_channels=out_channels,
+                                               kernel_size=3,
+                                               padding=1)
 
         self.align_corners = align_corners
 
@@ -177,8 +177,9 @@ class PPModule(nn.Layer):
         """
 
         prior = nn.AdaptiveAvgPool2D(output_size=(size, size))
-        conv = layers.ConvBNReLU(
-            in_channels=in_channels, out_channels=out_channels, kernel_size=1)
+        conv = layers.ConvBNReLU(in_channels=in_channels,
+                                 out_channels=out_channels,
+                                 kernel_size=1)
 
         return nn.Sequential(prior, conv)
 
@@ -186,11 +187,10 @@ class PPModule(nn.Layer):
         cat_layers = []
         for stage in self.stages:
             x = stage(input)
-            x = F.interpolate(
-                x,
-                paddle.shape(input)[2:],
-                mode='bilinear',
-                align_corners=self.align_corners)
+            x = F.interpolate(x,
+                              paddle.shape(input)[2:],
+                              mode='bilinear',
+                              align_corners=self.align_corners)
             cat_layers.append(x)
         cat_layers = [input] + cat_layers[::-1]
         cat = paddle.concat(cat_layers, axis=1)

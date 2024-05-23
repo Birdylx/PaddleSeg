@@ -16,6 +16,7 @@
 import argparse
 import os
 import sys
+
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.abspath(os.path.join(__dir__, '../../../')))
 
@@ -39,9 +40,8 @@ model_urls = {
 if __name__ == "__main__":
     data_path = os.path.abspath("./inference_models")
     for model_name, url in model_urls.items():
-        download_file_and_uncompress(
-            url=url,
-            savepath=data_path,
-            extrapath=data_path,
-            extraname=model_name)
+        download_file_and_uncompress(url=url,
+                                     savepath=data_path,
+                                     extrapath=data_path,
+                                     extraname=model_name)
     print("Download inference models finished.")

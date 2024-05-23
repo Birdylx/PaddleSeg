@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# In this package we provide PaddleSeg-style functions for training, 
+# In this package we provide PaddleSeg-style functions for training,
 # validation, prediction, and inference.
 # We do not re-use the APIs of PaddleSeg because there is a large gap
 # between semantic segmentation and panoptic segmentation.

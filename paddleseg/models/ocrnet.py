@@ -57,11 +57,10 @@ class OCRNet(nn.Layer):
         self.backbone_indices = backbone_indices
         in_channels = [self.backbone.feat_channels[i] for i in backbone_indices]
 
-        self.head = OCRHead(
-            num_classes=num_classes,
-            in_channels=in_channels,
-            ocr_mid_channels=ocr_mid_channels,
-            ocr_key_channels=ocr_key_channels)
+        self.head = OCRHead(num_classes=num_classes,
+                            in_channels=in_channels,
+                            ocr_mid_channels=ocr_mid_channels,
+                            ocr_key_channels=ocr_key_channels)
 
         self.align_corners = align_corners
         self.pretrained = pretrained
@@ -75,11 +74,11 @@ class OCRNet(nn.Layer):
             logit_list = [logit_list[0]]
 
         logit_list = [
-            F.interpolate(
-                logit,
-                paddle.shape(x)[2:],
-                mode='bilinear',
-                align_corners=self.align_corners) for logit in logit_list
+            F.interpolate(logit,
+                          paddle.shape(x)[2:],
+                          mode='bilinear',
+                          align_corners=self.align_corners)
+            for logit in logit_list
         ]
         return logit_list
 
@@ -113,8 +112,10 @@ class OCRHead(nn.Layer):
 
         self.indices = [-2, -1] if len(in_channels) > 1 else [-1, -1]
 
-        self.conv3x3_ocr = layers.ConvBNReLU(
-            in_channels[self.indices[1]], ocr_mid_channels, 3, padding=1)
+        self.conv3x3_ocr = layers.ConvBNReLU(in_channels[self.indices[1]],
+                                             ocr_mid_channels,
+                                             3,
+                                             padding=1)
         self.cls_head = nn.Conv2D(ocr_mid_channels, self.num_classes, 1)
         self.aux_head = nn.Sequential(
             layers.ConvBNReLU(in_channels[self.indices[0]],

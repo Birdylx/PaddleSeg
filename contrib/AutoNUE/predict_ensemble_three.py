@@ -27,50 +27,48 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Model prediction')
 
     # params of prediction
-    parser.add_argument(
-        "--config", dest="cfg", help="The config file.", default=None, type=str)
-    parser.add_argument(
-        '--model_path',
-        dest='model_path',
-        help='The path of model for prediction',
-        type=str,
-        default=None)
-    parser.add_argument(
-        "--config_1",
-        dest="cfg_1",
-        help="The config file.",
-        default=None,
-        type=str)
-    parser.add_argument(
-        '--model_path_1',
-        dest='model_path_1',
-        help='The path of model for prediction',
-        type=str,
-        default=None)
-    parser.add_argument(
-        "--config_crop",
-        dest="cfg_crop",
-        help="The config file.",
-        default=None,
-        type=str)
-    parser.add_argument(
-        '--model_path_crop',
-        dest='model_path_crop',
-        help='The path of model for prediction',
-        type=str,
-        default=None)
+    parser.add_argument("--config",
+                        dest="cfg",
+                        help="The config file.",
+                        default=None,
+                        type=str)
+    parser.add_argument('--model_path',
+                        dest='model_path',
+                        help='The path of model for prediction',
+                        type=str,
+                        default=None)
+    parser.add_argument("--config_1",
+                        dest="cfg_1",
+                        help="The config file.",
+                        default=None,
+                        type=str)
+    parser.add_argument('--model_path_1',
+                        dest='model_path_1',
+                        help='The path of model for prediction',
+                        type=str,
+                        default=None)
+    parser.add_argument("--config_crop",
+                        dest="cfg_crop",
+                        help="The config file.",
+                        default=None,
+                        type=str)
+    parser.add_argument('--model_path_crop',
+                        dest='model_path_crop',
+                        help='The path of model for prediction',
+                        type=str,
+                        default=None)
     parser.add_argument(
         '--image_path',
         dest='image_path',
-        help='The path of image, it can be a file or a directory including images',
+        help=
+        'The path of image, it can be a file or a directory including images',
         type=str,
         default=None)
-    parser.add_argument(
-        '--save_dir',
-        dest='save_dir',
-        help='The directory for saving the predicted results',
-        type=str,
-        default='./output/result')
+    parser.add_argument('--save_dir',
+                        dest='save_dir',
+                        help='The directory for saving the predicted results',
+                        type=str,
+                        default='./output/result')
 
     # augment for prediction
     parser.add_argument(
@@ -78,42 +76,40 @@ def parse_args():
         dest='aug_pred',
         help='Whether to use mulit-scales and flip augment for prediction',
         action='store_true')
-    parser.add_argument(
-        '--scales',
-        dest='scales',
-        nargs='+',
-        help='Scales for augment',
-        type=float,
-        default=1.0)
-    parser.add_argument(
-        '--flip_horizontal',
-        dest='flip_horizontal',
-        help='Whether to use flip horizontally augment',
-        action='store_true')
-    parser.add_argument(
-        '--flip_vertical',
-        dest='flip_vertical',
-        help='Whether to use flip vertically augment',
-        action='store_true')
+    parser.add_argument('--scales',
+                        dest='scales',
+                        nargs='+',
+                        help='Scales for augment',
+                        type=float,
+                        default=1.0)
+    parser.add_argument('--flip_horizontal',
+                        dest='flip_horizontal',
+                        help='Whether to use flip horizontally augment',
+                        action='store_true')
+    parser.add_argument('--flip_vertical',
+                        dest='flip_vertical',
+                        help='Whether to use flip vertically augment',
+                        action='store_true')
 
     # sliding window prediction
-    parser.add_argument(
-        '--is_slide',
-        dest='is_slide',
-        help='Whether to prediction by sliding window',
-        action='store_true')
+    parser.add_argument('--is_slide',
+                        dest='is_slide',
+                        help='Whether to prediction by sliding window',
+                        action='store_true')
     parser.add_argument(
         '--crop_size',
         dest='crop_size',
         nargs=2,
-        help='The crop size of sliding window, the first is width and the second is height.',
+        help=
+        'The crop size of sliding window, the first is width and the second is height.',
         type=int,
         default=None)
     parser.add_argument(
         '--stride',
         dest='stride',
         nargs=2,
-        help='The stride of sliding window, the first is width and the second is height.',
+        help=
+        'The stride of sliding window, the first is width and the second is height.',
         type=int,
         default=None)
 
@@ -199,7 +195,8 @@ def main(args):
         flip_vertical=args.flip_vertical,
         is_slide=args.is_slide,
         crop_size=args.crop_size,
-        stride=args.stride, )
+        stride=args.stride,
+    )
 
 
 if __name__ == '__main__':

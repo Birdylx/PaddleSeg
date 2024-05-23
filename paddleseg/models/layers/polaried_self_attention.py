@@ -37,44 +37,39 @@ class PolarizedSelfAttentionModule(nn.Layer):
         self.kernel_size = kernel_size
         self.stride = stride
         self.padding = (kernel_size - 1) // 2
-        self.conv_q_right = nn.Conv2D(
-            self.inplanes,
-            1,
-            kernel_size=1,
-            stride=stride,
-            padding=0,
-            bias_attr=False)
-        self.conv_v_right = nn.Conv2D(
-            self.inplanes,
-            self.inter_planes,
-            kernel_size=1,
-            stride=stride,
-            padding=0,
-            bias_attr=False)
-        self.conv_up = nn.Conv2D(
-            self.inter_planes,
-            self.planes,
-            kernel_size=1,
-            stride=1,
-            padding=0,
-            bias_attr=False)
+        self.conv_q_right = nn.Conv2D(self.inplanes,
+                                      1,
+                                      kernel_size=1,
+                                      stride=stride,
+                                      padding=0,
+                                      bias_attr=False)
+        self.conv_v_right = nn.Conv2D(self.inplanes,
+                                      self.inter_planes,
+                                      kernel_size=1,
+                                      stride=stride,
+                                      padding=0,
+                                      bias_attr=False)
+        self.conv_up = nn.Conv2D(self.inter_planes,
+                                 self.planes,
+                                 kernel_size=1,
+                                 stride=1,
+                                 padding=0,
+                                 bias_attr=False)
         self.softmax_right = nn.Softmax(axis=2)
         self.sigmoid = nn.Sigmoid()
-        self.conv_q_left = nn.Conv2D(
-            self.inplanes,
-            self.inter_planes,
-            kernel_size=1,
-            stride=stride,
-            padding=0,
-            bias_attr=False)
+        self.conv_q_left = nn.Conv2D(self.inplanes,
+                                     self.inter_planes,
+                                     kernel_size=1,
+                                     stride=stride,
+                                     padding=0,
+                                     bias_attr=False)
         self.avg_pool = nn.AdaptiveAvgPool2D(1)
-        self.conv_v_left = nn.Conv2D(
-            self.inplanes,
-            self.inter_planes,
-            kernel_size=1,
-            stride=stride,
-            padding=0,
-            bias_attr=False)
+        self.conv_v_left = nn.Conv2D(self.inplanes,
+                                     self.inter_planes,
+                                     kernel_size=1,
+                                     stride=stride,
+                                     padding=0,
+                                     bias_attr=False)
         self.softmax_left = nn.Softmax(axis=2)
 
         self.init_weight()

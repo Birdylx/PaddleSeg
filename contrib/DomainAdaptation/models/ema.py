@@ -18,6 +18,7 @@
 
 
 class EMA(object):
+
     def __init__(self, model, alpha=0.999):
         """ Model exponential moving average. """
         self.step = 0

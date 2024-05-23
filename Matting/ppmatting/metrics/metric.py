@@ -138,8 +138,9 @@ class Grad:
         filter_x = np.zeros((size, size))
         for i in range(size):
             for j in range(size):
-                filter_x[i, j] = self.gaussian(
-                    i - half_size, sigma) * self.dgaussian(j - half_size, sigma)
+                filter_x[i, j] = self.gaussian(i - half_size,
+                                               sigma) * self.dgaussian(
+                                                   j - half_size, sigma)
 
         # normalize filter
         norm = np.sqrt((filter_x**2).sum())
@@ -150,10 +151,14 @@ class Grad:
 
     def gauss_gradient(self, img, sigma):
         filter_x, filter_y = self.gauss_filter(sigma)
-        img_filtered_x = cv2.filter2D(
-            img, -1, filter_x, borderType=cv2.BORDER_REPLICATE)
-        img_filtered_y = cv2.filter2D(
-            img, -1, filter_y, borderType=cv2.BORDER_REPLICATE)
+        img_filtered_x = cv2.filter2D(img,
+                                      -1,
+                                      filter_x,
+                                      borderType=cv2.BORDER_REPLICATE)
+        img_filtered_y = cv2.filter2D(img,
+                                      -1,
+                                      filter_y,
+                                      borderType=cv2.BORDER_REPLICATE)
         return np.sqrt(img_filtered_x**2 + img_filtered_y**2)
 
     def update(self, pred, gt, trimap=None, sigma=1.4):

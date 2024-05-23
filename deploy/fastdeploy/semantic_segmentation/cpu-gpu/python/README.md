@@ -18,7 +18,7 @@ pip install fastdeploy-gpu-python -f https://www.paddlepaddle.org.cn/whl/fastdep
 conda config --add channels conda-forge && conda install cudatoolkit=11.2 cudnn=8.2
 
 # 下载部署示例代码
-git clone https://github.com/PaddlePaddle/PaddleSeg.git 
+git clone https://github.com/PaddlePaddle/PaddleSeg.git
 # 注意：如果当前分支找不到下面的fastdeploy测试代码，请切换到develop分支
 # git checkout develop
 cd PaddleSeg/deploy/fastdeploy/semantic_segmentation/cpp-gpu/python
@@ -48,7 +48,7 @@ python infer.py --model PP_LiteSeg_B_STDC2_cityscapes_without_argmax_infer --ima
 |---|---|---|  
 |--model|指定模型文件夹所在的路径|None|
 |--image|指定测试图片所在的路径|None|  
-|--device|指定即将运行的硬件类型，支持的值为`[cpu, gpu]`，当设置为cpu时，可运行在x86 cpu/arm cpu等cpu上|cpu| 
+|--device|指定即将运行的硬件类型，支持的值为`[cpu, gpu]`，当设置为cpu时，可运行在x86 cpu/arm cpu等cpu上|cpu|
 |--use_trt|是否使用trt，该项只在device为gpu时有效|False|  
 
 关于如何通过FastDeploy使用更多不同的推理后端，以及如何使用不同的硬件，请参考文档：[如何切换模型推理后端引擎](https://github.com/PaddlePaddle/FastDeploy/blob/develop/docs/cn/faq/how_to_change_backend.md)

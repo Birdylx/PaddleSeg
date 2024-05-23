@@ -137,11 +137,10 @@ def train(model,
         logger.info('use AMP to train. AMP level = {}'.format(amp_level))
         scaler = paddle.amp.GradScaler(init_loss_scaling=1024)
         if amp_level == 'O2':
-            model, optimizer = paddle.amp.decorate(
-                models=model,
-                optimizers=optimizer,
-                level='O2',
-                save_dtype='float32')
+            model, optimizer = paddle.amp.decorate(models=model,
+                                                   optimizers=optimizer,
+                                                   level='O2',
+                                                   save_dtype='float32')
 
     if nranks > 1:
         paddle.distributed.fleet.init(is_collective=True)
@@ -149,15 +148,18 @@ def train(model,
             optimizer)  # The return is Fleet object
         ddp_model = paddle.distributed.fleet.distributed_model(model)
 
-    batch_sampler = paddle.io.DistributedBatchSampler(
-        train_dataset, batch_size=batch_size, shuffle=True, drop_last=True)
+    batch_sampler = paddle.io.DistributedBatchSampler(train_dataset,
+                                                      batch_size=batch_size,
+                                                      shuffle=True,
+                                                      drop_last=True)
 
     loader = paddle.io.DataLoader(
         train_dataset,
         batch_sampler=batch_sampler,
         num_workers=num_workers,
         return_list=True,
-        worker_init_fn=worker_init_fn, )
+        worker_init_fn=worker_init_fn,
+    )
 
     if use_vdl:
         from visualdl import LogWriter
@@ -210,8 +212,8 @@ def train(model,
                     logits_list = ddp_model(images, heatmap,
                                             labels) if nranks > 1 else model(
                                                 images, heatmap, labels)
-                    loss_list = fined_loss_computation(
-                        logits_list=logits_list, losses=losses)
+                    loss_list = fined_loss_computation(logits_list=logits_list,
+                                                       losses=losses)
 
                     loss = sum(loss_list)
 
@@ -225,8 +227,8 @@ def train(model,
                 logits_list = ddp_model(images, heatmap,
                                         labels) if nranks > 1 else model(
                                             images, heatmap, labels)
-                loss_list = fined_loss_computation(
-                    logits_list=logits_list, losses=losses)
+                loss_list = fined_loss_computation(logits_list=logits_list,
+                                                   losses=losses)
 
                 loss = sum(loss_list)
                 loss.backward()
@@ -255,8 +257,8 @@ def train(model,
             else:
                 for i in range(len(loss_list)):
                     avg_loss_list[i] += loss_list[i].numpy()
-            batch_cost_averager.record(
-                time.time() - batch_start, num_samples=batch_size)
+            batch_cost_averager.record(time.time() - batch_start,
+                                       num_samples=batch_size)
 
             if (iter) % log_iters == 0 and local_rank == 0:
                 avg_loss /= log_iters
@@ -267,9 +269,9 @@ def train(model,
                 eta = calculate_eta(remain_iters, avg_train_batch_cost)
                 logger.info(
                     "[TRAIN] epoch: {}, iter: {}/{}, loss: {:.4f}, lr: {:.6f}, batch_cost: {:.4f}, reader_cost: {:.5f}, ips: {:.4f} samples/sec | ETA {}"
-                    .format((iter - 1
-                             ) // iters_per_epoch + 1, iter, iters, avg_loss,
-                            lr, avg_train_batch_cost, avg_train_reader_cost,
+                    .format((iter - 1) // iters_per_epoch + 1, iter, iters,
+                            avg_loss, lr, avg_train_batch_cost,
+                            avg_train_reader_cost,
                             batch_cost_averager.get_ips_average(), eta))
                 if use_vdl:
                     log_writer.add_scalar('Train/loss', avg_loss, iter)
@@ -292,21 +294,20 @@ def train(model,
                 reader_cost_averager.reset()
                 batch_cost_averager.reset()
 
-            if (iter % save_interval == 0 or
-                    iter == iters) and (val_dataset is not None):
+            if (iter % save_interval == 0 or iter == iters) and (val_dataset
+                                                                 is not None):
                 num_workers = 1 if num_workers > 0 else 0
 
                 if test_config is None:
                     test_config = {}
-                mean_iou, acc, _, _, _ = evaluate(
-                    model,
-                    coase_model,
-                    coase_model_path,
-                    val_dataset,
-                    num_workers=num_workers,
-                    precision=precision,
-                    amp_level=amp_level,
-                    **test_config)
+                mean_iou, acc, _, _, _ = evaluate(model,
+                                                  coase_model,
+                                                  coase_model_path,
+                                                  val_dataset,
+                                                  num_workers=num_workers,
+                                                  precision=precision,
+                                                  amp_level=amp_level,
+                                                  **test_config)
 
                 model.train()
 

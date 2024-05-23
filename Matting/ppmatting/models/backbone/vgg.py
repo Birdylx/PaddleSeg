@@ -25,48 +25,50 @@ import ppmatting
 
 
 class ConvBlock(nn.Layer):
+
     def __init__(self, input_channels, output_channels, groups, name=None):
         super(ConvBlock, self).__init__()
 
         self.groups = groups
-        self._conv_1 = Conv2D(
-            in_channels=input_channels,
-            out_channels=output_channels,
-            kernel_size=3,
-            stride=1,
-            padding=1,
-            weight_attr=ParamAttr(name=name + "1_weights"),
-            bias_attr=False)
+        self._conv_1 = Conv2D(in_channels=input_channels,
+                              out_channels=output_channels,
+                              kernel_size=3,
+                              stride=1,
+                              padding=1,
+                              weight_attr=ParamAttr(name=name + "1_weights"),
+                              bias_attr=False)
         if groups == 2 or groups == 3 or groups == 4:
-            self._conv_2 = Conv2D(
-                in_channels=output_channels,
-                out_channels=output_channels,
-                kernel_size=3,
-                stride=1,
-                padding=1,
-                weight_attr=ParamAttr(name=name + "2_weights"),
-                bias_attr=False)
+            self._conv_2 = Conv2D(in_channels=output_channels,
+                                  out_channels=output_channels,
+                                  kernel_size=3,
+                                  stride=1,
+                                  padding=1,
+                                  weight_attr=ParamAttr(name=name +
+                                                        "2_weights"),
+                                  bias_attr=False)
         if groups == 3 or groups == 4:
-            self._conv_3 = Conv2D(
-                in_channels=output_channels,
-                out_channels=output_channels,
-                kernel_size=3,
-                stride=1,
-                padding=1,
-                weight_attr=ParamAttr(name=name + "3_weights"),
-                bias_attr=False)
+            self._conv_3 = Conv2D(in_channels=output_channels,
+                                  out_channels=output_channels,
+                                  kernel_size=3,
+                                  stride=1,
+                                  padding=1,
+                                  weight_attr=ParamAttr(name=name +
+                                                        "3_weights"),
+                                  bias_attr=False)
         if groups == 4:
-            self._conv_4 = Conv2D(
-                in_channels=output_channels,
-                out_channels=output_channels,
-                kernel_size=3,
-                stride=1,
-                padding=1,
-                weight_attr=ParamAttr(name=name + "4_weights"),
-                bias_attr=False)
+            self._conv_4 = Conv2D(in_channels=output_channels,
+                                  out_channels=output_channels,
+                                  kernel_size=3,
+                                  stride=1,
+                                  padding=1,
+                                  weight_attr=ParamAttr(name=name +
+                                                        "4_weights"),
+                                  bias_attr=False)
 
-        self._pool = MaxPool2D(
-            kernel_size=2, stride=2, padding=0, return_mask=True)
+        self._pool = MaxPool2D(kernel_size=2,
+                               stride=2,
+                               padding=0,
+                               return_mask=True)
 
     def forward(self, inputs):
         x = self._conv_1(inputs)
@@ -86,6 +88,7 @@ class ConvBlock(nn.Layer):
 
 
 class VGGNet(nn.Layer):
+
     def __init__(self, input_channels=3, layers=11, pretrained=None):
         super(VGGNet, self).__init__()
         self.pretrained = pretrained
@@ -103,16 +106,21 @@ class VGGNet(nn.Layer):
         self.groups = self.vgg_configure[self.layers]
 
         # matting的第一层卷积输入为4通道，初始化是直接初始化为0
-        self._conv_block_1 = ConvBlock(
-            input_channels, 64, self.groups[0], name="conv1_")
+        self._conv_block_1 = ConvBlock(input_channels,
+                                       64,
+                                       self.groups[0],
+                                       name="conv1_")
         self._conv_block_2 = ConvBlock(64, 128, self.groups[1], name="conv2_")
         self._conv_block_3 = ConvBlock(128, 256, self.groups[2], name="conv3_")
         self._conv_block_4 = ConvBlock(256, 512, self.groups[3], name="conv4_")
         self._conv_block_5 = ConvBlock(512, 512, self.groups[4], name="conv5_")
 
         # 这一层的初始化需要利用vgg fc6的参数转换后进行初始化，可以暂时不考虑初始化
-        self._conv_6 = Conv2D(
-            512, 512, kernel_size=3, padding=1, bias_attr=False)
+        self._conv_6 = Conv2D(512,
+                              512,
+                              kernel_size=3,
+                              padding=1,
+                              bias_attr=False)
 
         self.init_weight()
 

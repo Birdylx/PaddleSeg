@@ -74,13 +74,17 @@ class PPMobileSeg(nn.Layer):
         x = self.backbone(x)
         x = self.decode_head(x)
         if self.upsample == 'intepolate' or self.training or self.num_classes < 30:
-            x = F.interpolate(
-                x, x_hw, mode='bilinear', align_corners=self.align_corners)
+            x = F.interpolate(x,
+                              x_hw,
+                              mode='bilinear',
+                              align_corners=self.align_corners)
         elif self.upsample == 'vim':
             labelset = paddle.unique(paddle.argmax(x, 1))
             x = paddle.gather(x, labelset, axis=1)
-            x = F.interpolate(
-                x, x_hw, mode='bilinear', align_corners=self.align_corners)
+            x = F.interpolate(x,
+                              x_hw,
+                              mode='bilinear',
+                              align_corners=self.align_corners)
 
             pred = paddle.argmax(x, 1)
             pred_retrieve = paddle.zeros(pred.shape, dtype='int32')
@@ -95,6 +99,7 @@ class PPMobileSeg(nn.Layer):
 
 
 class PPMobileSegHead(nn.Layer):
+
     def __init__(self,
                  num_classes,
                  in_channels,
@@ -105,16 +110,16 @@ class PPMobileSegHead(nn.Layer):
         self.align_corners = align_corners
         self.last_channels = in_channels
 
-        self.linear_fuse = ConvBNAct(
-            in_channels=self.last_channels,
-            out_channels=self.last_channels,
-            kernel_size=1,
-            stride=1,
-            groups=self.last_channels if use_dw else 1,
-            act=nn.ReLU)
+        self.linear_fuse = ConvBNAct(in_channels=self.last_channels,
+                                     out_channels=self.last_channels,
+                                     kernel_size=1,
+                                     stride=1,
+                                     groups=self.last_channels if use_dw else 1,
+                                     act=nn.ReLU)
         self.dropout = nn.Dropout2D(dropout_ratio)
-        self.conv_seg = nn.Conv2D(
-            self.last_channels, num_classes, kernel_size=1)
+        self.conv_seg = nn.Conv2D(self.last_channels,
+                                  num_classes,
+                                  kernel_size=1)
 
     def forward(self, x):
         x = self.linear_fuse(x)

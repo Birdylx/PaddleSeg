@@ -25,23 +25,25 @@ def parse_pred_args(*args, **kwargs):
     parser = argparse.ArgumentParser(description="Model prediction")
 
     # params of prediction
-    parser.add_argument(
-        '--config', dest='cfg', help="Config file.", default=None, type=str)
-    parser.add_argument(
-        '--model_path',
-        help="Path of the model for prediction.",
-        type=str,
-        default=None)
+    parser.add_argument('--config',
+                        dest='cfg',
+                        help="Config file.",
+                        default=None,
+                        type=str)
+    parser.add_argument('--model_path',
+                        help="Path of the model for prediction.",
+                        type=str,
+                        default=None)
     parser.add_argument(
         '--image_path',
-        help="Path of the input image, which can be a file or a directory that contains images.",
+        help=
+        "Path of the input image, which can be a file or a directory that contains images.",
         type=str,
         default=None)
-    parser.add_argument(
-        '--save_dir',
-        help="Directory to save the predicted results.",
-        type=str,
-        default="./output/result")
+    parser.add_argument('--save_dir',
+                        help="Directory to save the predicted results.",
+                        type=str,
+                        default="./output/result")
 
     return parser.parse_args(*args, **kwargs)
 
@@ -61,17 +63,16 @@ def pred_with_args(args):
     image_list, image_dir = get_image_list(args.image_path)
     logger.info("Number of images for prediction = {}.".format(len(image_list)))
 
-    predict(
-        model,
-        model_path=args.model_path,
-        transforms=transforms,
-        postprocessor=builder.postprocessor,
-        image_list=image_list,
-        label_divisor=val_dataset.label_divisor,
-        ignore_index=val_dataset.ignore_index,
-        image_dir=image_dir,
-        colormap=val_dataset.get_colormap(),
-        save_dir=args.save_dir)
+    predict(model,
+            model_path=args.model_path,
+            transforms=transforms,
+            postprocessor=builder.postprocessor,
+            image_list=image_list,
+            label_divisor=val_dataset.label_divisor,
+            ignore_index=val_dataset.ignore_index,
+            image_dir=image_dir,
+            colormap=val_dataset.get_colormap(),
+            save_dir=args.save_dir)
 
 
 if __name__ == '__main__':

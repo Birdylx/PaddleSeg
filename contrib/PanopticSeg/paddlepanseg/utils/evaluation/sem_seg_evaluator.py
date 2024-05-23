@@ -19,6 +19,7 @@ from .evaluator import Evaluator
 
 
 class SemSegEvaluator(Evaluator):
+
     def __init__(self, num_classes, ignore_index=255):
         self.num_classes = num_classes
         self.ignore_index = ignore_index
@@ -33,8 +34,8 @@ class SemSegEvaluator(Evaluator):
 
         # row: pred, column: gt
         self.conf_matrix += np.bincount(
-            self._N * pred.reshape(-1) + gt.reshape(-1), minlength=self._N
-            **2).reshape(self._N, self._N)
+            self._N * pred.reshape(-1) + gt.reshape(-1),
+            minlength=self._N**2).reshape(self._N, self._N)
 
     def evaluate(self):
         acc = np.zeros(self.num_classes, dtype=float)

@@ -70,10 +70,10 @@ class Config(object):
 
     def __init__(self,
                  path: str,
-                 learning_rate: float=None,
-                 batch_size: int=None,
-                 iters: int=None,
-                 opts: list=None):
+                 learning_rate: float = None,
+                 batch_size: int = None,
+                 iters: int = None,
+                 opts: list = None):
         if not path:
             raise ValueError('Please specify the configuration file path.')
 
@@ -88,11 +88,10 @@ class Config(object):
         else:
             raise RuntimeError('Config file should in yaml format!')
 
-        self.update(
-            learning_rate=learning_rate,
-            batch_size=batch_size,
-            iters=iters,
-            opts=opts)
+        self.update(learning_rate=learning_rate,
+                    batch_size=batch_size,
+                    iters=iters,
+                    opts=opts)
 
         model_cfg = self.dic.get('model', None)
         if model_cfg is None:
@@ -135,10 +134,10 @@ class Config(object):
         return dic
 
     def update(self,
-               learning_rate: float=None,
-               batch_size: int=None,
-               iters: int=None,
-               opts: list=None):
+               learning_rate: float = None,
+               batch_size: int = None,
+               iters: int = None,
+               opts: list = None):
         '''Update config'''
         if learning_rate:
             if 'lr_scheduler' in self.dic:
@@ -156,8 +155,8 @@ class Config(object):
         if opts is not None:
             if len(opts) % 2 != 0 or len(opts) == 0:
                 raise ValueError(
-                    "Command line options config `--opts` format error! It should be even length like: k1 v1 k2 v2 ... Please check it: {}".
-                    format(opts))
+                    "Command line options config `--opts` format error! It should be even length like: k1 v1 k2 v2 ... Please check it: {}"
+                    .format(opts))
             for key, value in zip(opts[0::2], opts[1::2]):
                 if isinstance(value, six.string_types):
                     try:
@@ -299,9 +298,10 @@ class Config(object):
 
     @property
     def decay_args(self) -> dict:
-        args = self.dic.get('learning_rate', {}).get(
-            'decay', {'type': 'poly',
-                      'power': 0.9}).copy()
+        args = self.dic.get('learning_rate', {}).get('decay', {
+            'type': 'poly',
+            'power': 0.9
+        }).copy()
 
         if args['type'] == 'poly':
             args.setdefault('decay_steps', self.iters)

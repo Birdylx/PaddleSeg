@@ -42,8 +42,8 @@ class MODNet(nn.Layer):
         super().__init__()
         self.backbone = backbone
         self.pretrained = pretrained
-        self.head = MODNetHead(
-            hr_channels=hr_channels, backbone_channels=backbone.feat_channels)
+        self.head = MODNetHead(hr_channels=hr_channels,
+                               backbone_channels=backbone.feat_channels)
         self.init_weight()
         self.blurer = GaussianBlurLayer(1, 3)
         self.loss_func_dict = None
@@ -66,8 +66,8 @@ class MODNet(nn.Layer):
         if loss_func_dict is None:
             if self.loss_func_dict is None:
                 self.loss_func_dict = defaultdict(list)
-                self.loss_func_dict['semantic'].append(paddleseg.models.MSELoss(
-                ))
+                self.loss_func_dict['semantic'].append(
+                    paddleseg.models.MSELoss())
                 self.loss_func_dict['detail'].append(paddleseg.models.L1Loss())
                 self.loss_func_dict['fusion'].append(paddleseg.models.L1Loss())
                 self.loss_func_dict['fusion'].append(paddleseg.models.L1Loss())
@@ -76,11 +76,10 @@ class MODNet(nn.Layer):
 
         loss = {}
         # semantic loss
-        semantic_gt = F.interpolate(
-            label_dict['alpha'],
-            scale_factor=1 / 16,
-            mode='bilinear',
-            align_corners=False)
+        semantic_gt = F.interpolate(label_dict['alpha'],
+                                    scale_factor=1 / 16,
+                                    mode='bilinear',
+                                    align_corners=False)
         semantic_gt = self.blurer(semantic_gt)
         #         semantic_gt.stop_gradient=True
         loss['semantic'] = self.loss_func_dict['semantic'][0](
@@ -103,22 +102,23 @@ class MODNet(nn.Layer):
         matte_boundary = paddle.where(transition_mask, matte, alpha)
         # l1 loss
         loss_fusion_l1 = self.loss_func_dict['fusion'][0](
-            matte, alpha) + 4 * self.loss_func_dict['fusion'][0](matte_boundary,
-                                                                 alpha)
+            matte,
+            alpha) + 4 * self.loss_func_dict['fusion'][0](matte_boundary, alpha)
         # composition loss
         loss_fusion_comp = self.loss_func_dict['fusion'][1](
-            matte * label_dict['img'], alpha *
-            label_dict['img']) + 4 * self.loss_func_dict['fusion'][1](
+            matte * label_dict['img'],
+            alpha * label_dict['img']) + 4 * self.loss_func_dict['fusion'][1](
                 matte_boundary * label_dict['img'], alpha * label_dict['img'])
         # consisten loss with semantic
-        transition_mask = F.interpolate(
-            label_dict['trimap'],
-            scale_factor=1 / 16,
-            mode='nearest',
-            align_corners=False)
+        transition_mask = F.interpolate(label_dict['trimap'],
+                                        scale_factor=1 / 16,
+                                        mode='nearest',
+                                        align_corners=False)
         transition_mask = transition_mask == 128
-        matte_con_sem = F.interpolate(
-            matte, scale_factor=1 / 16, mode='bilinear', align_corners=False)
+        matte_con_sem = F.interpolate(matte,
+                                      scale_factor=1 / 16,
+                                      mode='bilinear',
+                                      align_corners=False)
         matte_con_sem = self.blurer(matte_con_sem)
         logit_semantic = logit_dict['semantic'].clone()
         logit_semantic.stop_gradient = True
@@ -156,6 +156,7 @@ class MODNet(nn.Layer):
 
 
 class MODNetHead(nn.Layer):
+
     def __init__(self, hr_channels, backbone_channels):
         super().__init__()
 
@@ -186,35 +187,50 @@ class MODNetHead(nn.Layer):
 
 
 class FusionBranch(nn.Layer):
+
     def __init__(self, hr_channels, enc_channels):
         super().__init__()
-        self.conv_lr4x = Conv2dIBNormRelu(
-            enc_channels[2], hr_channels, 5, stride=1, padding=2)
+        self.conv_lr4x = Conv2dIBNormRelu(enc_channels[2],
+                                          hr_channels,
+                                          5,
+                                          stride=1,
+                                          padding=2)
 
-        self.conv_f2x = Conv2dIBNormRelu(
-            2 * hr_channels, hr_channels, 3, stride=1, padding=1)
+        self.conv_f2x = Conv2dIBNormRelu(2 * hr_channels,
+                                         hr_channels,
+                                         3,
+                                         stride=1,
+                                         padding=1)
         self.conv_f = nn.Sequential(
-            Conv2dIBNormRelu(
-                hr_channels + 3, int(hr_channels / 2), 3, stride=1, padding=1),
-            Conv2dIBNormRelu(
-                int(hr_channels / 2),
-                1,
-                1,
-                stride=1,
-                padding=0,
-                with_ibn=False,
-                with_relu=False))
+            Conv2dIBNormRelu(hr_channels + 3,
+                             int(hr_channels / 2),
+                             3,
+                             stride=1,
+                             padding=1),
+            Conv2dIBNormRelu(int(hr_channels / 2),
+                             1,
+                             1,
+                             stride=1,
+                             padding=0,
+                             with_ibn=False,
+                             with_relu=False))
 
     def forward(self, img, lr8x, hr2x):
-        lr4x = F.interpolate(
-            lr8x, scale_factor=2, mode='bilinear', align_corners=False)
+        lr4x = F.interpolate(lr8x,
+                             scale_factor=2,
+                             mode='bilinear',
+                             align_corners=False)
         lr4x = self.conv_lr4x(lr4x)
-        lr2x = F.interpolate(
-            lr4x, scale_factor=2, mode='bilinear', align_corners=False)
+        lr2x = F.interpolate(lr4x,
+                             scale_factor=2,
+                             mode='bilinear',
+                             align_corners=False)
 
         f2x = self.conv_f2x(paddle.concat((lr2x, hr2x), axis=1))
-        f = F.interpolate(
-            f2x, scale_factor=2, mode='bilinear', align_corners=False)
+        f = F.interpolate(f2x,
+                          scale_factor=2,
+                          mode='bilinear',
+                          align_corners=False)
         f = self.conv_f(paddle.concat((f, img), axis=1))
         pred_matte = F.sigmoid(f)
 
@@ -229,55 +245,82 @@ class HRBranch(nn.Layer):
     def __init__(self, hr_channels, enc_channels):
         super().__init__()
 
-        self.tohr_enc2x = Conv2dIBNormRelu(
-            enc_channels[0], hr_channels, 1, stride=1, padding=0)
-        self.conv_enc2x = Conv2dIBNormRelu(
-            hr_channels + 3, hr_channels, 3, stride=2, padding=1)
+        self.tohr_enc2x = Conv2dIBNormRelu(enc_channels[0],
+                                           hr_channels,
+                                           1,
+                                           stride=1,
+                                           padding=0)
+        self.conv_enc2x = Conv2dIBNormRelu(hr_channels + 3,
+                                           hr_channels,
+                                           3,
+                                           stride=2,
+                                           padding=1)
 
-        self.tohr_enc4x = Conv2dIBNormRelu(
-            enc_channels[1], hr_channels, 1, stride=1, padding=0)
-        self.conv_enc4x = Conv2dIBNormRelu(
-            2 * hr_channels, 2 * hr_channels, 3, stride=1, padding=1)
+        self.tohr_enc4x = Conv2dIBNormRelu(enc_channels[1],
+                                           hr_channels,
+                                           1,
+                                           stride=1,
+                                           padding=0)
+        self.conv_enc4x = Conv2dIBNormRelu(2 * hr_channels,
+                                           2 * hr_channels,
+                                           3,
+                                           stride=1,
+                                           padding=1)
 
         self.conv_hr4x = nn.Sequential(
-            Conv2dIBNormRelu(
-                2 * hr_channels + enc_channels[2] + 3,
-                2 * hr_channels,
-                3,
-                stride=1,
-                padding=1),
-            Conv2dIBNormRelu(
-                2 * hr_channels, 2 * hr_channels, 3, stride=1, padding=1),
-            Conv2dIBNormRelu(
-                2 * hr_channels, hr_channels, 3, stride=1, padding=1))
+            Conv2dIBNormRelu(2 * hr_channels + enc_channels[2] + 3,
+                             2 * hr_channels,
+                             3,
+                             stride=1,
+                             padding=1),
+            Conv2dIBNormRelu(2 * hr_channels,
+                             2 * hr_channels,
+                             3,
+                             stride=1,
+                             padding=1),
+            Conv2dIBNormRelu(2 * hr_channels,
+                             hr_channels,
+                             3,
+                             stride=1,
+                             padding=1))
 
         self.conv_hr2x = nn.Sequential(
-            Conv2dIBNormRelu(
-                2 * hr_channels, 2 * hr_channels, 3, stride=1, padding=1),
-            Conv2dIBNormRelu(
-                2 * hr_channels, hr_channels, 3, stride=1, padding=1),
-            Conv2dIBNormRelu(
-                hr_channels, hr_channels, 3, stride=1, padding=1),
-            Conv2dIBNormRelu(
-                hr_channels, hr_channels, 3, stride=1, padding=1))
+            Conv2dIBNormRelu(2 * hr_channels,
+                             2 * hr_channels,
+                             3,
+                             stride=1,
+                             padding=1),
+            Conv2dIBNormRelu(2 * hr_channels,
+                             hr_channels,
+                             3,
+                             stride=1,
+                             padding=1),
+            Conv2dIBNormRelu(hr_channels, hr_channels, 3, stride=1, padding=1),
+            Conv2dIBNormRelu(hr_channels, hr_channels, 3, stride=1, padding=1))
 
         self.conv_hr = nn.Sequential(
-            Conv2dIBNormRelu(
-                hr_channels + 3, hr_channels, 3, stride=1, padding=1),
-            Conv2dIBNormRelu(
-                hr_channels,
-                1,
-                1,
-                stride=1,
-                padding=0,
-                with_ibn=False,
-                with_relu=False))
+            Conv2dIBNormRelu(hr_channels + 3,
+                             hr_channels,
+                             3,
+                             stride=1,
+                             padding=1),
+            Conv2dIBNormRelu(hr_channels,
+                             1,
+                             1,
+                             stride=1,
+                             padding=0,
+                             with_ibn=False,
+                             with_relu=False))
 
     def forward(self, img, enc2x, enc4x, lr8x):
-        img2x = F.interpolate(
-            img, scale_factor=1 / 2, mode='bilinear', align_corners=False)
-        img4x = F.interpolate(
-            img, scale_factor=1 / 4, mode='bilinear', align_corners=False)
+        img2x = F.interpolate(img,
+                              scale_factor=1 / 2,
+                              mode='bilinear',
+                              align_corners=False)
+        img4x = F.interpolate(img,
+                              scale_factor=1 / 4,
+                              mode='bilinear',
+                              align_corners=False)
 
         enc2x = self.tohr_enc2x(enc2x)
         hr4x = self.conv_enc2x(paddle.concat((img2x, enc2x), axis=1))
@@ -285,18 +328,24 @@ class HRBranch(nn.Layer):
         enc4x = self.tohr_enc4x(enc4x)
         hr4x = self.conv_enc4x(paddle.concat((hr4x, enc4x), axis=1))
 
-        lr4x = F.interpolate(
-            lr8x, scale_factor=2, mode='bilinear', align_corners=False)
+        lr4x = F.interpolate(lr8x,
+                             scale_factor=2,
+                             mode='bilinear',
+                             align_corners=False)
         hr4x = self.conv_hr4x(paddle.concat((hr4x, lr4x, img4x), axis=1))
 
-        hr2x = F.interpolate(
-            hr4x, scale_factor=2, mode='bilinear', align_corners=False)
+        hr2x = F.interpolate(hr4x,
+                             scale_factor=2,
+                             mode='bilinear',
+                             align_corners=False)
         hr2x = self.conv_hr2x(paddle.concat((hr2x, enc2x), axis=1))
 
         pred_detail = None
         if self.training:
-            hr = F.interpolate(
-                hr2x, scale_factor=2, mode='bilinear', align_corners=False)
+            hr = F.interpolate(hr2x,
+                               scale_factor=2,
+                               mode='bilinear',
+                               align_corners=False)
             hr = self.conv_hr(paddle.concat((hr, img), axis=1))
             pred_detail = F.sigmoid(hr)
 
@@ -304,31 +353,41 @@ class HRBranch(nn.Layer):
 
 
 class LRBranch(nn.Layer):
+
     def __init__(self, backbone_channels):
         super().__init__()
         self.se_block = SEBlock(backbone_channels[4], reduction=4)
-        self.conv_lr16x = Conv2dIBNormRelu(
-            backbone_channels[4], backbone_channels[3], 5, stride=1, padding=2)
-        self.conv_lr8x = Conv2dIBNormRelu(
-            backbone_channels[3], backbone_channels[2], 5, stride=1, padding=2)
-        self.conv_lr = Conv2dIBNormRelu(
-            backbone_channels[2],
-            1,
-            3,
-            stride=2,
-            padding=1,
-            with_ibn=False,
-            with_relu=False)
+        self.conv_lr16x = Conv2dIBNormRelu(backbone_channels[4],
+                                           backbone_channels[3],
+                                           5,
+                                           stride=1,
+                                           padding=2)
+        self.conv_lr8x = Conv2dIBNormRelu(backbone_channels[3],
+                                          backbone_channels[2],
+                                          5,
+                                          stride=1,
+                                          padding=2)
+        self.conv_lr = Conv2dIBNormRelu(backbone_channels[2],
+                                        1,
+                                        3,
+                                        stride=2,
+                                        padding=1,
+                                        with_ibn=False,
+                                        with_relu=False)
 
     def forward(self, feat_list):
         enc2x, enc4x, enc32x = feat_list[0], feat_list[1], feat_list[4]
 
         enc32x = self.se_block(enc32x)
-        lr16x = F.interpolate(
-            enc32x, scale_factor=2, mode='bilinear', align_corners=False)
+        lr16x = F.interpolate(enc32x,
+                              scale_factor=2,
+                              mode='bilinear',
+                              align_corners=False)
         lr16x = self.conv_lr16x(lr16x)
-        lr8x = F.interpolate(
-            lr16x, scale_factor=2, mode='bilinear', align_corners=False)
+        lr8x = F.interpolate(lr16x,
+                             scale_factor=2,
+                             mode='bilinear',
+                             align_corners=False)
         lr8x = self.conv_lr8x(lr8x)
 
         pred_semantic = None
@@ -379,15 +438,14 @@ class Conv2dIBNormRelu(nn.Layer):
         super().__init__()
 
         layers = [
-            nn.Conv2D(
-                in_channels,
-                out_channels,
-                kernel_size,
-                stride=stride,
-                padding=padding,
-                dilation=dilation,
-                groups=groups,
-                bias_attr=bias_attr)
+            nn.Conv2D(in_channels,
+                      out_channels,
+                      kernel_size,
+                      stride=stride,
+                      padding=padding,
+                      dilation=dilation,
+                      groups=groups,
+                      bias_attr=bias_attr)
         ]
 
         if with_ibn:
@@ -411,18 +469,14 @@ class SEBlock(nn.Layer):
         super().__init__()
         self.pool = nn.AdaptiveAvgPool2D(1)
         self.conv = nn.Sequential(
-            nn.Conv2D(
-                num_channels,
-                int(num_channels // reduction),
-                1,
-                bias_attr=False),
-            nn.ReLU(),
-            nn.Conv2D(
-                int(num_channels // reduction),
-                num_channels,
-                1,
-                bias_attr=False),
-            nn.Sigmoid())
+            nn.Conv2D(num_channels,
+                      int(num_channels // reduction),
+                      1,
+                      bias_attr=False), nn.ReLU(),
+            nn.Conv2D(int(num_channels // reduction),
+                      num_channels,
+                      1,
+                      bias_attr=False), nn.Sigmoid())
 
     def forward(self, x):
         w = self.pool(x)
@@ -449,16 +503,14 @@ class GaussianBlurLayer(nn.Layer):
         assert self.kernel_size % 2 != 0
 
         self.op = nn.Sequential(
-            nn.Pad2D(
-                int(self.kernel_size / 2), mode='reflect'),
-            nn.Conv2D(
-                channels,
-                channels,
-                self.kernel_size,
-                stride=1,
-                padding=0,
-                bias_attr=False,
-                groups=channels))
+            nn.Pad2D(int(self.kernel_size / 2), mode='reflect'),
+            nn.Conv2D(channels,
+                      channels,
+                      self.kernel_size,
+                      stride=1,
+                      padding=0,
+                      bias_attr=False,
+                      groups=channels))
 
         self._init_kernel()
         self.op[1].weight.stop_gradient = True
@@ -476,8 +528,8 @@ class GaussianBlurLayer(nn.Layer):
             exit()
         elif not x.shape[1] == self.channels:
             print('In \'GaussianBlurLayer\', the required channel ({0}) is'
-                  'not the same as input ({1})\n'.format(self.channels, x.shape[
-                      1]))
+                  'not the same as input ({1})\n'.format(
+                      self.channels, x.shape[1]))
             exit()
 
         return self.op(x)

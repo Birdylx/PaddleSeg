@@ -38,21 +38,20 @@ from tqdm import tqdm
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Generate COCOStuff dataset')
-    parser.add_argument(
-        '--annotation_path',
-        default='annotations',
-        help='COCOStuff anotation path',
-        type=str)
-    parser.add_argument(
-        '--save_path',
-        default='convert_annotations',
-        help='COCOStuff anotation path',
-        type=str)
+    parser.add_argument('--annotation_path',
+                        default='annotations',
+                        help='COCOStuff anotation path',
+                        type=str)
+    parser.add_argument('--save_path',
+                        default='convert_annotations',
+                        help='COCOStuff anotation path',
+                        type=str)
 
     return parser.parse_args()
 
 
 class COCOStuffGenerator(object):
+
     def __init__(self, annotation_path, save_path):
 
         super(COCOStuffGenerator, self).__init__()
@@ -109,8 +108,8 @@ class COCOStuffGenerator(object):
 
 def main():
     args = parse_args()
-    generator = COCOStuffGenerator(
-        annotation_path=args.annotation_path, save_path=args.save_path)
+    generator = COCOStuffGenerator(annotation_path=args.annotation_path,
+                                   save_path=args.save_path)
     generator.generate_label()
 
 

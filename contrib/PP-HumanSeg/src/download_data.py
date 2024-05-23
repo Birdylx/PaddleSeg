@@ -14,6 +14,7 @@
 
 import os
 import sys
+
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.abspath(os.path.join(__dir__, '../../../')))
 
@@ -28,7 +29,8 @@ if __name__ == "__main__":
     ]
 
     for url in urls:
-        download_file_and_uncompress(
-            url=url, savepath=data_path, extrapath=data_path)
+        download_file_and_uncompress(url=url,
+                                     savepath=data_path,
+                                     extrapath=data_path)
 
     print("Data download finished!")

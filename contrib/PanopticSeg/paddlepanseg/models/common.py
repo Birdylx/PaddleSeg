@@ -20,6 +20,7 @@ __all__ = ["Conv2D"]
 
 
 class Conv2D(nn.Conv2D):
+
     def __init__(self, *args, **kwargs):
         norm = kwargs.pop("norm", None)
         activation = kwargs.pop("activation", None)

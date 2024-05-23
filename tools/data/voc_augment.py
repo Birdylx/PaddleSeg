@@ -35,21 +35,20 @@ URL = 'http://www.eecs.berkeley.edu/Research/Projects/CS/vision/grouping/semanti
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='Convert SBD to Pascal Voc annotations to augment the train dataset of Pascal Voc'
+        description=
+        'Convert SBD to Pascal Voc annotations to augment the train dataset of Pascal Voc'
     )
-    parser.add_argument(
-        '--voc_path',
-        dest='voc_path',
-        help='pascal voc path',
-        type=str,
-        default=os.path.join(DATA_HOME, 'VOCdevkit'))
+    parser.add_argument('--voc_path',
+                        dest='voc_path',
+                        help='pascal voc path',
+                        type=str,
+                        default=os.path.join(DATA_HOME, 'VOCdevkit'))
 
-    parser.add_argument(
-        '--num_workers',
-        dest='num_workers',
-        help='How many processes are used for data conversion',
-        type=int,
-        default=cpu_count())
+    parser.add_argument('--num_workers',
+                        dest='num_workers',
+                        help='How many processes are used for data conversion',
+                        type=int,
+                        default=cpu_count())
     return parser.parse_args()
 
 
@@ -63,11 +62,10 @@ def mat_to_png(mat_file, sbd_cls_dir, save_dir):
 
 def main():
     args = parse_args()
-    sbd_path = download_file_and_uncompress(
-        url=URL,
-        savepath=DATA_HOME,
-        extrapath=DATA_HOME,
-        extraname='benchmark_RELEASE')
+    sbd_path = download_file_and_uncompress(url=URL,
+                                            savepath=DATA_HOME,
+                                            extrapath=DATA_HOME,
+                                            extraname='benchmark_RELEASE')
     with open(os.path.join(sbd_path, 'dataset/train.txt'), 'r') as f:
         sbd_file_list = [line.strip() for line in f]
     with open(os.path.join(sbd_path, 'dataset/val.txt'), 'r') as f:

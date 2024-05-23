@@ -27,6 +27,7 @@ logger = setup_logger('SegPredictor')
 
 
 class SegPredictor(object):
+
     def __init__(self, seg_config, seg_model):
         self.seg_config = seg_config
         self.model = seg_config.model
@@ -83,8 +84,9 @@ class SegPredictor(object):
             offset_top = bbox[1] - crop_bbox[1]
             offset_right = offset_left + bbox[2]
             offset_bottom = offset_top + bbox[3]
-            class_map = class_map[int(offset_top):int(offset_bottom), int(
-                offset_left):int(offset_right)].astype(np.uint8)
+            class_map = class_map[int(offset_top):int(offset_bottom),
+                                  int(offset_left):int(offset_right)].astype(
+                                      np.uint8)
             contours, _ = cv2.findContours(class_map, cv2.RETR_LIST,
                                            cv2.CHAIN_APPROX_SIMPLE)
             polygon = []
@@ -149,13 +151,12 @@ class SegPredictor(object):
                         stride=stride,
                         crop_size=crop_size)
                 else:
-                    pred, _ = infer.inference(
-                        self.model,
-                        data['img'],
-                        trans_info=data['trans_info'],
-                        is_slide=is_slide,
-                        stride=stride,
-                        crop_size=crop_size)
+                    pred, _ = infer.inference(self.model,
+                                              data['img'],
+                                              trans_info=data['trans_info'],
+                                              is_slide=is_slide,
+                                              stride=stride,
+                                              crop_size=crop_size)
                 pred = paddle.squeeze(pred)
                 pred = pred.numpy().astype('uint8')
 

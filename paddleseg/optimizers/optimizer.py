@@ -173,8 +173,9 @@ class Momentum(BaseOptimizer):
 
     def __call__(self, model, lr):
         params = self._collect_params(model)
-        return paddle.optimizer.Momentum(
-            learning_rate=lr, parameters=params, **self.args)
+        return paddle.optimizer.Momentum(learning_rate=lr,
+                                         parameters=params,
+                                         **self.args)
 
 
 @manager.OPTIMIZERS.add_component
@@ -201,8 +202,9 @@ class Adam(BaseOptimizer):
 
     def __call__(self, model, lr):
         params = self._collect_params(model)
-        opt = paddle.optimizer.Adam(
-            learning_rate=lr, parameters=params, **self.args)
+        opt = paddle.optimizer.Adam(learning_rate=lr,
+                                    parameters=params,
+                                    **self.args)
         return opt
 
 
@@ -230,8 +232,9 @@ class AdamW(BaseOptimizer):
 
     def __call__(self, model, lr):
         params = self._collect_params(model)
-        opt = paddle.optimizer.AdamW(
-            learning_rate=lr, parameters=params, **self.args)
+        opt = paddle.optimizer.AdamW(learning_rate=lr,
+                                     parameters=params,
+                                     **self.args)
         return opt
 
 
@@ -260,8 +263,9 @@ class AdamWDL(BaseOptimizer):
 
     def __call__(self, model, lr):
         params = self._collect_params(model)
-        opt = custom_opt.AdamWDL(
-            learning_rate=lr, parameters=params, **self.args)
+        opt = custom_opt.AdamWDL(learning_rate=lr,
+                                 parameters=params,
+                                 **self.args)
         return opt
 
 
@@ -293,8 +297,9 @@ class AdamWDL_CAE(AdamWDL):
         skip_list = model.backbone.no_weight_decay()
 
         decay_dict = {
-            param.name: not (len(param.shape) == 1 or name.endswith(".bias") or
-                             name in skip_list)
+            param.name:
+            not (len(param.shape) == 1 or name.endswith(".bias")
+                 or name in skip_list)
             for name, param in model.named_parameters()
         }
         self.args['n_layers'] = model.backbone.get_num_layers()
@@ -304,6 +309,7 @@ class AdamWDL_CAE(AdamWDL):
             name_dict[p.name] = n
         self.args['name_dict'] = name_dict
 
-        opt = custom_opt.AdamWDL(
-            learning_rate=lr, parameters=params, **self.args)
+        opt = custom_opt.AdamWDL(learning_rate=lr,
+                                 parameters=params,
+                                 **self.args)
         return opt

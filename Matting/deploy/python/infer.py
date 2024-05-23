@@ -38,13 +38,12 @@ from ppmatting.utils import get_image_list, mkdir, estimate_foreground_ml, Video
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Deploy for matting model')
-    parser.add_argument(
-        "--config",
-        dest="cfg",
-        help="The config file.",
-        default=None,
-        type=str,
-        required=True)
+    parser.add_argument("--config",
+                        dest="cfg",
+                        help="The config file.",
+                        default=None,
+                        type=str,
+                        required=True)
     parser.add_argument(
         '--image_path',
         dest='image_path',
@@ -54,81 +53,78 @@ def parse_args():
     parser.add_argument(
         '--trimap_path',
         dest='trimap_path',
-        help='The directory or path or file list of the triamp to help predicted.',
+        help=
+        'The directory or path or file list of the triamp to help predicted.',
         type=str,
         default=None)
     parser.add_argument(
         '--batch_size',
         dest='batch_size',
-        help='Mini batch size of one gpu or cpu. When video inference, it is invalid.',
+        help=
+        'Mini batch size of one gpu or cpu. When video inference, it is invalid.',
         type=int,
         default=1)
-    parser.add_argument(
-        '--video_path',
-        dest='video_path',
-        help='The path of the video to be predicted.',
-        type=str,
-        default=None)
-    parser.add_argument(
-        '--save_dir',
-        dest='save_dir',
-        help='The directory for saving the predict result.',
-        type=str,
-        default='./output')
+    parser.add_argument('--video_path',
+                        dest='video_path',
+                        help='The path of the video to be predicted.',
+                        type=str,
+                        default=None)
+    parser.add_argument('--save_dir',
+                        dest='save_dir',
+                        help='The directory for saving the predict result.',
+                        type=str,
+                        default='./output')
     parser.add_argument(
         '--device',
         choices=['cpu', 'gpu'],
         default="gpu",
         help="Select which device to inference, defaults to gpu.")
-    parser.add_argument(
-        '--fg_estimate',
-        default=True,
-        type=eval,
-        choices=[True, False],
-        help='Whether to estimate foreground when predicting.')
+    parser.add_argument('--fg_estimate',
+                        default=True,
+                        type=eval,
+                        choices=[True, False],
+                        help='Whether to estimate foreground when predicting.')
 
-    parser.add_argument(
-        '--cpu_threads',
-        default=10,
-        type=int,
-        help='Number of threads to predict when using cpu.')
-    parser.add_argument(
-        '--enable_mkldnn',
-        default=False,
-        type=eval,
-        choices=[True, False],
-        help='Enable to use mkldnn to speed up when using cpu.')
+    parser.add_argument('--cpu_threads',
+                        default=10,
+                        type=int,
+                        help='Number of threads to predict when using cpu.')
+    parser.add_argument('--enable_mkldnn',
+                        default=False,
+                        type=eval,
+                        choices=[True, False],
+                        help='Enable to use mkldnn to speed up when using cpu.')
     parser.add_argument(
         '--use_trt',
         default=False,
         type=eval,
         choices=[True, False],
         help='Whether to use Nvidia TensorRT to accelerate prediction.')
-    parser.add_argument(
-        "--precision",
-        default="fp32",
-        type=str,
-        choices=["fp32", "fp16", "int8"],
-        help='The tensorrt precision.')
+    parser.add_argument("--precision",
+                        default="fp32",
+                        type=str,
+                        choices=["fp32", "fp16", "int8"],
+                        help='The tensorrt precision.')
     parser.add_argument(
         '--enable_auto_tune',
         default=False,
         type=eval,
         choices=[True, False],
-        help='Whether to enable tuned dynamic shape. We uses some images to collect '
+        help=
+        'Whether to enable tuned dynamic shape. We uses some images to collect '
         'the dynamic shape for trt sub graph, which avoids setting dynamic shape manually.'
     )
-    parser.add_argument(
-        '--auto_tuned_shape_file',
-        type=str,
-        default="auto_tune_tmp.pbtxt",
-        help='The temp file to save tuned dynamic shape.')
+    parser.add_argument('--auto_tuned_shape_file',
+                        type=str,
+                        default="auto_tune_tmp.pbtxt",
+                        help='The temp file to save tuned dynamic shape.')
 
     parser.add_argument(
         "--benchmark",
         type=eval,
         default=False,
-        help="Whether to log some information about environment, model, configuration and performance."
+        help=
+        "Whether to log some information about environment, model, configuration and performance."
     )
     parser.add_argument(
         "--model_name",
@@ -136,22 +132,22 @@ def parse_args():
         type=str,
         help='When `--benchmark` is True, the specified model name is displayed.'
     )
-    parser.add_argument(
-        '--print_detail',
-        default=True,
-        type=eval,
-        choices=[True, False],
-        help='Print GLOG information of Paddle Inference.')
+    parser.add_argument('--print_detail',
+                        default=True,
+                        type=eval,
+                        choices=[True, False],
+                        help='Print GLOG information of Paddle Inference.')
 
     return parser.parse_args()
 
 
 class DeployConfig:
+
     def __init__(self, path):
         with codecs.open(path, 'r', 'utf-8') as file:
             self.dic = yaml.load(file, Loader=yaml.FullLoader)
-        self._transforms = self.load_transforms(self.dic['Deploy'][
-            'transforms'])
+        self._transforms = self.load_transforms(
+            self.dic['Deploy']['transforms'])
         self._dir = os.path.dirname(path)
 
     @property
@@ -233,6 +229,7 @@ def auto_tune(args, imgs, img_nums):
 
 
 class Predictor:
+
     def __init__(self, args):
         """
         Prepare for prediction.
@@ -254,21 +251,22 @@ class Predictor:
             import auto_log
             pid = os.getpid()
             gpu_id = None if args.device == 'cpu' else 0
-            self.autolog = auto_log.AutoLogger(
-                model_name=args.model_name,
-                model_precision=args.precision,
-                batch_size=args.batch_size,
-                data_shape="dynamic",
-                save_path=None,
-                inference_config=self.pred_cfg,
-                pids=pid,
-                process_name=None,
-                gpu_ids=gpu_id,
-                time_keys=[
-                    'preprocess_time', 'inference_time', 'postprocess_time'
-                ],
-                warmup=0,
-                logger=logger)
+            self.autolog = auto_log.AutoLogger(model_name=args.model_name,
+                                               model_precision=args.precision,
+                                               batch_size=args.batch_size,
+                                               data_shape="dynamic",
+                                               save_path=None,
+                                               inference_config=self.pred_cfg,
+                                               pids=pid,
+                                               process_name=None,
+                                               gpu_ids=gpu_id,
+                                               time_keys=[
+                                                   'preprocess_time',
+                                                   'inference_time',
+                                                   'postprocess_time'
+                                               ],
+                                               warmup=0,
+                                               logger=logger)
 
     def _init_base_config(self):
         self.pred_cfg = PredictConfig(self.cfg.model, self.cfg.params)
@@ -305,13 +303,12 @@ class Predictor:
 
         if self.args.use_trt:
             logger.info("Use TRT")
-            self.pred_cfg.enable_tensorrt_engine(
-                workspace_size=1 << 30,
-                max_batch_size=1,
-                min_subgraph_size=300,
-                precision_mode=precision_mode,
-                use_static=False,
-                use_calib_mode=False)
+            self.pred_cfg.enable_tensorrt_engine(workspace_size=1 << 30,
+                                                 max_batch_size=1,
+                                                 min_subgraph_size=300,
+                                                 precision_mode=precision_mode,
+                                                 use_static=False,
+                                                 use_calib_mode=False)
 
             if use_auto_tune(self.args) and \
                 os.path.exists(self.args.auto_tuned_shape_file):
@@ -354,8 +351,8 @@ class Predictor:
                         data = self._preprocess(img=img, trimap=trimap)
                         img_inputs.append(data['img'])
                         if trimaps is not None:
-                            trimap_inputs.append(data['trimap'][
-                                np.newaxis, :, :])
+                            trimap_inputs.append(
+                                data['trimap'][np.newaxis, :, :])
                         trans_info.append(data['trans_info'])
                     img_inputs = np.array(img_inputs)
                     if trimaps is not None:
@@ -372,8 +369,9 @@ class Predictor:
                     for j in range(args.batch_size):
                         trimap = trimap_inputs[
                             j] if trimaps is not None else None
-                        result = self._postprocess(
-                            results[j], trans_info[j], trimap=trimap)
+                        result = self._postprocess(results[j],
+                                                   trans_info[j],
+                                                   trimap=trimap)
 
             # inference
             if args.benchmark:
@@ -412,8 +410,9 @@ class Predictor:
             results = results.squeeze(1)
             for j in range(args.batch_size):
                 trimap = trimap_inputs[j] if trimaps is not None else None
-                result = self._postprocess(
-                    results[j], trans_info[j], trimap=trimap)
+                result = self._postprocess(results[j],
+                                           trans_info[j],
+                                           trimap=trimap)
                 self._save_imgs(result, imgs[i + j])
 
             if args.benchmark:
@@ -438,14 +437,14 @@ class Predictor:
         for item in trans_info[::-1]:
             if item[0] == 'resize':
                 h, w = item[1][0], item[1][1]
-                alpha = cv2.resize(
-                    alpha, (w, h), interpolation=cv2.INTER_LINEAR)
+                alpha = cv2.resize(alpha, (w, h),
+                                   interpolation=cv2.INTER_LINEAR)
             elif item[0] == 'padding':
                 h, w = item[1][0], item[1][1]
                 alpha = alpha[0:h, 0:w]
             else:
-                raise Exception("Unexpected info '{}' in im_info".format(item[
-                    0]))
+                raise Exception("Unexpected info '{}' in im_info".format(
+                    item[0]))
         return alpha
 
     def _save_imgs(self, alpha, img_path, fg=None):
@@ -492,8 +491,8 @@ class Predictor:
                 input_names[i])
         output_names = self.predictor.get_output_names()
         output_handle = {}
-        output_handle['alpha'] = self.predictor.get_output_handle(output_names[
-            0])
+        output_handle['alpha'] = self.predictor.get_output_handle(
+            output_names[0])
 
         # Build reader and writer
         reader = VideoReader(video_path, self.cfg.transforms)
@@ -501,16 +500,14 @@ class Predictor:
         name = os.path.splitext(base_name)[0]
         alpha_save_path = os.path.join(args.save_dir, name + '_alpha.avi')
         fg_save_path = os.path.join(args.save_dir, name + '_fg.avi')
-        writer_alpha = VideoWriter(
-            alpha_save_path,
-            reader.fps,
-            frame_size=(reader.width, reader.height),
-            is_color=False)
-        writer_fg = VideoWriter(
-            fg_save_path,
-            reader.fps,
-            frame_size=(reader.width, reader.height),
-            is_color=True)
+        writer_alpha = VideoWriter(alpha_save_path,
+                                   reader.fps,
+                                   frame_size=(reader.width, reader.height),
+                                   is_color=False)
+        writer_fg = VideoWriter(fg_save_path,
+                                reader.fps,
+                                frame_size=(reader.width, reader.height),
+                                is_color=True)
 
         for data in tqdm.tqdm(reader):
             trans_info = data['trans_info']
@@ -524,12 +521,11 @@ class Predictor:
 
             alpha = alpha.squeeze()
             alpha = self._postprocess(alpha, trans_info)
-            self._save_frame(
-                alpha,
-                fg=None,
-                img=data['ori_img'],
-                writer_alpha=writer_alpha,
-                writer_fg=writer_fg)
+            self._save_frame(alpha,
+                             fg=None,
+                             img=data['ori_img'],
+                             writer_alpha=writer_alpha,
+                             writer_fg=writer_fg)
 
         writer_alpha.release()
         writer_fg.release()
@@ -549,6 +545,7 @@ class Predictor:
 
 
 class PredictorRVM(Predictor):
+
     def __init__(self, args):
         super().__init__(args=args)
 
@@ -563,8 +560,8 @@ class PredictorRVM(Predictor):
                 input_names[i])
         output_names = self.predictor.get_output_names()
         output_handle = {}
-        output_handle['alpha'] = self.predictor.get_output_handle(output_names[
-            0])
+        output_handle['alpha'] = self.predictor.get_output_handle(
+            output_names[0])
         output_handle['fg'] = self.predictor.get_output_handle(output_names[1])
         output_handle['r1'] = self.predictor.get_output_handle(output_names[2])
         output_handle['r2'] = self.predictor.get_output_handle(output_names[3])
@@ -589,8 +586,8 @@ class PredictorRVM(Predictor):
                     img_inputs = np.array(img_inputs)
                     n, _, h, w = img_inputs.shape
                     downsample_ratio = min(512 / max(h, w), 1)
-                    downsample_ratio = np.array(
-                        [downsample_ratio], dtype='float32')
+                    downsample_ratio = np.array([downsample_ratio],
+                                                dtype='float32')
 
                     input_handle['img'].copy_from_cpu(img_inputs)
                     input_handle['downsample_ratio'].copy_from_cpu(
@@ -600,8 +597,8 @@ class PredictorRVM(Predictor):
                         j = k + 1
                         hj = int(np.ceil(int(h * downsample_ratio[0]) / 2**j))
                         wj = int(np.ceil(int(w * downsample_ratio[0]) / 2**j))
-                        rj = np.zeros(
-                            (n, r_channels[k], hj, wj), dtype='float32')
+                        rj = np.zeros((n, r_channels[k], hj, wj),
+                                      dtype='float32')
                         input_handle['r' + str(j)].copy_from_cpu(rj)
 
                     self.predictor.run()
@@ -674,8 +671,8 @@ class PredictorRVM(Predictor):
                 input_names[i])
         output_names = self.predictor.get_output_names()
         output_handle = {}
-        output_handle['alpha'] = self.predictor.get_output_handle(output_names[
-            0])
+        output_handle['alpha'] = self.predictor.get_output_handle(
+            output_names[0])
         output_handle['fg'] = self.predictor.get_output_handle(output_names[1])
         output_handle['r1'] = self.predictor.get_output_handle(output_names[2])
         output_handle['r2'] = self.predictor.get_output_handle(output_names[3])
@@ -688,16 +685,14 @@ class PredictorRVM(Predictor):
         name = os.path.splitext(base_name)[0]
         alpha_save_path = os.path.join(args.save_dir, name + '_alpha.avi')
         fg_save_path = os.path.join(args.save_dir, name + '_fg.avi')
-        writer_alpha = VideoWriter(
-            alpha_save_path,
-            reader.fps,
-            frame_size=(reader.width, reader.height),
-            is_color=False)
-        writer_fg = VideoWriter(
-            fg_save_path,
-            reader.fps,
-            frame_size=(reader.width, reader.height),
-            is_color=True)
+        writer_alpha = VideoWriter(alpha_save_path,
+                                   reader.fps,
+                                   frame_size=(reader.width, reader.height),
+                                   is_color=False)
+        writer_fg = VideoWriter(fg_save_path,
+                                reader.fps,
+                                frame_size=(reader.width, reader.height),
+                                is_color=True)
 
         r_channels = [16, 20, 40, 64]
         for i, data in tqdm.tqdm(enumerate(reader)):

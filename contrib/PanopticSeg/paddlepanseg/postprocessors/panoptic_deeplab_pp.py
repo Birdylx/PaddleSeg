@@ -24,6 +24,7 @@ from paddlepanseg.postprocessors.base_pp import Postprocessor
 
 @manager.POSTPROCESSORS.add_component
 class PanopticDeepLabPostprocessor(Postprocessor):
+
     def __init__(self,
                  num_classes,
                  thing_ids,
@@ -33,11 +34,10 @@ class PanopticDeepLabPostprocessor(Postprocessor):
                  top_k=200,
                  label_divisor=1000,
                  ignore_index=255):
-        super().__init__(
-            num_classes=num_classes,
-            thing_ids=thing_ids,
-            label_divisor=label_divisor,
-            ignore_index=ignore_index)
+        super().__init__(num_classes=num_classes,
+                         thing_ids=thing_ids,
+                         label_divisor=label_divisor,
+                         ignore_index=ignore_index)
         self.stuff_area = stuff_area
         self.threshold = threshold
         self.nms_kernel = nms_kernel
@@ -62,12 +62,12 @@ class PanopticDeepLabPostprocessor(Postprocessor):
         # For semantic segmentation evaluation.
         sem_prob = F.softmax(r, axis=0)  # [C, H, W]
         pp_out['sem_prob'] = sem_prob.unsqueeze(0)
-        pp_out['sem_pred'] = paddle.argmax(
-            sem_prob, axis=0, keepdim=True).unsqueeze(0)
+        pp_out['sem_pred'] = paddle.argmax(sem_prob, axis=0,
+                                           keepdim=True).unsqueeze(0)
 
         # Post-processing to get panoptic segmentation.
-        panoptic_image = self._get_panoptic_segmentation(pp_out['sem_pred'], c,
-                                                         o)
+        panoptic_image = self._get_panoptic_segmentation(
+            pp_out['sem_pred'], c, o)
         pp_out['pan_pred'] = panoptic_image
         return pp_out
 
@@ -78,11 +78,10 @@ class PanopticDeepLabPostprocessor(Postprocessor):
         # NMS
         nms_padding = (self.nms_kernel - 1) // 2
         center_heatmap = center_heatmap.unsqueeze(0)
-        center_heatmap_max_pooled = F.max_pool2d(
-            center_heatmap,
-            kernel_size=self.nms_kernel,
-            stride=1,
-            padding=nms_padding)
+        center_heatmap_max_pooled = F.max_pool2d(center_heatmap,
+                                                 kernel_size=self.nms_kernel,
+                                                 stride=1,
+                                                 padding=nms_padding)
         center_heatmap[center_heatmap != center_heatmap_max_pooled] = -1
 
         center_heatmap = center_heatmap.squeeze()
@@ -92,31 +91,30 @@ class PanopticDeepLabPostprocessor(Postprocessor):
             return paddle.nonzero(center_heatmap > 0)
         else:
             # find top k centers.
-            top_k_scores, _ = paddle.topk(
-                paddle.flatten(center_heatmap), self.top_k)
-            return paddle.nonzero(center_heatmap > paddle.clip(
-                top_k_scores[-1], min=0))
+            top_k_scores, _ = paddle.topk(paddle.flatten(center_heatmap),
+                                          self.top_k)
+            return paddle.nonzero(
+                center_heatmap > paddle.clip(top_k_scores[-1], min=0))
 
     def _group_pixels(self, center_points, offsets, sem_seg):
         height, width = offsets.shape[1:]
 
         # Generates a coordinate map, where each location is the coordinate of that location.
         y_coord, x_coord = paddle.meshgrid(
-            paddle.arange(
-                height, dtype=offsets.dtype),
-            paddle.arange(
-                width, dtype=offsets.dtype), )
-        coord = paddle.concat(
-            (y_coord.unsqueeze(0), x_coord.unsqueeze(0)), axis=0)
+            paddle.arange(height, dtype=offsets.dtype),
+            paddle.arange(width, dtype=offsets.dtype),
+        )
+        coord = paddle.concat((y_coord.unsqueeze(0), x_coord.unsqueeze(0)),
+                              axis=0)
 
         center_loc = coord + offsets
         center_loc = center_loc.flatten(1).T.unsqueeze_(0)  # [1, H*W, 2]
 
         center_points = center_points.unsqueeze(1)
-        distance = paddle.norm(
-            (center_points - center_loc).astype('float32'), axis=-1)
-        instance_id = paddle.argmin(
-            distance, axis=0).reshape((1, height, width)) + 1
+        distance = paddle.norm((center_points - center_loc).astype('float32'),
+                               axis=-1)
+        instance_id = paddle.argmin(distance, axis=0).reshape(
+            (1, height, width)) + 1
 
         return instance_id
 
@@ -148,11 +146,12 @@ class PanopticDeepLabPostprocessor(Postprocessor):
                 class_id = int(class_id)
                 class_id_tracker[class_id] += 1
                 new_ins_id = class_id_tracker[class_id]
-                pan_seg[thing_mask] = paddle.full(
-                    [1],
-                    encode_pan_id(
-                        class_id, self.label_divisor, ins_id=new_ins_id),
-                    dtype='int64')
+                pan_seg[thing_mask] = paddle.full([1],
+                                                  encode_pan_id(
+                                                      class_id,
+                                                      self.label_divisor,
+                                                      ins_id=new_ins_id),
+                                                  dtype='int64')
 
         # Paste stuff to unoccupied area.
         class_ids = paddle.unique(sem_seg)
@@ -164,10 +163,11 @@ class PanopticDeepLabPostprocessor(Postprocessor):
             # Calculate stuff area.
             stuff_mask = (sem_seg == class_id) & (ins_seg == 0)
             if stuff_mask.sum() >= self.stuff_area:
-                pan_seg[stuff_mask] = paddle.full(
-                    [1],
-                    encode_pan_id(class_id, self.label_divisor),
-                    dtype='int64')
+                pan_seg[stuff_mask] = paddle.full([1],
+                                                  encode_pan_id(
+                                                      class_id,
+                                                      self.label_divisor),
+                                                  dtype='int64')
 
         return pan_seg
 

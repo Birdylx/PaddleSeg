@@ -77,7 +77,8 @@ class OhemCrossEntropyLoss(nn.Layer):
             if self.min_kept > 0:
                 index = prob.argsort()
                 if hasattr(paddle.Tensor, "contiguous"):
-                    threshold_index = index[min(len(index), self.min_kept) - 1].contiguous()
+                    threshold_index = index[min(len(index), self.min_kept) -
+                                            1].contiguous()
                 else:
                     threshold_index = index[min(len(index), self.min_kept) - 1]
                 threshold_index = int(threshold_index)
@@ -92,8 +93,10 @@ class OhemCrossEntropyLoss(nn.Layer):
 
         label = label.reshape((n, 1, h, w))
         valid_mask = valid_mask.reshape((n, 1, h, w)).astype('float32')
-        loss = F.softmax_with_cross_entropy(
-            logit, label, ignore_index=self.ignore_index, axis=1)
+        loss = F.softmax_with_cross_entropy(logit,
+                                            label,
+                                            ignore_index=self.ignore_index,
+                                            axis=1)
         loss = loss * valid_mask
         avg_loss = paddle.mean(loss) / (paddle.mean(valid_mask) + self.EPS)
 

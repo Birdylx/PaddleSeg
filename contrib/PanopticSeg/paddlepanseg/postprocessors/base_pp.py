@@ -18,6 +18,7 @@ from paddlepanseg.cvlibs import build_info_dict
 
 
 class Postprocessor(metaclass=abc.ABCMeta):
+
     def __init__(self, num_classes, thing_ids, label_divisor, ignore_index):
         super().__init__()
         self.num_classes = num_classes

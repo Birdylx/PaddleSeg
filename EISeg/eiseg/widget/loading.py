@@ -21,6 +21,7 @@ from eiseg import pjpath
 
 
 class LoadingWidget(QWidget):
+
     def __init__(self):
         super().__init__()
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint)

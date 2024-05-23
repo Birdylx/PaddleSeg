@@ -27,33 +27,36 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Model prediction')
 
     # params of prediction
-    parser.add_argument(
-        "--config", dest="cfg", help="The config file.", default=None, type=str)
-    parser.add_argument(
-        '--model_path',
-        dest='model_path',
-        help='The path of model for prediction',
-        type=str,
-        default=None)
+    parser.add_argument("--config",
+                        dest="cfg",
+                        help="The config file.",
+                        default=None,
+                        type=str)
+    parser.add_argument('--model_path',
+                        dest='model_path',
+                        help='The path of model for prediction',
+                        type=str,
+                        default=None)
     parser.add_argument(
         '--image_path',
         dest='image_path',
-        help='The path of image, it can be a file or a directory including images',
+        help=
+        'The path of image, it can be a file or a directory including images',
         type=str,
         default=None)
-    parser.add_argument(
-        '--save_dir',
-        dest='save_dir',
-        help='The directory for saving the predicted results',
-        type=str,
-        default='./output/result')
+    parser.add_argument('--save_dir',
+                        dest='save_dir',
+                        help='The directory for saving the predicted results',
+                        type=str,
+                        default='./output/result')
 
     # custom color map
     parser.add_argument(
         '--custom_color',
         dest='custom_color',
         nargs='+',
-        help='Save images with a custom color map. Default: None, use paddleseg\'s default color map.',
+        help=
+        'Save images with a custom color map. Default: None, use paddleseg\'s default color map.',
         type=int,
         default=None)
     return parser.parse_args()
@@ -95,14 +98,13 @@ def main(args):
 
     test_config = get_test_config(cfg, args)
 
-    predict(
-        model,
-        model_path=args.model_path,
-        val_dataset=val_dataset,
-        image_list=image_list,
-        image_dir=image_dir,
-        save_dir=args.save_dir,
-        **test_config)
+    predict(model,
+            model_path=args.model_path,
+            val_dataset=val_dataset,
+            image_list=image_list,
+            image_dir=image_dir,
+            save_dir=args.save_dir,
+            **test_config)
 
 
 if __name__ == '__main__':

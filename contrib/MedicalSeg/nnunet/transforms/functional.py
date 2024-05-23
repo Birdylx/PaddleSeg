@@ -37,25 +37,23 @@ def resize_segmentation(segmentation, new_shape, order=3):
     assert len(segmentation.shape) == len(
         new_shape), "New shape must have same dimensionality as segmentation"
     if order == 0:
-        return resize(
-            segmentation.astype(float),
-            new_shape,
-            order,
-            mode="edge",
-            clip=True,
-            anti_aliasing=False).astype(tpe)
+        return resize(segmentation.astype(float),
+                      new_shape,
+                      order,
+                      mode="edge",
+                      clip=True,
+                      anti_aliasing=False).astype(tpe)
     else:
         reshaped = np.zeros(new_shape, dtype=segmentation.dtype)
 
         for i, c in enumerate(unique_labels):
             mask = segmentation == c
-            reshaped_multihot = resize(
-                mask.astype(float),
-                new_shape,
-                order,
-                mode="edge",
-                clip=True,
-                anti_aliasing=False)
+            reshaped_multihot = resize(mask.astype(float),
+                                       new_shape,
+                                       order,
+                                       mode="edge",
+                                       clip=True,
+                                       anti_aliasing=False)
             reshaped[reshaped_multihot >= 0.5] = c
         return reshaped
 
@@ -119,13 +117,12 @@ def downsample_seg_for_ds_transform3(seg,
             else:
                 raise RuntimeError()
 
-            pooled = pool_op(
-                one_hot,
-                kernel_size,
-                stride,
-                pad,
-                count_include_pad=False,
-                ceil_mode=False)
+            pooled = pool_op(one_hot,
+                             kernel_size,
+                             stride,
+                             pad,
+                             count_include_pad=False,
+                             ceil_mode=False)
             output.append(pooled)
     return output
 
@@ -156,7 +153,7 @@ def augment_gamma(data_sample,
                   invert_image=False,
                   epsilon=1e-7,
                   per_channel=False,
-                  retain_stats: Union[bool, Callable[[], bool]]=False):
+                  retain_stats: Union[bool, Callable[[], bool]] = False):
     if invert_image:
         data_sample = -data_sample
 
@@ -172,8 +169,8 @@ def augment_gamma(data_sample,
             gamma = np.random.uniform(max(gamma_range[0], 1), gamma_range[1])
         minm = data_sample.min()
         rnge = data_sample.max() - minm
-        data_sample = np.power((
-            (data_sample - minm) / float(rnge + epsilon)), gamma) * rnge + minm
+        data_sample = np.power(
+            ((data_sample - minm) / float(rnge + epsilon)), gamma) * rnge + minm
         if retain_stats_here:
             data_sample = data_sample - data_sample.mean()
             data_sample = data_sample / (data_sample.std() + 1e-8) * sd
@@ -188,17 +185,17 @@ def augment_gamma(data_sample,
             if np.random.random() < 0.5 and gamma_range[0] < 1:
                 gamma = np.random.uniform(gamma_range[0], 1)
             else:
-                gamma = np.random.uniform(
-                    max(gamma_range[0], 1), gamma_range[1])
+                gamma = np.random.uniform(max(gamma_range[0], 1),
+                                          gamma_range[1])
             minm = data_sample[c].min()
             rnge = data_sample[c].max() - minm
-            data_sample[c] = np.power((
-                (data_sample[c] - minm) / float(rnge + epsilon)),
-                                      gamma) * float(rnge + epsilon) + minm
+            data_sample[c] = np.power(
+                ((data_sample[c] - minm) / float(rnge + epsilon)),
+                gamma) * float(rnge + epsilon) + minm
             if retain_stats_here:
                 data_sample[c] = data_sample[c] - data_sample[c].mean()
-                data_sample[c] = data_sample[c] / (
-                    data_sample[c].std() + 1e-8) * sd
+                data_sample[c] = data_sample[c] / (data_sample[c].std() +
+                                                   1e-8) * sd
                 data_sample[c] = data_sample[c] + mn
     if invert_image:
         data_sample = -data_sample
@@ -248,18 +245,16 @@ def augment_linear_downsampling_scipy(data_sample,
                     for i in ignore_axes:
                         target_shape[i] = shp[i]
 
-            downsampled = resize(
-                data_sample[c].astype(float),
-                target_shape,
-                order=order_downsample,
-                mode='edge',
-                anti_aliasing=False)
-            data_sample[c] = resize(
-                downsampled,
-                shp,
-                order=order_upsample,
-                mode='edge',
-                anti_aliasing=False)
+            downsampled = resize(data_sample[c].astype(float),
+                                 target_shape,
+                                 order=order_downsample,
+                                 mode='edge',
+                                 anti_aliasing=False)
+            data_sample[c] = resize(downsampled,
+                                    shp,
+                                    order=order_upsample,
+                                    mode='edge',
+                                    anti_aliasing=False)
     return data_sample
 
 
@@ -273,13 +268,12 @@ def uniform(low, high, size=None):
         return np.random.uniform(low, high, size)
 
 
-def augment_contrast(
-        data_sample: np.ndarray,
-        contrast_range: Union[Tuple[float, float], Callable[[], float]]=(0.75,
-                                                                         1.25),
-        preserve_range: bool=True,
-        per_channel: bool=True,
-        p_per_channel: float=1) -> np.ndarray:
+def augment_contrast(data_sample: np.ndarray,
+                     contrast_range: Union[Tuple[float, float],
+                                           Callable[[], float]] = (0.75, 1.25),
+                     preserve_range: bool = True,
+                     per_channel: bool = True,
+                     p_per_channel: float = 1) -> np.ndarray:
     if not per_channel:
         if callable(contrast_range):
             factor = contrast_range()
@@ -287,8 +281,8 @@ def augment_contrast(
             if np.random.random() < 0.5 and contrast_range[0] < 1:
                 factor = np.random.uniform(contrast_range[0], 1)
             else:
-                factor = np.random.uniform(
-                    max(contrast_range[0], 1), contrast_range[1])
+                factor = np.random.uniform(max(contrast_range[0], 1),
+                                           contrast_range[1])
 
         for c in range(data_sample.shape[0]):
             if np.random.uniform() < p_per_channel:
@@ -311,8 +305,8 @@ def augment_contrast(
                     if np.random.random() < 0.5 and contrast_range[0] < 1:
                         factor = np.random.uniform(contrast_range[0], 1)
                     else:
-                        factor = np.random.uniform(
-                            max(contrast_range[0], 1), contrast_range[1])
+                        factor = np.random.uniform(max(contrast_range[0], 1),
+                                                   contrast_range[1])
 
                 mn = data_sample[c].mean()
                 if preserve_range:
@@ -330,8 +324,8 @@ def augment_contrast(
 def augment_brightness_additive(data_sample,
                                 mu: float,
                                 sigma: float,
-                                per_channel: bool=True,
-                                p_per_channel: float=1.):
+                                per_channel: bool = True,
+                                p_per_channel: float = 1.):
     if not per_channel:
         rnd_nb = np.random.normal(mu, sigma)
         for c in range(data_sample.shape[0]):
@@ -383,10 +377,10 @@ def get_range_val(value, rnd_type="uniform"):
 
 def augment_gaussian_blur(data_sample: np.ndarray,
                           sigma_range: Tuple[float, float],
-                          per_channel: bool=True,
-                          p_per_channel: float=1,
-                          different_sigma_per_axis: bool=False,
-                          p_isotropic: float=0) -> np.ndarray:
+                          per_channel: bool = True,
+                          p_per_channel: float = 1,
+                          different_sigma_per_axis: bool = False,
+                          p_isotropic: float = 0) -> np.ndarray:
     if not per_channel:
         sigma = get_range_val(sigma_range) if ((not different_sigma_per_axis) or
                                                ((np.random.uniform() < p_isotropic) and
@@ -406,9 +400,9 @@ def augment_gaussian_blur(data_sample: np.ndarray,
 
 
 def augment_gaussian_noise(data_sample: np.ndarray,
-                           noise_variance: Tuple[float, float]=(0, 0.1),
-                           p_per_channel: float=1,
-                           per_channel: bool=False) -> np.ndarray:
+                           noise_variance: Tuple[float, float] = (0, 0.1),
+                           p_per_channel: float = 1,
+                           per_channel: bool = False) -> np.ndarray:
     if not per_channel:
         variance = noise_variance[0] if noise_variance[0] == noise_variance[1] else \
             random.uniform(noise_variance[0], noise_variance[1])
@@ -449,11 +443,10 @@ def elastic_deform_coordinates(coordinates, alpha, sigma):
     offsets = []
     for _ in range(n_dim):
         offsets.append(
-            gaussian_filter(
-                (np.random.random(coordinates.shape[1:]) * 2 - 1),
-                sigma,
-                mode="constant",
-                cval=0) * alpha)
+            gaussian_filter((np.random.random(coordinates.shape[1:]) * 2 - 1),
+                            sigma,
+                            mode="constant",
+                            cval=0) * alpha)
     offsets = np.array(offsets)
     indices = offsets + coordinates
     return indices
@@ -532,18 +525,19 @@ def interpolate_img(img,
         unique_labels = np.unique(img)
         result = np.zeros(coords.shape[1:], img.dtype)
         for i, c in enumerate(unique_labels):
-            res_new = map_coordinates(
-                (img == c).astype(float),
-                coords,
-                order=order,
-                mode=mode,
-                cval=cval)
+            res_new = map_coordinates((img == c).astype(float),
+                                      coords,
+                                      order=order,
+                                      mode=mode,
+                                      cval=cval)
             result[res_new >= 0.5] = c
         return result
     else:
-        return map_coordinates(
-            img.astype(float), coords, order=order, mode=mode,
-            cval=cval).astype(img.dtype)
+        return map_coordinates(img.astype(float),
+                               coords,
+                               order=order,
+                               mode=mode,
+                               cval=cval).astype(img.dtype)
 
 
 def get_lbs_for_center_crop(crop_size, data_shape):
@@ -601,11 +595,11 @@ def crop(data,
     if not isinstance(margins, (np.ndarray, tuple, list)):
         margins = [margins] * dim
 
-    data_return = np.zeros(
-        [data_shape[0], data_shape[1]] + list(crop_size), dtype=data_dtype)
+    data_return = np.zeros([data_shape[0], data_shape[1]] + list(crop_size),
+                           dtype=data_dtype)
     if seg is not None:
-        seg_return = np.zeros(
-            [seg_shape[0], seg_shape[1]] + list(crop_size), dtype=seg_dtype)
+        seg_return = np.zeros([seg_shape[0], seg_shape[1]] + list(crop_size),
+                              dtype=seg_dtype)
     else:
         seg_return = None
 
@@ -688,8 +682,8 @@ def augment_spatial(data,
                     p_scale_per_sample=1,
                     p_rot_per_sample=1,
                     independent_scale_for_each_axis=False,
-                    p_rot_per_axis: float=1,
-                    p_independent_scale_per_axis: int=1):
+                    p_rot_per_axis: float = 1,
+                    p_independent_scale_per_axis: int = 1):
     dim = len(patch_size)
     seg_result = None
     if seg is not None:
@@ -698,20 +692,18 @@ def augment_spatial(data,
                 (seg.shape[0], seg.shape[1], patch_size[0], patch_size[1]),
                 dtype=np.float32)
         else:
-            seg_result = np.zeros(
-                (seg.shape[0], seg.shape[1], patch_size[0], patch_size[1],
-                 patch_size[2]),
-                dtype=np.float32)
+            seg_result = np.zeros((seg.shape[0], seg.shape[1], patch_size[0],
+                                   patch_size[1], patch_size[2]),
+                                  dtype=np.float32)
 
     if dim == 2:
         data_result = np.zeros(
             (data.shape[0], data.shape[1], patch_size[0], patch_size[1]),
             dtype=np.float32)
     else:
-        data_result = np.zeros(
-            (data.shape[0], data.shape[1], patch_size[0], patch_size[1],
-             patch_size[2]),
-            dtype=np.float32)
+        data_result = np.zeros((data.shape[0], data.shape[1], patch_size[0],
+                                patch_size[1], patch_size[2]),
+                               dtype=np.float32)
 
     if not isinstance(patch_center_dist_from_border, (list, tuple, np.ndarray)):
         patch_center_dist_from_border = dim * [patch_center_dist_from_border]
@@ -777,12 +769,13 @@ def augment_spatial(data,
                     ctr = data.shape[d + 2] / 2. - 0.5
                 coords[d] += ctr
             for channel_id in range(data.shape[1]):
-                data_result[sample_id, channel_id] = interpolate_img(
-                    data[sample_id, channel_id],
-                    coords,
-                    order_data,
-                    border_mode_data,
-                    cval=border_cval_data)
+                data_result[sample_id,
+                            channel_id] = interpolate_img(data[sample_id,
+                                                               channel_id],
+                                                          coords,
+                                                          order_data,
+                                                          border_mode_data,
+                                                          cval=border_cval_data)
             if seg is not None:
                 for channel_id in range(seg.shape[1]):
                     seg_result[sample_id, channel_id] = interpolate_img(

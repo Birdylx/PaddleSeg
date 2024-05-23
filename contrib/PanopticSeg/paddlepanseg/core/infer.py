@@ -36,12 +36,14 @@ def reverse_transform_for_single_map(pred, trans_info, mode='nearest'):
             if paddle.get_device() == 'cpu' and dtype in intTypeList:
                 pred = paddle.cast(pred, 'float32')
                 # align_corners=False matches the result of OpenCV
-                pred = F.interpolate(
-                    pred, [h, w], mode=mode, align_corners=False)
+                pred = F.interpolate(pred, [h, w],
+                                     mode=mode,
+                                     align_corners=False)
                 pred = paddle.cast(pred, dtype)
             else:
-                pred = F.interpolate(
-                    pred, [h, w], mode=mode, align_corners=False)
+                pred = F.interpolate(pred, [h, w],
+                                     mode=mode,
+                                     align_corners=False)
             if ndims < 4:
                 for _ in range(4 - ndims):
                     pred = pred.squeeze(0)
@@ -59,8 +61,9 @@ def reverse_transform(net_out, trans_info):
         val = net_out[key]
         if val is None:
             continue
-        net_out[key] = reverse_transform_for_single_map(
-            val, trans_info=trans_info, mode='bilinear')
+        net_out[key] = reverse_transform_for_single_map(val,
+                                                        trans_info=trans_info,
+                                                        mode='bilinear')
     return net_out
 
 

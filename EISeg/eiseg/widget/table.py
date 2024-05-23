@@ -17,6 +17,7 @@ from qtpy.QtCore import Qt
 
 
 class TableWidget(QtWidgets.QTableWidget):
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.setDragEnabled(True)
@@ -71,6 +72,6 @@ class TableWidget(QtWidgets.QTableWidget):
         elif rect.bottom() - pos.y() < margin:
             return True
         # noinspection PyTypeChecker
-        return (rect.contains(pos, True) and
-                not (int(self.model().flags(index)) & Qt.ItemIsDropEnabled) and
-                pos.y() >= rect.center().y())
+        return (rect.contains(pos, True)
+                and not (int(self.model().flags(index)) & Qt.ItemIsDropEnabled)
+                and pos.y() >= rect.center().y())

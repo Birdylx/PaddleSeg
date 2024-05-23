@@ -3,7 +3,7 @@
 
 本目录下用于展示PaddleSeg系列模型在RKNPU2上的部署，以下的部署过程以PPHumanSeg为例子。
 
-## 1. 部署环境准备 
+## 1. 部署环境准备
 在部署前，需确认以下两个步骤:
 
 1. 软硬件环境满足要求
@@ -19,7 +19,7 @@
 
 ```bash
 # 下载部署示例代码
-git clone https://github.com/PaddlePaddle/PaddleSeg.git 
+git clone https://github.com/PaddlePaddle/PaddleSeg.git
 # 注意：如果当前分支找不到下面的fastdeploy测试代码，请切换到develop分支
 # git checkout develop
 cd PaddleSeg/deploy/fastdeploy/semantic_segmentation/rockchip/rknpu2/cpp

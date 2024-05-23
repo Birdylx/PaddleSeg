@@ -91,8 +91,8 @@ def load_pretrained_model(model, pretrained_model):
             for k in keys:
                 if k not in para_state_dict:
                     logger.warning("{} is not in pretrained model".format(k))
-                elif list(para_state_dict[k].shape) != list(model_state_dict[k]
-                                                            .shape):
+                elif list(para_state_dict[k].shape) != list(
+                        model_state_dict[k].shape):
                     # When the input is more than 3 channels such as trimap-based method, padding zeros to load.
                     para_shape = list(para_state_dict[k].shape)
                     model_shape = list(model_state_dict[k].shape)
@@ -120,12 +120,13 @@ def load_pretrained_model(model, pretrained_model):
                     num_params_loaded += 1
             model.set_dict(model_state_dict)
             logger.info("There are {}/{} variables loaded into {}.".format(
-                num_params_loaded,
-                len(model_state_dict), model.__class__.__name__))
+                num_params_loaded, len(model_state_dict),
+                model.__class__.__name__))
 
         else:
-            raise ValueError('The pretrained model directory is not Found: {}'.
-                             format(pretrained_model))
+            raise ValueError(
+                'The pretrained model directory is not Found: {}'.format(
+                    pretrained_model))
     else:
         logger.info(
             'No pretrained model to load, {} will be trained from scratch.'.

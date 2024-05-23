@@ -42,8 +42,8 @@ def loss_computation(logits_list, labels, losses, edges=None):
         logits = logits_list[i]
         loss_i = losses['types'][i]
         # Whether to use edges as labels According to loss type.
-        if loss_i.__class__.__name__ in ('BCELoss', 'FocalLoss'
-                                         ) and loss_i.edge_label:
+        if loss_i.__class__.__name__ in ('BCELoss',
+                                         'FocalLoss') and loss_i.edge_label:
             loss_list.append(losses['coef'][i] * loss_i(logits, edges))
         elif loss_i.__class__.__name__ in ("KLLoss", ):
             loss_list.append(losses['coef'][i] *
@@ -135,15 +135,18 @@ def distill_train(distill_model,
             optimizer)  # The return is Fleet object
         ddp_distill_model = fleet.distributed_model(distill_model)
 
-    batch_sampler = paddle.io.DistributedBatchSampler(
-        train_dataset, batch_size=batch_size, shuffle=True, drop_last=True)
+    batch_sampler = paddle.io.DistributedBatchSampler(train_dataset,
+                                                      batch_size=batch_size,
+                                                      shuffle=True,
+                                                      drop_last=True)
 
     loader = paddle.io.DataLoader(
         train_dataset,
         batch_sampler=batch_sampler,
         num_workers=num_workers,
         return_list=True,
-        worker_init_fn=worker_init_fn, )
+        worker_init_fn=worker_init_fn,
+    )
 
     if fp16:
         logger.info('use amp to train')
@@ -193,11 +196,10 @@ def distill_train(distill_model,
                         logits_list = ddp_distill_model(images)
                     else:
                         logits_list = distill_model(images)
-                    loss_list = loss_computation(
-                        logits_list=logits_list,
-                        labels=labels,
-                        losses=losses,
-                        edges=edges)
+                    loss_list = loss_computation(logits_list=logits_list,
+                                                 labels=labels,
+                                                 losses=losses,
+                                                 edges=edges)
                     loss = sum(loss_list)
 
                 scaled = scaler.scale(loss)  # scale the loss
@@ -214,11 +216,10 @@ def distill_train(distill_model,
                     s_logits_list, t_logits_list, feature_distill_loss = distill_model(
                         images)
 
-                out_loss_list = loss_computation(
-                    logits_list=s_logits_list,
-                    labels=labels,
-                    losses=losses,
-                    edges=edges)
+                out_loss_list = loss_computation(logits_list=s_logits_list,
+                                                 labels=labels,
+                                                 losses=losses,
+                                                 edges=edges)
                 out_loss = sum(out_loss_list)
 
                 out_distill_loss_list = distill_loss_computation(
@@ -253,8 +254,8 @@ def distill_train(distill_model,
             else:
                 for i in range(len(out_loss_list)):
                     avg_out_loss_list[i] += out_loss_list[i].numpy()
-            batch_cost_averager.record(
-                time.time() - batch_start, num_samples=batch_size)
+            batch_cost_averager.record(time.time() - batch_start,
+                                       num_samples=batch_size)
 
             if (iter) % log_iters == 0 and local_rank == 0:
                 avg_loss /= log_iters
@@ -299,18 +300,17 @@ def distill_train(distill_model,
                 reader_cost_averager.reset()
                 batch_cost_averager.reset()
 
-            if (iter % save_interval == 0 or
-                    iter == iters) and (val_dataset is not None):
+            if (iter % save_interval == 0 or iter == iters) and (val_dataset
+                                                                 is not None):
                 num_workers = 1 if num_workers > 0 else 0
 
                 if test_config is None:
                     test_config = {}
 
-                mean_iou, acc, _, _, _ = evaluate(
-                    student_model,
-                    val_dataset,
-                    num_workers=num_workers,
-                    **test_config)
+                mean_iou, acc, _, _, _ = evaluate(student_model,
+                                                  val_dataset,
+                                                  num_workers=num_workers,
+                                                  **test_config)
 
                 student_model.train()
 
@@ -354,9 +354,8 @@ def distill_train(distill_model,
             m.total_ops += int(2 * nelements)
 
         _, c, h, w = images.shape
-        flops = paddle.flops(
-            student_model, [1, c, h, w],
-            custom_ops={paddle.nn.SyncBatchNorm: count_syncbn})
+        flops = paddle.flops(student_model, [1, c, h, w],
+                             custom_ops={paddle.nn.SyncBatchNorm: count_syncbn})
 
     # Sleep for half a second to let dataloader release resources.
     time.sleep(0.5)

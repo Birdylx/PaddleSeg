@@ -1,15 +1,15 @@
 <div align="center">
-	<img src="https://user-images.githubusercontent.com/50255927/189930324-0f3992cd-47f8-487c-b20e-5a59f28f978f.png" align="middle" alt="LOGO" height="60"/><img src="https://user-images.githubusercontent.com/35907364/179460858-7dfb19b1-cabf-4f8a-9e81-eb15b6cc7d5f.png" align="middle" alt="LOGO" height="60"/><img src="https://user-images.githubusercontent.com/50255927/189930342-d32b90e5-ef80-44fb-9eab-c9df25ca0d12.png" align="middle" alt="LOGO" height="60" />
+    <img src="https://user-images.githubusercontent.com/50255927/189930324-0f3992cd-47f8-487c-b20e-5a59f28f978f.png" align="middle" alt="LOGO" height="60"/><img src="https://user-images.githubusercontent.com/35907364/179460858-7dfb19b1-cabf-4f8a-9e81-eb15b6cc7d5f.png" align="middle" alt="LOGO" height="60"/><img src="https://user-images.githubusercontent.com/50255927/189930342-d32b90e5-ef80-44fb-9eab-c9df25ca0d12.png" align="middle" alt="LOGO" height="60" />
 </div>
 
 
 # MUSCLE - MICCAI 2022
-This is a repository for paper "MUSCLE: Multi-task Self-supervised Continual Learning to 
+This is a repository for paper "MUSCLE: Multi-task Self-supervised Continual Learning to
 Pre-train Deep Models for X-ray Images of Multiple Body Parts" accepted by MICCAI 2022.
 
 ## Introduction
 
-The goal of MUSCLE (*<u>MU</u>lti-task <u>S</u>elf-supervised <u>C</u>ontinual <u>LE</u>arning*) is to pre-train the deep neural network (DNN) models and 
+The goal of MUSCLE (*<u>MU</u>lti-task <u>S</u>elf-supervised <u>C</u>ontinual <u>LE</u>arning*) is to pre-train the deep neural network (DNN) models and
 deliver decent performance on medical image analysis tasks.
 
 All codes are implemented using PaddlePaddle.
@@ -19,10 +19,10 @@ All codes are implemented using PaddlePaddle.
 ![image](https://user-images.githubusercontent.com/50255927/189317770-c8c9e866-beb2-4eb5-8116-21ab00850ef0.png)
 
 MUSCLE aggregated multiple X-ray image datasets collected from different human body
-parts, subject to various X-ray analytics tasks. We proposed Multi-Dataset Momentum 
-Contrastive Representation Learning (MD-MoCo) and Multi-task Continual Learning to 
-pre-train the backbone DNNs in a self-supervised continual learning manner. 
-The pre-trained models could be fine-tuned to target tasks using task-specific heads 
+parts, subject to various X-ray analytics tasks. We proposed Multi-Dataset Momentum
+Contrastive Representation Learning (MD-MoCo) and Multi-task Continual Learning to
+pre-train the backbone DNNs in a self-supervised continual learning manner.
+The pre-trained models could be fine-tuned to target tasks using task-specific heads
 and achieve superb performance.
 
 ## Datasets
@@ -145,7 +145,7 @@ and achieve superb performance.
 - Backbone
     - ResNet-18 and ResNet-50
 - Task
-    - Pneumonia classification (Pneumonia), 
+    - Pneumonia classification (Pneumonia),
     - Skeletal abnormality classification (MURA)
     - Lung segmentation (Lung)
     - Tuberculosis detection (TBX)
@@ -212,7 +212,7 @@ and achieve superb performance.
     <td class="tg-2b7s">97.26</td>
     <td class="tg-8d8j">97.42</td>
     <td class="tg-8d8j">96.84</td>
-    <td class="tg-2b7s">99.61(99.32-99.83)	</td>
+    <td class="tg-2b7s">99.61(99.32-99.83)    </td>
   </tr>
   <tr>
     <td class="tg-2b7s" rowspan="5">ResNet-50</td>

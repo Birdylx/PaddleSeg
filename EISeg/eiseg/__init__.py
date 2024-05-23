@@ -32,8 +32,8 @@ for k, v in os.environ.items():
         del os.environ[k]
 
 # log
-settings = QtCore.QSettings(
-    osp.join(pjpath, "config/setting.txt"), QtCore.QSettings.IniFormat)
+settings = QtCore.QSettings(osp.join(pjpath, "config/setting.txt"),
+                            QtCore.QSettings.IniFormat)
 
 logFolder = settings.value("logFolder")
 logLevel = bool(settings.value("log"))

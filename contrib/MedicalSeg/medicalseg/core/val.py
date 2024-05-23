@@ -27,17 +27,18 @@ np.set_printoptions(suppress=True)
 
 
 def evaluate(
-        model,
-        eval_dataset,
-        losses,
-        num_workers=0,
-        print_detail=True,
-        auc_roc=False,
-        writer=None,
-        save_dir=None,
-        sw_num=None,
-        is_save_data=True,
-        has_dataset_json=True, ):
+    model,
+    eval_dataset,
+    losses,
+    num_workers=0,
+    print_detail=True,
+    auc_roc=False,
+    writer=None,
+    save_dir=None,
+    sw_num=None,
+    is_save_data=True,
+    has_dataset_json=True,
+):
     """
     Launch evalution.
     Args:
@@ -67,13 +68,16 @@ def evaluate(
         if not paddle.distributed.parallel.parallel_helper._is_parallel_ctx_initialized(
         ):
             paddle.distributed.init_parallel_env()
-    batch_sampler = paddle.io.DistributedBatchSampler(
-        eval_dataset, batch_size=1, shuffle=False, drop_last=False)
+    batch_sampler = paddle.io.DistributedBatchSampler(eval_dataset,
+                                                      batch_size=1,
+                                                      shuffle=False,
+                                                      drop_last=False)
     loader = paddle.io.DataLoader(
         eval_dataset,
         batch_sampler=batch_sampler,
         num_workers=num_workers,
-        return_list=True, )
+        return_list=True,
+    )
 
     if has_dataset_json:
 
@@ -85,10 +89,11 @@ def evaluate(
     label_all = None
 
     if print_detail:
-        logger.info("Start evaluating (total_samples: {}, total_iters: {})...".
-                    format(len(eval_dataset), total_iters))
-    progbar_val = progbar.Progbar(
-        target=total_iters, verbose=1 if nranks < 2 else 2)
+        logger.info(
+            "Start evaluating (total_samples: {}, total_iters: {})...".format(
+                len(eval_dataset), total_iters))
+    progbar_val = progbar.Progbar(target=total_iters,
+                                  verbose=1 if nranks < 2 else 2)
     reader_cost_averager = TimeAverager()
     batch_cost_averager = TimeAverager()
     batch_start = time.time()
@@ -102,8 +107,8 @@ def evaluate(
             reader_cost_averager.record(time.time() - batch_start)
 
             if has_dataset_json:
-                image_json = dataset_json_dict["training"][idx[0].split("/")[-1]
-                                                           .split(".")[0]]
+                image_json = dataset_json_dict["training"][idx[0].split("/")
+                                                           [-1].split(".")[0]]
             else:
                 image_json = None
 
@@ -130,8 +135,10 @@ def evaluate(
             if hasattr(model, "postprocess"):
                 logits, label = model.postprocess(logits, label)
                 # Update pred from postprocessed logits
-                pred = paddle.argmax(
-                    logits[0], axis=1, keepdim=True, dtype='int32')
+                pred = paddle.argmax(logits[0],
+                                     axis=1,
+                                     keepdim=True,
+                                     dtype='int32')
 
             # logits [N, num_classes, D, H, W] Compute loss to get dice
             loss, per_channel_dice = loss_computation(logits, label, new_loss)
@@ -143,8 +150,9 @@ def evaluate(
                     logits_all = logits.numpy()
                     label_all = label.numpy()
                 else:
-                    logits_all = np.concatenate(
-                        [logits_all, logits.numpy()])  # (KN, C, H, W)
+                    logits_all = np.concatenate([logits_all,
+                                                 logits.numpy()
+                                                 ])  # (KN, C, H, W)
                     label_all = np.concatenate([label_all, label.numpy()])
 
             loss_all += loss.numpy()
@@ -159,24 +167,27 @@ def evaluate(
                         raise ValueError(
                             "No json file is loaded. Please check if the dataset is preprocessed and `has_dataset_json` is True."
                         )
-                    save_array(
-                        save_path=os.path.join(save_dir, str(iter)),
-                        save_content={
-                            'pred': pred.numpy(),
-                            'label': label.numpy(),
-                            'img': im.numpy()
-                        },
-                        form=('npy', 'nii.gz'),
-                        image_infor={
-                            "spacing": image_json.get("spacing_resample",
-                                                      image_json["spacing"]),
-                            'direction': image_json["direction"],
-                            "origin": image_json["origin"],
-                            'format': "xyz"
-                        })
+                    save_array(save_path=os.path.join(save_dir, str(iter)),
+                               save_content={
+                                   'pred': pred.numpy(),
+                                   'label': label.numpy(),
+                                   'img': im.numpy()
+                               },
+                               form=('npy', 'nii.gz'),
+                               image_infor={
+                                   "spacing":
+                                   image_json.get("spacing_resample",
+                                                  image_json["spacing"]),
+                                   'direction':
+                                   image_json["direction"],
+                                   "origin":
+                                   image_json["origin"],
+                                   'format':
+                                   "xyz"
+                               })
 
-            batch_cost_averager.record(
-                time.time() - batch_start, num_samples=len(label))
+            batch_cost_averager.record(time.time() - batch_start,
+                                       num_samples=len(label))
             batch_cost = batch_cost_averager.get_average()
             reader_cost = reader_cost_averager.get_average()
 
@@ -193,8 +204,9 @@ def evaluate(
 
     result_dict = {"mdice": mdice}
     if auc_roc:
-        auc_roc = metric.auc_roc(
-            logits_all, label_all, num_classes=eval_dataset.num_classes)
+        auc_roc = metric.auc_roc(logits_all,
+                                 label_all,
+                                 num_classes=eval_dataset.num_classes)
         auc_infor = 'Auc_roc: {:.4f}'.format(auc_roc)
         result_dict['auc_roc'] = auc_roc
 
@@ -203,7 +215,7 @@ def evaluate(
             len(eval_dataset), mdice, loss_all[0])
         infor = infor + auc_infor if auc_roc else infor
         logger.info(infor)
-        logger.info("[EVAL] Class dice: \n" + str(
-            np.round(channel_dice_array, 4)))
+        logger.info("[EVAL] Class dice: \n" +
+                    str(np.round(channel_dice_array, 4)))
 
     return result_dict

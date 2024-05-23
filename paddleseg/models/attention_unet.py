@@ -44,27 +44,34 @@ class AttentionUNet(nn.Layer):
         self.encoder = Encoder(in_channels, [64, 128, 256, 512])
         filters = np.array([64, 128, 256, 512, 1024])
         self.up5 = UpConv(ch_in=filters[4], ch_out=filters[3])
-        self.att5 = AttentionBlock(
-            F_g=filters[3], F_l=filters[3], F_out=filters[2])
+        self.att5 = AttentionBlock(F_g=filters[3],
+                                   F_l=filters[3],
+                                   F_out=filters[2])
         self.up_conv5 = ConvBlock(ch_in=filters[4], ch_out=filters[3])
 
         self.up4 = UpConv(ch_in=filters[3], ch_out=filters[2])
-        self.att4 = AttentionBlock(
-            F_g=filters[2], F_l=filters[2], F_out=filters[1])
+        self.att4 = AttentionBlock(F_g=filters[2],
+                                   F_l=filters[2],
+                                   F_out=filters[1])
         self.up_conv4 = ConvBlock(ch_in=filters[3], ch_out=filters[2])
 
         self.up3 = UpConv(ch_in=filters[2], ch_out=filters[1])
-        self.att3 = AttentionBlock(
-            F_g=filters[1], F_l=filters[1], F_out=filters[0])
+        self.att3 = AttentionBlock(F_g=filters[1],
+                                   F_l=filters[1],
+                                   F_out=filters[0])
         self.up_conv3 = ConvBlock(ch_in=filters[2], ch_out=filters[1])
 
         self.up2 = UpConv(ch_in=filters[1], ch_out=filters[0])
-        self.att2 = AttentionBlock(
-            F_g=filters[0], F_l=filters[0], F_out=filters[0] // 2)
+        self.att2 = AttentionBlock(F_g=filters[0],
+                                   F_l=filters[0],
+                                   F_out=filters[0] // 2)
         self.up_conv2 = ConvBlock(ch_in=filters[1], ch_out=filters[0])
 
-        self.conv_1x1 = nn.Conv2D(
-            filters[0], num_classes, kernel_size=1, stride=1, padding=0)
+        self.conv_1x1 = nn.Conv2D(filters[0],
+                                  num_classes,
+                                  kernel_size=1,
+                                  stride=1,
+                                  padding=0)
         self.pretrained = pretrained
         self.init_weight()
 
@@ -100,23 +107,20 @@ class AttentionUNet(nn.Layer):
 
 
 class AttentionBlock(nn.Layer):
+
     def __init__(self, F_g, F_l, F_out):
         super().__init__()
         self.W_g = nn.Sequential(
-            nn.Conv2D(
-                F_g, F_out, kernel_size=1, stride=1, padding=0),
+            nn.Conv2D(F_g, F_out, kernel_size=1, stride=1, padding=0),
             nn.BatchNorm2D(F_out))
 
         self.W_x = nn.Sequential(
-            nn.Conv2D(
-                F_l, F_out, kernel_size=1, stride=1, padding=0),
+            nn.Conv2D(F_l, F_out, kernel_size=1, stride=1, padding=0),
             nn.BatchNorm2D(F_out))
 
         self.psi = nn.Sequential(
-            nn.Conv2D(
-                F_out, 1, kernel_size=1, stride=1, padding=0),
-            nn.BatchNorm2D(1),
-            nn.Sigmoid())
+            nn.Conv2D(F_out, 1, kernel_size=1, stride=1, padding=0),
+            nn.BatchNorm2D(1), nn.Sigmoid())
 
         self.relu = nn.ReLU()
 
@@ -130,21 +134,20 @@ class AttentionBlock(nn.Layer):
 
 
 class UpConv(nn.Layer):
+
     def __init__(self, ch_in, ch_out):
         super().__init__()
         self.up = nn.Sequential(
-            nn.Upsample(
-                scale_factor=2, mode="bilinear"),
-            nn.Conv2D(
-                ch_in, ch_out, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2D(ch_out),
-            nn.ReLU())
+            nn.Upsample(scale_factor=2, mode="bilinear"),
+            nn.Conv2D(ch_in, ch_out, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2D(ch_out), nn.ReLU())
 
     def forward(self, x):
         return self.up(x)
 
 
 class Encoder(nn.Layer):
+
     def __init__(self, input_channels, filters):
         super().__init__()
         self.double_conv = nn.Sequential(
@@ -173,17 +176,14 @@ class Encoder(nn.Layer):
 
 
 class ConvBlock(nn.Layer):
+
     def __init__(self, ch_in, ch_out):
         super(ConvBlock, self).__init__()
         self.conv = nn.Sequential(
-            nn.Conv2D(
-                ch_in, ch_out, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2D(ch_out),
-            nn.ReLU(),
-            nn.Conv2D(
-                ch_out, ch_out, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2D(ch_out),
-            nn.ReLU())
+            nn.Conv2D(ch_in, ch_out, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2D(ch_out), nn.ReLU(),
+            nn.Conv2D(ch_out, ch_out, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2D(ch_out), nn.ReLU())
 
     def forward(self, x):
         return self.conv(x)

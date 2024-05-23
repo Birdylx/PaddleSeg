@@ -33,41 +33,41 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Model evaluation')
 
     # params of evaluate
-    parser.add_argument(
-        "--config", dest="cfg", help="The config file.", default=None, type=str)
-    parser.add_argument(
-        '--model_path',
-        dest='model_path',
-        help='The path of model for evaluation',
-        type=str,
-        default=None)
-    parser.add_argument(
-        '--num_workers',
-        dest='num_workers',
-        help='Num workers for data loader',
-        type=int,
-        default=0)
+    parser.add_argument("--config",
+                        dest="cfg",
+                        help="The config file.",
+                        default=None,
+                        type=str)
+    parser.add_argument('--model_path',
+                        dest='model_path',
+                        help='The path of model for evaluation',
+                        type=str,
+                        default=None)
+    parser.add_argument('--num_workers',
+                        dest='num_workers',
+                        help='Num workers for data loader',
+                        type=int,
+                        default=0)
 
     parser.add_argument(
         '--data_format',
         dest='data_format',
-        help='Data format that specifies the layout of input. It can be "NCHW" or "NHWC". Default: "NCHW".',
+        help=
+        'Data format that specifies the layout of input. It can be "NCHW" or "NHWC". Default: "NCHW".',
         type=str,
         default='NCHW')
 
-    parser.add_argument(
-        '--is_view',
-        dest='is_view',
-        help='Whether to visualize results.',
-        type=str,
-        default=False)
+    parser.add_argument('--is_view',
+                        dest='is_view',
+                        help='Whether to visualize results.',
+                        type=str,
+                        default=False)
 
-    parser.add_argument(
-        '--save_dir',
-        dest='save_dir',
-        help='The directory for saving the predicted results',
-        type=str,
-        default='./output/result')
+    parser.add_argument('--save_dir',
+                        dest='save_dir',
+                        help='The directory for saving the predicted results',
+                        type=str,
+                        default='./output/result')
 
     return parser.parse_args()
 
@@ -115,13 +115,12 @@ def main(args):
 
     test_config = get_test_config(cfg, args)
 
-    evaluate(
-        model,
-        val_dataset,
-        num_workers=args.num_workers,
-        is_view=args.is_view,
-        save_dir=args.save_dir,
-        **test_config)
+    evaluate(model,
+             val_dataset,
+             num_workers=args.num_workers,
+             is_view=args.is_view,
+             save_dir=args.save_dir,
+             **test_config)
 
 
 if __name__ == '__main__':

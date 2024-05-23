@@ -41,7 +41,8 @@ def saveMaskToCOCO(image_dir, mask_dir):
         img_path = osp.join(image_dir, img_name)
         mask_path = osp.join(mask_dir, mask_name)
         mask = np.asarray(Image.open(mask_path).convert('L')).astype("uint8")
-        imgId = coco.addImage(osp.basename(img_path), mask.shape[1], mask.shape[0])
+        imgId = coco.addImage(osp.basename(img_path), mask.shape[1],
+                              mask.shape[0])
         polygons = getPolygonFromMask(mask)
         for polygon in polygons:
             coco_id = None
@@ -64,4 +65,5 @@ def saveMaskToCOCO(image_dir, mask_dir):
             coco.updateCategory(lab, str(lab), color)
         else:
             coco.addCategory(lab, str(lab), color)
-    open(coco_path, "w", encoding="utf-8").write(json.dumps(coco.dataset, cls=JSEncoder))
+    open(coco_path, "w",
+         encoding="utf-8").write(json.dumps(coco.dataset, cls=JSEncoder))

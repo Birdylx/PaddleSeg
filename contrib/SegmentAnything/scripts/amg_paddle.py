@@ -16,6 +16,7 @@
 
 import os
 import sys
+
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
 
 import time
@@ -51,14 +52,16 @@ parser.add_argument(
     type=str,
     default="vit_l",
     required=True,
-    help="The type of model to load, in ['vit_h', 'vit_l', 'vit_b', 'vit_t']", )
+    help="The type of model to load, in ['vit_h', 'vit_l', 'vit_b', 'vit_t']",
+)
 
 parser.add_argument(
     "--convert-to-rle",
     action="store_true",
-    help=(
-        "Save masks as COCO RLEs in a single json instead of as a folder of PNGs. "
-        "Requires pycocotools."), )
+    help=
+    ("Save masks as COCO RLEs in a single json instead of as a folder of PNGs. "
+     "Requires pycocotools."),
+)
 
 amg_settings = parser.add_argument_group("AMG Settings")
 
@@ -66,27 +69,31 @@ amg_settings.add_argument(
     "--points-per-side",
     type=int,
     default=None,
-    help="Generate masks by sampling a grid over the image with this many points to a side.",
+    help=
+    "Generate masks by sampling a grid over the image with this many points to a side.",
 )
 
 amg_settings.add_argument(
     "--points-per-batch",
     type=int,
     default=None,
-    help="How many input points to process simultaneously in one batch.", )
+    help="How many input points to process simultaneously in one batch.",
+)
 
 amg_settings.add_argument(
     "--pred-iou-thresh",
     type=float,
     default=None,
-    help="Exclude masks with a predicted score from the model that is lower than this threshold.",
+    help=
+    "Exclude masks with a predicted score from the model that is lower than this threshold.",
 )
 
 amg_settings.add_argument(
     "--stability-score-thresh",
     type=float,
     default=None,
-    help="Exclude masks with a stability score lower than this threshold.", )
+    help="Exclude masks with a stability score lower than this threshold.",
+)
 
 amg_settings.add_argument(
     "--stability-score-offset",
@@ -99,34 +106,39 @@ amg_settings.add_argument(
     "--box-nms-thresh",
     type=float,
     default=None,
-    help="The overlap threshold for excluding a duplicate mask.", )
+    help="The overlap threshold for excluding a duplicate mask.",
+)
 
 amg_settings.add_argument(
     "--crop-n-layers",
     type=int,
     default=None,
-    help=(
-        "If >0, mask generation is run on smaller crops of the image to generate more masks. "
-        "The value sets how many different scales to crop at."), )
+    help=
+    ("If >0, mask generation is run on smaller crops of the image to generate more masks. "
+     "The value sets how many different scales to crop at."),
+)
 
 amg_settings.add_argument(
     "--crop-nms-thresh",
     type=float,
     default=None,
-    help="The overlap threshold for excluding duplicate masks across different crops.",
+    help=
+    "The overlap threshold for excluding duplicate masks across different crops.",
 )
 
 amg_settings.add_argument(
     "--crop-overlap-ratio",
     type=int,
     default=None,
-    help="Larger numbers mean image crops will overlap more.", )
+    help="Larger numbers mean image crops will overlap more.",
+)
 
 amg_settings.add_argument(
     "--crop-n-points-downscale-factor",
     type=int,
     default=None,
-    help="The number of points-per-side in each layer of crop is reduced by this factor.",
+    help=
+    "The number of points-per-side in each layer of crop is reduced by this factor.",
 )
 
 amg_settings.add_argument(
@@ -135,7 +147,8 @@ amg_settings.add_argument(
     default=None,
     help=(
         "Disconnected mask regions or holes with area smaller than this value "
-        "in pixels are removed by postprocessing."), )
+        "in pixels are removed by postprocessing."),
+)
 
 
 def get_amg_kwargs(args):
@@ -238,8 +251,9 @@ def gradio_display(generator):
         predictor = generator
         masks = predictor.generate(img)
         pred_result, pseudo_map = masks2pseudomap(masks)  # PIL Image
-        added_pseudo_map = visualize(
-            img, pred_result, color_map=get_color_map_list(256))
+        added_pseudo_map = visualize(img,
+                                     pred_result,
+                                     color_map=get_color_map_list(256))
         res_download = download(pseudo_map)
 
         return pseudo_map, added_pseudo_map, res_download
@@ -254,11 +268,10 @@ def gradio_display(generator):
                 image_submit_btn = gr.Button("Submit")
 
             with gr.Row():
-                img_out1 = gr.Image(
-                    label="Output image", interactive=False).style(height=300)
-                img_out2 = gr.Image(
-                    label="Output image with mask",
-                    interactive=False).style(height=300)
+                img_out1 = gr.Image(label="Output image",
+                                    interactive=False).style(height=300)
+                img_out2 = gr.Image(label="Output image with mask",
+                                    interactive=False).style(height=300)
             downloaded_img = gr.File(label='Image download').style(height=50)
 
         image_clear_btn.click(
@@ -266,10 +279,11 @@ def gradio_display(generator):
             inputs=None,
             outputs=[image_in, img_out1, img_out2, downloaded_img])
 
-        image_submit_btn.click(
-            fn=get_id_photo_output,
-            inputs=[image_in, ],
-            outputs=[img_out1, img_out2, downloaded_img])
+        image_submit_btn.click(fn=get_id_photo_output,
+                               inputs=[
+                                   image_in,
+                               ],
+                               outputs=[img_out1, img_out2, downloaded_img])
 
         gr.Markdown(
             """<font color=Gray>Tips: You can try segment the default image OR upload any images you want to segment by click on the clear button first.</font>"""
@@ -297,8 +311,9 @@ def main(args: argparse.Namespace) -> None:
         paddle.set_device("cpu")
     output_mode = "coco_rle" if args.convert_to_rle else "binary_mask"
     amg_kwargs = get_amg_kwargs(args)
-    generator = SamAutomaticMaskGenerator(
-        sam, output_mode=output_mode, **amg_kwargs)
+    generator = SamAutomaticMaskGenerator(sam,
+                                          output_mode=output_mode,
+                                          **amg_kwargs)
 
     gradio_display(generator)
 

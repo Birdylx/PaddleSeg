@@ -26,8 +26,8 @@ from PIL import Image
 def parse_args():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument(
-        'dir_or_file', help='input gray label directory or file list path')
+    parser.add_argument('dir_or_file',
+                        help='input gray label directory or file list path')
     parser.add_argument('output_dir', help='output colorful label directory')
     parser.add_argument('--dataset_dir', help='dataset directory')
     parser.add_argument('--file_separator', help='file list separator')

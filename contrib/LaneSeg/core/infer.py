@@ -41,9 +41,9 @@ def get_reverse_list(ori_shape, transforms):
             reverse_list.append(('resize', (h, w)))
             h, w = op.target_size[0], op.target_size[1]
         if op.__class__.__name__ in ['SubImgCrop']:
-            reverse_list.append(('SubImgCrop', (op.offset_top,
-                                                op.offset_bottom),
-                                 (op.offset_left, op.offset_right)))
+            reverse_list.append(
+                ('SubImgCrop', (op.offset_top, op.offset_bottom),
+                 (op.offset_left, op.offset_right)))
             h = h - op.offset_top
             h = h - op.offset_bottom
             w = w - op.offset_left
@@ -119,11 +119,11 @@ def reverse_transform(pred, ori_shape, transforms, mode='nearest'):
         elif item[0] == 'SubImgCrop':
             offset_top, offset_bottom = item[1][0], item[1][1]
             offset_left, offset_right = item[2][0], item[2][1]
-            pred = F.pad(
-                pred, [offset_left, offset_right, offset_top, offset_bottom],
-                value=0,
-                mode='constant',
-                data_format="NCHW")
+            pred = F.pad(pred,
+                         [offset_left, offset_right, offset_top, offset_bottom],
+                         value=0,
+                         mode='constant',
+                         data_format="NCHW")
         elif item[0] == 'padding':
             h, w = item[1][0], item[1][1]
             pred = pred[:, :, 0:h, 0:w]

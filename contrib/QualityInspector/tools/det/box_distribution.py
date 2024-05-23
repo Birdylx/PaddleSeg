@@ -121,16 +121,19 @@ def get_ratio_infos(jsonfile, out_img, eval_size, small_stride):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '--json_path', type=str, default=None, help="Dataset json path.")
+    parser.add_argument('--json_path',
+                        type=str,
+                        default=None,
+                        help="Dataset json path.")
     parser.add_argument('--eval_size', type=int, default=640, help="eval size.")
-    parser.add_argument(
-        '--small_stride', type=int, default=8, help="smallest stride.")
-    parser.add_argument(
-        '--out_img',
-        type=str,
-        default='box_distribution.jpg',
-        help="Name of distibution img.")
+    parser.add_argument('--small_stride',
+                        type=int,
+                        default=8,
+                        help="smallest stride.")
+    parser.add_argument('--out_img',
+                        type=str,
+                        default='box_distribution.jpg',
+                        help="Name of distibution img.")
     args = parser.parse_args()
 
     get_ratio_infos(args.json_path, args.out_img, args.eval_size,

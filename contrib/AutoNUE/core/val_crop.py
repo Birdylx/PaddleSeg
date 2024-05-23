@@ -66,13 +66,16 @@ def evaluate(model,
         if not paddle.distributed.parallel.parallel_helper._is_parallel_ctx_initialized(
         ):
             paddle.distributed.init_parallel_env()
-    batch_sampler = paddle.io.DistributedBatchSampler(
-        eval_dataset, batch_size=1, shuffle=False, drop_last=False)
+    batch_sampler = paddle.io.DistributedBatchSampler(eval_dataset,
+                                                      batch_size=1,
+                                                      shuffle=False,
+                                                      drop_last=False)
     loader = paddle.io.DataLoader(
         eval_dataset,
         batch_sampler=batch_sampler,
         num_workers=num_workers,
-        return_list=True, )
+        return_list=True,
+    )
 
     total_iters = len(loader)
     intersect_area_all = 0
@@ -80,8 +83,9 @@ def evaluate(model,
     label_area_all = 0
 
     if print_detail:
-        logger.info("Start evaluating (total_samples={}, total_iters={})...".
-                    format(len(eval_dataset), total_iters))
+        logger.info(
+            "Start evaluating (total_samples={}, total_iters={})...".format(
+                len(eval_dataset), total_iters))
     progbar_val = progbar.Progbar(target=total_iters, verbose=1)
     reader_cost_averager = TimeAverager()
     batch_cost_averager = TimeAverager()
@@ -117,18 +121,19 @@ def evaluate(model,
                         crop_size=crop_size)
                 preds.append(pred)
 
-            left_ensem = (
-                preds[0][:, :, :, 640:1280] + preds[1][:, :, :, 0:640]) / 2
-            right_ensem = (
-                preds[1][:, :, :, 640:1280] + preds[2][:, :, :, 0:640]) / 2
-            pred_ensem = paddle.concat(
-                [
-                    preds[0][:, :, :, 0:640], left_ensem, right_ensem,
-                    preds[2][:, :, :, 640:1280]
-                ],
-                axis=3)
-            pred = paddle.argmax(
-                pred_ensem, axis=1, keepdim=True, dtype='int32')
+            left_ensem = (preds[0][:, :, :, 640:1280] +
+                          preds[1][:, :, :, 0:640]) / 2
+            right_ensem = (preds[1][:, :, :, 640:1280] +
+                           preds[2][:, :, :, 0:640]) / 2
+            pred_ensem = paddle.concat([
+                preds[0][:, :, :, 0:640], left_ensem, right_ensem,
+                preds[2][:, :, :, 640:1280]
+            ],
+                                       axis=3)
+            pred = paddle.argmax(pred_ensem,
+                                 axis=1,
+                                 keepdim=True,
+                                 dtype='int32')
 
             intersect_area, pred_area, label_area = metrics.calculate_area(
                 pred,
@@ -163,8 +168,8 @@ def evaluate(model,
                 pred_area_all = pred_area_all + pred_area
                 label_area_all = label_area_all + label_area
 
-            batch_cost_averager.record(
-                time.time() - batch_start, num_samples=len(label))
+            batch_cost_averager.record(time.time() - batch_start,
+                                       num_samples=len(label))
             batch_cost = batch_cost_averager.get_average()
             reader_cost = reader_cost_averager.get_average()
 
@@ -181,8 +186,9 @@ def evaluate(model,
     kappa = metrics.kappa(intersect_area_all, pred_area_all, label_area_all)
 
     if print_detail:
-        logger.info("[EVAL] #Images={} mIoU={:.4f} Acc={:.4f} Kappa={:.4f} ".
-                    format(len(eval_dataset), miou, acc, kappa))
+        logger.info(
+            "[EVAL] #Images={} mIoU={:.4f} Acc={:.4f} Kappa={:.4f} ".format(
+                len(eval_dataset), miou, acc, kappa))
         logger.info("[EVAL] Class IoU: \n" + str(np.round(class_iou, 4)))
         logger.info("[EVAL] Class Acc: \n" + str(np.round(class_acc, 4)))
     return miou, acc

@@ -24,15 +24,13 @@ if use_trt:
     option.set_trt_cache_file('pp_lite_seg.trt')
 
 # Create model instance
-model_instance = fd.vision.segmentation.PaddleSegModel(
-    model_file=model_file,
-    params_file=params_file,
-    config_file=config_file,
-    runtime_option=option)
+model_instance = fd.vision.segmentation.PaddleSegModel(model_file=model_file,
+                                                       params_file=params_file,
+                                                       config_file=config_file,
+                                                       runtime_option=option)
 
 # Create server, setup REST API
 app = SimpleServer()
-app.register(
-    task_name="fd/ppliteseg",
-    model_handler=fd.serving.handler.VisionModelHandler,
-    predictor=model_instance)
+app.register(task_name="fd/ppliteseg",
+             model_handler=fd.serving.handler.VisionModelHandler,
+             predictor=model_instance)

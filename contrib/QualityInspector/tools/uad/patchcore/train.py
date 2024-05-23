@@ -44,32 +44,33 @@ CLASS_NAMES = textures + objects
 
 def argsparser():
     parser = argparse.ArgumentParser('PatchCore')
-    parser.add_argument(
-        "--config",
-        type=str,
-        default=None,
-        help="Path of config",
-        required=True)
+    parser.add_argument("--config",
+                        type=str,
+                        default=None,
+                        help="Path of config",
+                        required=True)
     parser.add_argument("--device", type=str, default=None)
     parser.add_argument('--batch_size', type=int, default=None)
     parser.add_argument('--num_workers', type=int, default=None)
     parser.add_argument("--seed", type=int, default=None)
     parser.add_argument('--data_path', type=str, default=None)
     parser.add_argument('--save_path', type=str, default=None)
-    parser.add_argument(
-        "--category",
-        type=str,
-        default=None,
-        help="category name for MvTec AD dataset")
+    parser.add_argument("--category",
+                        type=str,
+                        default=None,
+                        help="category name for MvTec AD dataset")
     parser.add_argument('--resize', type=list or tuple, default=None)
     parser.add_argument('--crop_size', type=list or tuple, default=None)
     parser.add_argument(
         "--backbone",
         type=str,
         default=None,
-        help="backbone model arch, one of [resnet18, resnet50, wide_resnet50_2]")
-    parser.add_argument(
-        "--k", type=int, default=None, help="used feature channels")
+        help="backbone model arch, one of [resnet18, resnet50, wide_resnet50_2]"
+    )
+    parser.add_argument("--k",
+                        type=int,
+                        default=None,
+                        help="used feature channels")
     parser.add_argument(
         "--method",
         type=str,
@@ -77,21 +78,22 @@ def argsparser():
         choices=[
             'sample', 'h_sample', 'ortho', 'svd_ortho', 'gaussian', 'coreset'
         ],
-        help="projection method, one of [sample, ortho, svd_ortho, gaussian, coreset]"
+        help=
+        "projection method, one of [sample, ortho, svd_ortho, gaussian, coreset]"
     )
     parser.add_argument("--do_eval", type=bool, default=None)
     parser.add_argument("--save_pic", type=str2bool, default=None)
 
     parser.add_argument("--save_model", type=str2bool, default=True)
     parser.add_argument('--test_batch_size', type=int, default=1)
-    parser.add_argument(
-        "--inc", action='store_true', help="use incremental cov & mean")
+    parser.add_argument("--inc",
+                        action='store_true',
+                        help="use incremental cov & mean")
     parser.add_argument('--eval_PRO', type=bool, default=True)
-    parser.add_argument(
-        '--eval_threthold_step',
-        type=int,
-        default=500,
-        help="threthold_step when computing PRO Score")
+    parser.add_argument('--eval_threthold_step',
+                        type=int,
+                        default=500,
+                        help="threthold_step when computing PRO Score")
     parser.add_argument('--einsum', action='store_true')
     parser.add_argument('--non_partial_AUC', action='store_true')
     return parser.parse_args()
@@ -131,31 +133,27 @@ def main():
         args.save_path + f"/{args.method}_{args.backbone}_{args.k}",
         '{}_seed{}.csv'.format(args.category, args.seed))
     for i, class_name in enumerate(class_names):
-        print("Training model {}/{} for {}".format(
-            i + 1, len(class_names), class_name))
+        print("Training model {}/{} for {}".format(i + 1, len(class_names),
+                                                   class_name))
         # build datasets
-        train_dataset = mvtec.MVTecDataset(
-            args.data_path,
-            class_name=class_name,
-            is_train=True,
-            resize=args.resize,
-            cropsize=args.crop_size)
-        train_dataloader = DataLoader(
-            train_dataset,
-            batch_size=args.batch_size,
-            num_workers=args.num_workers)
+        train_dataset = mvtec.MVTecDataset(args.data_path,
+                                           class_name=class_name,
+                                           is_train=True,
+                                           resize=args.resize,
+                                           cropsize=args.crop_size)
+        train_dataloader = DataLoader(train_dataset,
+                                      batch_size=args.batch_size,
+                                      num_workers=args.num_workers)
         train(args, model, train_dataloader, class_name)
         if args.do_eval:
-            test_dataset = mvtec.MVTecDataset(
-                args.data_path,
-                class_name=class_name,
-                is_train=False,
-                resize=args.resize,
-                cropsize=args.crop_size)
-            test_dataloader = DataLoader(
-                test_dataset,
-                batch_size=args.test_batch_size,
-                num_workers=args.num_workers)
+            test_dataset = mvtec.MVTecDataset(args.data_path,
+                                              class_name=class_name,
+                                              is_train=False,
+                                              resize=args.resize,
+                                              cropsize=args.crop_size)
+            test_dataloader = DataLoader(test_dataset,
+                                         batch_size=args.test_batch_size,
+                                         num_workers=args.num_workers)
             result.append(
                 [class_name, *val(args, model, test_dataloader, class_name)])
             if args.category in ['all', 'textures', 'objects']:

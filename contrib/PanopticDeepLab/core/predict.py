@@ -135,27 +135,30 @@ def predict(model,
             # visual semantic segmentation results
             save_path = os.path.join(semantic_save_dir, im_file)
             mkdir(save_path)
-            utils.visualize_semantic(
-                semantic, save_path=save_path, colormap=colormap)
+            utils.visualize_semantic(semantic,
+                                     save_path=save_path,
+                                     colormap=colormap)
             # Save added image for semantic segmentation results
             save_path_ = add_info_to_save_path(save_path, 'add')
-            utils.visualize_semantic(
-                semantic, save_path=save_path_, colormap=colormap, image=ori_im)
+            utils.visualize_semantic(semantic,
+                                     save_path=save_path_,
+                                     colormap=colormap,
+                                     image=ori_im)
             # panoptic to semantic
             ins_mask = panoptic > label_divisor
             pan_to_sem = panoptic.copy()
             pan_to_sem[ins_mask] = pan_to_sem[ins_mask] // label_divisor
             save_path_ = add_info_to_save_path(save_path,
                                                'panoptic_to_semantic')
-            utils.visualize_semantic(
-                pan_to_sem, save_path=save_path_, colormap=colormap)
+            utils.visualize_semantic(pan_to_sem,
+                                     save_path=save_path_,
+                                     colormap=colormap)
             save_path_ = add_info_to_save_path(save_path,
                                                'panoptic_to_semantic_added')
-            utils.visualize_semantic(
-                pan_to_sem,
-                save_path=save_path_,
-                colormap=colormap,
-                image=ori_im)
+            utils.visualize_semantic(pan_to_sem,
+                                     save_path=save_path_,
+                                     colormap=colormap,
+                                     image=ori_im)
 
             # vusual instance segmentation results
             pan_to_ins = panoptic.copy()
@@ -166,26 +169,25 @@ def predict(model,
             utils.visualize_instance(pan_to_ins, save_path=save_path)
             # Save added image for instance segmentation results
             save_path_ = add_info_to_save_path(save_path, 'added')
-            utils.visualize_instance(
-                pan_to_ins, save_path=save_path_, image=ori_im)
+            utils.visualize_instance(pan_to_ins,
+                                     save_path=save_path_,
+                                     image=ori_im)
 
             # visual panoptic segmentation results
             save_path = os.path.join(panoptic_save_dir, im_file)
             mkdir(save_path)
-            utils.visualize_panoptic(
-                panoptic,
-                save_path=save_path,
-                label_divisor=label_divisor,
-                colormap=colormap,
-                ignore_index=ignore_index)
+            utils.visualize_panoptic(panoptic,
+                                     save_path=save_path,
+                                     label_divisor=label_divisor,
+                                     colormap=colormap,
+                                     ignore_index=ignore_index)
             # Save added image for panoptic segmentation results
             save_path_ = add_info_to_save_path(save_path, 'added')
-            utils.visualize_panoptic(
-                panoptic,
-                save_path=save_path_,
-                label_divisor=label_divisor,
-                colormap=colormap,
-                image=ori_im,
-                ignore_index=ignore_index)
+            utils.visualize_panoptic(panoptic,
+                                     save_path=save_path_,
+                                     label_divisor=label_divisor,
+                                     colormap=colormap,
+                                     image=ori_im,
+                                     ignore_index=ignore_index)
 
             progbar_pred.update(i + 1)

@@ -68,14 +68,15 @@ class BaseDataset(Dataset):
         self._file_names = self._get_file_names(mode)
 
         if not os.path.exists(dataset_root):
-            raise FileNotFoundError('there is not `dataset_root`: {}.'.format(
-                dataset_root))
+            raise FileNotFoundError(
+                'there is not `dataset_root`: {}.'.format(dataset_root))
         if self.transforms is None:
             raise ValueError("`transforms` is necessary, but it is None.")
 
         if img_channels not in [1, 3]:
-            raise ValueError("`img_channels` should in [1, 3], but got {}".
-                             format(img_channels))
+            raise ValueError(
+                "`img_channels` should in [1, 3], but got {}".format(
+                    img_channels))
 
     def __len__(self):
         if self._file_length is not None:
@@ -126,8 +127,8 @@ class BaseDataset(Dataset):
                 files2 = f.readlines()
 
             for item in files2:
-                img_name, gt_name = self._process_item_names(item,
-                                                             self.separator)
+                img_name, gt_name = self._process_item_names(
+                    item, self.separator)
                 file_names2.append([img_name, gt_name])
 
             return file_names, file_names2

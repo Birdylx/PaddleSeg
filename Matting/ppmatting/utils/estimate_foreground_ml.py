@@ -66,13 +66,14 @@ def _resize_nearest(dst, src):
     cache=True,
     nogil=True)
 def _estimate_fb_ml(
-        input_image,
-        input_alpha,
-        regularization,
-        n_small_iterations,
-        n_big_iterations,
-        small_size,
-        gradient_weight, ):
+    input_image,
+    input_alpha,
+    regularization,
+    n_small_iterations,
+    n_big_iterations,
+    small_size,
+    gradient_weight,
+):
     h0, w0, depth = input_image.shape
 
     dtype = np.float32
@@ -169,14 +170,15 @@ def _estimate_fb_ml(
 
 
 def estimate_foreground_ml(
-        image,
-        alpha,
-        regularization=1e-5,
-        n_small_iterations=10,
-        n_big_iterations=2,
-        small_size=32,
-        return_background=False,
-        gradient_weight=1.0, ):
+    image,
+    alpha,
+    regularization=1e-5,
+    n_small_iterations=10,
+    n_big_iterations=2,
+    small_size=32,
+    return_background=False,
+    gradient_weight=1.0,
+):
     """Estimates the foreground of an image given its alpha matte.
 
     See :cite:`germer2020multilevel` for reference.
@@ -228,7 +230,8 @@ def estimate_foreground_ml(
         n_small_iterations,
         n_big_iterations,
         small_size,
-        gradient_weight, )
+        gradient_weight,
+    )
 
     if return_background:
         return foreground, background

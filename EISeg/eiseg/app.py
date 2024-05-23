@@ -71,8 +71,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
     def __init__(self, parent=None):
         super(APP_EISeg, self).__init__(parent)
 
-        self.settings = QtCore.QSettings(
-            osp.join(pjpath, "config/setting.txt"), QtCore.QSettings.IniFormat)
+        self.settings = QtCore.QSettings(osp.join(pjpath, "config/setting.txt"),
+                                         QtCore.QSettings.IniFormat)
         currentLang = self.settings.value("language")
         layoutdir = Qt.RightToLeft if currentLang == "Arabic" else Qt.LeftToRight
         self.setLayoutDirection(layoutdir)
@@ -100,7 +100,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
         }
         self.controller = InteractiveController(
             predictor_params=self.predictor_params,
-            prob_thresh=self.segThresh, )
+            prob_thresh=self.segThresh,
+        )
 
         self.video = InferenceCore()
         self.video_images = None
@@ -165,8 +166,9 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
             "det": [self.DetDock],
         }
         # self.display_dockwidget = [True, True, True, True, False, False, False, False, False, False]
-        self.dockStatus = self.settings.value(
-            "dock_status", QVariant([]), type=list)  # 所有widget是否展示
+        self.dockStatus = self.settings.value("dock_status",
+                                              QVariant([]),
+                                              type=list)  # 所有widget是否展示
         if len(self.dockStatus) != len(self.dockWidgets):
             self.dockStatus = [True] * 4 + [False] * (len(self.dockWidgets) - 4)
             self.settings.setValue("dock_status", self.dockStatus)
@@ -177,14 +179,18 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
         self.layoutStatus = self.settings.value("layout_status",
                                                 QByteArray())  # 界面元素位置
 
-        self.recentModels = self.settings.value(
-            "recent_models", QVariant([]), type=list)
-        self.video_recentModels = self.settings.value(
-            "video_recent_models", QVariant([]), type=list)
-        self.recentFiles = self.settings.value(
-            "recent_files", QVariant([]), type=list)
-        self.det_recentModels = self.settings.value(
-            "det_recentModels", "", type=str)
+        self.recentModels = self.settings.value("recent_models",
+                                                QVariant([]),
+                                                type=list)
+        self.video_recentModels = self.settings.value("video_recent_models",
+                                                      QVariant([]),
+                                                      type=list)
+        self.recentFiles = self.settings.value("recent_files",
+                                               QVariant([]),
+                                               type=list)
+        self.det_recentModels = self.settings.value("det_recentModels",
+                                                    "",
+                                                    type=str)
 
         self.config = util.parse_configs(osp.join(pjpath, "config/config.yaml"))
         self.detSettingDir = osp.join(pjpath, "config/labelcorres.json")
@@ -323,114 +329,131 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
             self.openImage,
             "open_image",
             "OpenImage",
-            tr("打开一张图像进行标注"), )
+            tr("打开一张图像进行标注"),
+        )
         open_folder = action(
             tr("&打开文件夹"),
             self.openFolder,
             "open_folder",
             "OpenFolder",
-            tr("打开一个文件夹下所有的图像进行标注"), )
+            tr("打开一个文件夹下所有的图像进行标注"),
+        )
         convert_mask = action(
             tr("&加载分割标签图像"),
             self.loadMaskImage,
             "convert_mask",
             "Convert",
-            tr("将分割的图像和图像标签转换为EISeg可以读取多边形的格式"), )
+            tr("将分割的图像和图像标签转换为EISeg可以读取多边形的格式"),
+        )
         change_output_dir = action(
             tr("&改变标签保存路径"),
             partial(self.changeOutputDir, None),
             "change_output_dir",
             "ChangeOutputDir",
-            tr("改变标签保存的文件夹路径"), )
+            tr("改变标签保存的文件夹路径"),
+        )
         load_param = action(
             tr("&加载模型参数"),
             self.changeParam,
             "load_param",
             "Model",
-            tr("加载一个模型参数"), )
+            tr("加载一个模型参数"),
+        )
         save = action(
             tr("&保存"),
             self.exportLabel,
             "save",
             "Save",
-            tr("保存图像标签"), )
+            tr("保存图像标签"),
+        )
         save_as = action(
             tr("&另存为"),
-            partial(
-                self.exportLabel, saveAs=True),
+            partial(self.exportLabel, saveAs=True),
             "save_as",
             "SaveAs",
-            tr("在指定位置另存为标签"), )
+            tr("在指定位置另存为标签"),
+        )
         auto_save = action(
             tr("&自动保存"),
             self.toggleAutoSave,
             "auto_save",
             "AutoSave",
             tr("翻页同时自动保存"),
-            checkable=True, )
+            checkable=True,
+        )
         # 标注
         turn_prev = action(
             tr("&上一张"),
             partial(self.turnImg, -1),
             "turn_prev",
             "Prev",
-            tr("翻到上一张图片"), )
+            tr("翻到上一张图片"),
+        )
         turn_next = action(
             tr("&下一张"),
             partial(self.turnImg, 1),
             "turn_next",
             "Next",
-            tr("翻到下一张图片"), )
+            tr("翻到下一张图片"),
+        )
         finish_object = action(
             tr("&完成当前目标"),
             self.finishObject,
             "finish_object",
             "Ok",
-            tr("完成当前目标的标注"), )
+            tr("完成当前目标的标注"),
+        )
         clear = action(
             tr("&清除所有标注"),
             self.clearAll,
             "clear",
             "Clear",
-            tr("清除所有标注信息"), )
+            tr("清除所有标注信息"),
+        )
         undo = action(
             tr("&撤销"),
             self.undoClick,
             "undo",
             "Undo",
-            tr("撤销一次点击"), )
+            tr("撤销一次点击"),
+        )
         redo = action(
             tr("&重做"),
             self.redoClick,
             "redo",
             "Redo",
-            tr("重做一次点击"), )
+            tr("重做一次点击"),
+        )
         del_active_polygon = action(
             tr("&删除多边形"),
             self.delActivePolygon,
             "del_active_polygon",
             "DeletePolygon",
-            tr("删除当前选中的多边形"), )
+            tr("删除当前选中的多边形"),
+        )
         del_all_polygon = action(
             tr("&删除所有多边形"),
             self.delAllPolygon,
             "del_all_polygon",
             "DeleteAllPolygon",
-            tr("删除所有的多边形"), )
+            tr("删除所有的多边形"),
+        )
         largest_component = action(
             tr("&保留最大连通块"),
             self.toggleLargestCC,
             "largest_component",
             "SaveLargestCC",
             tr("保留最大的连通块"),
-            checkable=True, )
+            checkable=True,
+        )
         origional_extension = action(
             tr("&标签和图像使用相同拓展名"),
             self.toggleOrigExt,
             "origional_extension",
             "Same",
             tr("标签和图像使用相同拓展名，用于图像中有文件名相同但拓展名不同的情况，防止标签覆盖"),
-            checkable=True, )
+            checkable=True,
+        )
         save_pseudo = action(
             tr("&伪彩色保存"),
             partial(self.toggleSave, "pseudo_color"),
@@ -438,7 +461,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
             "SavePseudoColor",
             tr("保存为伪彩色图像"),
             checkable=True,
-            checked=self.save_status["pseudo_color"], )
+            checked=self.save_status["pseudo_color"],
+        )
         save_grayscale = action(
             tr("&灰度保存"),
             partial(self.toggleSave, "gray_scale"),
@@ -446,7 +470,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
             "SaveGrayScale",
             tr("保存为灰度图像，像素的灰度为对应类型的标签"),
             checkable=True,
-            checked=self.save_status["gray_scale"], )
+            checked=self.save_status["gray_scale"],
+        )
         save_coco = action(
             tr("&COCO保存"),
             partial(self.toggleSave, "coco"),
@@ -454,7 +479,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
             "SaveCOCO",
             tr("保存为COCO格式"),
             checkable=True,
-            checked=self.save_status["coco"], )
+            checked=self.save_status["coco"],
+        )
         # seg
         save_json = action(
             tr("&JSON保存"),
@@ -463,7 +489,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
             "SaveJson",
             tr("保存为labelme的JSON格式"),
             checkable=True,
-            checked=self.save_status["json_labelme"], )
+            checked=self.save_status["json_labelme"],
+        )
         # det
         save_yolo = action(
             tr("&YOLO保存"),
@@ -472,7 +499,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
             "SaveYOLO",
             tr("保存为YOLO格式"),
             checkable=True,
-            checked=self.save_status["yolo"], )
+            checked=self.save_status["yolo"],
+        )
         save_yolo.setEnabled(False)
         # test func
         self.show_rs_poly = action(
@@ -482,7 +510,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
             "Show",
             tr("显示遥感大图的多边形结果"),
             checkable=True,
-            checked=False, )
+            checked=False,
+        )
         self.grid_message = action(
             tr("&启用宫格检测"),
             None,
@@ -490,173 +519,197 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
             "Show",
             tr("针对每张图片启用宫格检测"),
             checkable=True,
-            checked=True, )
-        save_cutout = action(
-            tr("&抠图保存"),
-            partial(self.toggleSave, "cutout"),
-            "save_cutout",
-            "SaveCutout",
-            tr("只保留前景，背景设置为背景色"),
-            checkable=True,
-            checked=self.save_status["cutout"])
+            checked=True,
+        )
+        save_cutout = action(tr("&抠图保存"),
+                             partial(self.toggleSave, "cutout"),
+                             "save_cutout",
+                             "SaveCutout",
+                             tr("只保留前景，背景设置为背景色"),
+                             checkable=True,
+                             checked=self.save_status["cutout"])
         eiseg_med3D = action(
             tr("&EISeg-Med3D"),
             self.enterEISegMed3D,
             "enterEISegMed3D",
             "MedicalImaging",
-            tr("3D医疗交互式分割插件"), )
+            tr("3D医疗交互式分割插件"),
+        )
         set_cutout_background = action(
             tr("&设置抠图背景色"),
             self.setCutoutBackground,
             "set_cutout_background",
             self.cutoutBackground,
-            tr("抠图后背景像素的颜色"), )
+            tr("抠图后背景像素的颜色"),
+        )
         set_cross_color = action(
             tr("&设置十字丝颜色"),
             self.setCrossColor,
             "set_cross_color",
             self.crossColor,
-            tr("十字丝的显示颜色"), )
+            tr("十字丝的显示颜色"),
+        )
         set_cross_color.setEnabled(False)
         close = action(
             tr("&关闭"),
             partial(self.saveImage, True),
             "close",
             "Close",
-            tr("关闭当前图像"), )
+            tr("关闭当前图像"),
+        )
         quit = action(
             tr("&退出"),
             self.close,
             "quit",
             "Quit",
-            tr("退出软件"), )
+            tr("退出软件"),
+        )
         export_label_list = action(
             tr("&导出标签列表"),
             partial(self.exportLabelList, None),
             "export_label_list",
             "ExportLabel",
-            tr("将标签列表导出成标签配置文件"), )
+            tr("将标签列表导出成标签配置文件"),
+        )
         import_label_list = action(
             tr("&载入标签列表"),
             partial(self.importLabelList, None),
             "import_label_list",
             "ImportLabel",
-            tr("从标签配置文件载入标签列表"), )
+            tr("从标签配置文件载入标签列表"),
+        )
         clear_label_list = action(
             tr("&清空标签列表"),
             self.clearLabelList,
             "clear_label_list",
             "ClearLabel",
-            tr("清空所有的标签"), )
+            tr("清空所有的标签"),
+        )
         clear_recent = action(
             tr("&清除近期文件记录"),
             self.clearRecentFile,
             "clear_recent",
             "ClearRecent",
-            tr("清除近期标注文件记录"), )
+            tr("清除近期标注文件记录"),
+        )
         model_widget = action(
             tr("&模型选择"),
             partial(self.toggleWidget, 0),
             "model_widget",
             "Net",
             tr("隐藏/展示模型选择面板"),
-            checkable=True, )
+            checkable=True,
+        )
         data_widget = action(
             tr("&数据列表"),
             partial(self.toggleWidget, 1),
             "data_widget",
             "Data",
             tr("隐藏/展示数据列表面板"),
-            checkable=True, )
+            checkable=True,
+        )
         label_widget = action(
             tr("&标签列表"),
             partial(self.toggleWidget, 2),
             "label_widget",
             "Label",
             tr("隐藏/展示标签列表面板"),
-            checkable=True, )
+            checkable=True,
+        )
         segmentation_widget = action(
             tr("&分割设置"),
             partial(self.toggleWidget, 3),
             "segmentation_widget",
             "Setting",
             tr("隐藏/展示分割设置面板"),
-            checkable=True, )
+            checkable=True,
+        )
         rs_widget = action(
             tr("&遥感设置"),
             partial(self.toggleWidget, 4),
             "rs_widget",
             "RemoteSensing",
             tr("隐藏/展示遥感设置面板"),
-            checkable=True, )
+            checkable=True,
+        )
         mi_widget = action(
             tr("&医疗设置"),
             partial(self.toggleWidget, 5),
             "mi_widget",
             "MedicalImaging",
             tr("隐藏/展示医疗设置面板"),
-            checkable=True, )
+            checkable=True,
+        )
         grid_ann_widget = action(
             tr("&N2宫格标注"),
             partial(self.toggleWidget, 6),
             "grid_ann_widget",
             "N2",
             tr("隐藏/展示N^2宫格细粒度标注面板"),
-            checkable=True, )
+            checkable=True,
+        )
         video_play_widget = action(
             tr("&视频播放"),
             partial(self.toggleWidget, 7),
             "video_play_widget",
             "Video",
             tr("隐藏/展示视频播放面板"),
-            checkable=True, )
+            checkable=True,
+        )
         video_anno_widget = action(
             tr("&视频标注"),
             partial(self.toggleWidget, 8),
             "video_anno_widget",
             "VideoAnno",
             tr("隐藏/展示视频标注面板"),
-            checkable=True, )
+            checkable=True,
+        )
         td_widget = action(
             tr("&3D显示"),
             partial(self.toggleWidget, 9),
             "td_widget",
             "3D",
             tr("隐藏/展示3D显示面板"),
-            checkable=True, )
+            checkable=True,
+        )
         det_widget = action(
             tr("&检测设置"),
             partial(self.toggleWidget, 10),
             "det_widget",
             "DetSetting",
             tr("隐藏/展示检测设置面板"),
-            checkable=True, )
+            checkable=True,
+        )
         det_widget.setEnabled(False)
         quick_start = action(
             tr("&快速入门"),
             self.quickStart,
             "quick_start",
             "Use",
-            tr("主要功能使用介绍"), )
+            tr("主要功能使用介绍"),
+        )
         report_bug = action(
             tr("&反馈问题"),
             self.reportBug,
             "report_bug",
             "ReportBug",
-            tr("通过Github Issue反馈使用过程中遇到的问题。我们会尽快进行修复"), )
+            tr("通过Github Issue反馈使用过程中遇到的问题。我们会尽快进行修复"),
+        )
         edit_shortcuts = action(
             tr("&编辑快捷键"),
             self.editShortcut,
             "edit_shortcuts",
             "Shortcut",
-            tr("编辑软件快捷键"), )
+            tr("编辑软件快捷键"),
+        )
         toggle_logging = action(
             tr("&调试日志"),
             self.toggleLogging,
             "toggle_logging",
             "Log",
             tr("用于观察软件执行过程和进行debug。我们不会自动收集任何日志，可能会希望您在反馈问题时间打开此功能，帮助我们定位问题。"),
-            checkable=True, )
+            checkable=True,
+        )
         toggle_logging.setChecked(bool(self.settings.value("log", False)))
         use_qt_widget = action(
             tr("&使用QT文件窗口"),
@@ -664,26 +717,28 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
             "use_qt_widget",
             "Qt",
             tr("如果使用文件选择窗口时遇到问题可以选择使用Qt窗口"),
-            checkable=True, )
+            checkable=True,
+        )
         typing_seg = action(
             tr("&分割标注模式"),
             partial(self.toggleMode, 0),
             "typing_seg",
             "Segmentation",
-            tr("交互式分割标注模式"), )
+            tr("交互式分割标注模式"),
+        )
         typing_det = action(
             tr("&检测标注模式"),
             partial(self.toggleMode, 1),
             "typing_det",
             "Detection",
-            tr("预标注检测标注模式"), )
+            tr("预标注检测标注模式"),
+        )
         # print(
         #     "use_qt_widget",
         #     self.settings.value("use_qt_widget", type=bool),
         # )
         use_qt_widget.setChecked(
-            self.settings.value(
-                "use_qt_widget", False, type=bool))
+            self.settings.value("use_qt_widget", False, type=bool))
 
         self.actions = util.struct()
         for name in dir():
@@ -697,10 +752,10 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
             return widget
 
         recent_files = newWidget(self.tr("近期文件"), "Data", self.updateRecentFile)
-        recent_params = newWidget(
-            self.tr("近期模型及参数"), "Net", self.updateModelMenu)
-        video_recent_params = newWidget(
-            self.tr("近期视频传播模型及参数"), "Net", self.updateVideoModelMenu)
+        recent_params = newWidget(self.tr("近期模型及参数"), "Net",
+                                  self.updateModelMenu)
+        video_recent_params = newWidget(self.tr("近期视频传播模型及参数"), "Net",
+                                        self.updateVideoModelMenu)
         languages = newWidget(self.tr("语言"), "Language", self.updateLanguage)
 
         self.menus = util.struct(
@@ -727,11 +782,13 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                 turn_prev,
                 close,
                 None,
-                quit, ),
+                quit,
+            ),
             labelMenu=(
                 export_label_list,
                 import_label_list,
-                clear_label_list, ),
+                clear_label_list,
+            ),
             functionMenu=(
                 largest_component,
                 del_active_polygon,
@@ -751,7 +808,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                 # test
                 self.show_rs_poly,
                 None,
-                self.grid_message, ),
+                self.grid_message,
+            ),
             showMenu=(
                 model_widget,
                 data_widget,
@@ -763,14 +821,16 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                 video_play_widget,
                 video_anno_widget,
                 td_widget,
-                det_widget, ),
+                det_widget,
+            ),
             helpMenu=(
                 languages,
                 use_qt_widget,
                 quick_start,
                 report_bug,
                 edit_shortcuts,
-                toggle_logging, ),
+                toggle_logging,
+            ),
             expandMenu=(eiseg_med3D, ),
             toolBar=(
                 finish_object,
@@ -790,7 +850,9 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                 None,
                 largest_component,
                 "spacer",
-                (typing_seg, typing_det), ), )
+                (typing_seg, typing_det),
+            ),
+        )
 
         def menu(title, actions=None):
             menu = self.menuBar().addMenu(title)
@@ -811,7 +873,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
         color = QtWidgets.QColorDialog.getColor(
             QtGui.QColor(*c),
             self,
-            options=QtWidgets.QColorDialog.ShowAlphaChannel, )
+            options=QtWidgets.QColorDialog.ShowAlphaChannel,
+        )
         action = color.getRgb()
         self.settings.setValue(setting_name, [int(c) for c in action])
         return action
@@ -852,7 +915,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                 lang,
                 partial(self.changeLanguage, lang),
                 None,
-                lang if lang != "Arabic" else "Egypt", )
+                lang if lang != "Arabic" else "Egypt",
+            )
             self.menus.languages.addAction(entry)
 
     def changeLanguage(self, lang):
@@ -870,14 +934,15 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
     def updateRecentFile(self):
         menu = self.menus.recent_files
         menu.clear()
-        recentFiles = self.settings.value(
-            "recent_files", QVariant([]), type=list)
+        recentFiles = self.settings.value("recent_files",
+                                          QVariant([]),
+                                          type=list)
         files = [f for f in recentFiles if osp.exists(f)]
         for i, f in enumerate(files):
             icon = util.newIcon("File")
-            action = QtWidgets.QAction(icon, "&【%d】 %s" %
-                                       (i + 1, QtCore.QFileInfo(f).fileName()),
-                                       self)
+            action = QtWidgets.QAction(
+                icon, "&【%d】 %s" % (i + 1, QtCore.QFileInfo(f).fileName()),
+                self)
             action.triggered.connect(partial(self.openRecentImage, f))
             menu.addAction(action)
         if len(files) == 0:
@@ -912,7 +977,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
             action = QtWidgets.QAction(
                 icon,
                 f"{osp.basename(m['param_path'])}",
-                self, )
+                self,
+            )
             action.triggered.connect(
                 partial(self.setModelParam, m["param_path"]))
             menu.addAction(action)
@@ -932,7 +998,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
             action = QtWidgets.QAction(
                 icon,
                 f"{osp.basename(m['param_path'])}",
-                self, )
+                self,
+            )
             action.triggered.connect(
                 partial(self.setVideoModelParam, m["param_path"]))
             menu.addAction(action)
@@ -952,11 +1019,11 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
             return True
         return False
 
-    def changeParam(self, param_path: str=None):
+    def changeParam(self, param_path: str = None):
         if not param_path:
             filters = self.tr("Paddle静态模型权重文件(*.pdiparams)")
-            start_path = ("." if len(self.recentModels) == 0 else
-                          osp.dirname(self.recentModels[-1]["param_path"]))
+            start_path = ("." if len(self.recentModels) == 0 else osp.dirname(
+                self.recentModels[-1]["param_path"]))
             if self.settings.value("use_qt_widget", False, type=bool):
                 options = QtWidgets.QFileDialog.DontUseNativeDialog
             else:
@@ -966,7 +1033,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                 self.tr("选择传播模型参数") + " - " + __APPNAME__,
                 start_path,
                 filters,
-                options=options, )
+                options=options,
+            )
             # QtWidgets.QFileDialog.DontUseNativeDialog
         if not param_path:
             return False
@@ -1006,11 +1074,11 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                 self.warnException(res)
                 return False
 
-    def changePropgationParam(self, param_path: str=None):
+    def changePropgationParam(self, param_path: str = None):
         if not param_path:
             filters = self.tr("Paddle静态模型权重文件(*.pdiparams)")
-            start_path = (
-                ".") if len(self.video_recentModels) == 0 else osp.dirname(
+            start_path = (".") if len(
+                self.video_recentModels) == 0 else osp.dirname(
                     self.video_recentModels[-1]["param_path"])
             if self.settings.value("use_qt_widget", False, type=bool):
                 options = QtWidgets.QFileDialog.DontUseNativeDialog
@@ -1021,7 +1089,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                 self.tr("选择模型参数") + " - " + __APPNAME__,
                 start_path,
                 filters,
-                options=options, )
+                options=options,
+            )
             # QtWidgets.QFileDialog.DontUseNativeDialog
         if not param_path:
             return False
@@ -1089,7 +1158,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                 self.tr("选择标签配置文件路径") + " - " + __APPNAME__,
                 ".",
                 filters,
-                options=options, )
+                options=options,
+            )
         filePath = normcase(filePath)
         if not osp.exists(filePath):
             return
@@ -1097,7 +1167,7 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
         logger.info(f"Loaded label list: {self.controller.labelList.labelList}")
         self.refreshLabelList()
 
-    def exportLabelList(self, savePath: str=None):
+    def exportLabelList(self, savePath: str = None):
         if len(self.controller.labelList) == 0:
             self.warn(self.tr("没有需要保存的标签"), self.tr("请先添加标签之后再进行保存！"))
             return
@@ -1107,7 +1177,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                 self,
                 self.tr("保存标签配置文件"),
                 ".",
-                filters, )
+                filters,
+            )
             dlg.setOption(QtWidgets.QFileDialog.DontConfirmOverwrite, False)
             if self.settings.value("use_qt_widget", False, type=bool):
                 options = QtWidgets.QFileDialog.DontUseNativeDialog
@@ -1120,7 +1191,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                 self.tr("选择保存标签配置文件路径") + " - " + __APPNAME__,
                 ".",
                 filters,
-                options=options, )
+                options=options,
+            )
         self.controller.exportLabel(savePath)
 
     def addLabel(self, idx=None, txt="", c=None):
@@ -1164,7 +1236,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
         res = self.warn(
             self.tr("清空标签列表?"),
             self.tr("请确认是否要清空标签列表"),
-            QMessageBox.Yes | QMessageBox.Cancel, )
+            QMessageBox.Yes | QMessageBox.Cancel,
+        )
         if res == QMessageBox.Cancel:
             return False
         self.controller.labelList.clear()
@@ -1237,12 +1310,11 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                         table.setRowHidden(row, True)
                     self.labellist_reorder()  # 序号重排
                 else:
-                    self.warn(
-                        self.tr("无法删除"),
-                        self.tr("当前多边形中存在此标签"), QMessageBox.Yes)
+                    self.warn(self.tr("无法删除"), self.tr("当前多边形中存在此标签"),
+                              QMessageBox.Yes)
             elif self.status == self.ANNING:
-                self.warn(
-                    self.tr("无法删除"), self.tr("交互式标注模式无法删除标签"), QMessageBox.Yes)
+                self.warn(self.tr("无法删除"), self.tr("交互式标注模式无法删除标签"),
+                          QMessageBox.Yes)
 
         if col == 0 or col == 1:
             for cl in range(2):
@@ -1289,7 +1361,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                 self.setDirty,
                 color,
                 color,
-                self.opacity, )
+                self.opacity,
+            )
             self.scene.addItem(poly)
             self.scene.polygon_items.append(poly)
             for p in points:
@@ -1302,7 +1375,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                 res = self.warn(
                     self.tr("确认删除？"),
                     self.tr("确认要删除当前选中多边形标注？"),
-                    QMessageBox.Yes | QMessageBox.Cancel, )
+                    QMessageBox.Yes | QMessageBox.Cancel,
+                )
                 if res == QMessageBox.Yes:
                     self.delPolygon(polygon)
 
@@ -1312,7 +1386,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
             if polygon.coco_id:
                 self.coco.delAnnotation(
                     polygon.coco_id,
-                    self.coco.imgNameToId[osp.basename(self.imagePath)], )
+                    self.coco.imgNameToId[osp.basename(self.imagePath)],
+                )
         self.setDirty(True)
 
     def delAllPolygon(self):
@@ -1349,7 +1424,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                 continue
             tmp_mask = (mask == i_clas).astype("uint8") * 255
             curr_polygon = util.get_polygon(
-                tmp_mask, img_size=m_shape,
+                tmp_mask,
+                img_size=m_shape,
                 building=self.boundaryRegular.isChecked())
             color = self.controller.labelList[i_clas - 1].color
             self.createPoly(curr_polygon, color, i_clas - 1)
@@ -1361,7 +1437,7 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
         self.listFiles.setCurrentRow(self.currIdx)  # 移动位置
         self.imagePaths.append(file_path)
 
-    def openImage(self, filePath: str=None):
+    def openImage(self, filePath: str = None):
         # 在triggered.connect中使用不管默认filePath为什么返回值都为False
         if not isinstance(filePath, str) or filePath is False:
             prompts = ["图片", "医学影像", "遥感影像", "视频"]
@@ -1383,7 +1459,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                 self.tr("选择待标注图片") + " - " + __APPNAME__,
                 recentPath,
                 filters,
-                options=options, )
+                options=options,
+            )
             if len(filePath) == 0:  # 用户没选就直接关闭窗口
                 return
             if osp.splitext(filePath)[-1] in self.video_ext:
@@ -1403,7 +1480,7 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
         self.imagePaths.append(filePath)
         return True
 
-    def openFolder(self, inputDir: str=None):
+    def openFolder(self, inputDir: str = None):
         # 1. 如果没传文件夹，弹框让用户选
         if not isinstance(inputDir, str):
             recentPath = self.settings.value("recent_files", [])
@@ -1411,15 +1488,16 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                 recentPath = "."
             else:
                 recentPath = osp.dirname(recentPath[-1])
-            options = (QtWidgets.QFileDialog.ShowDirsOnly |
-                       QtWidgets.QFileDialog.DontResolveSymlinks)
+            options = (QtWidgets.QFileDialog.ShowDirsOnly
+                       | QtWidgets.QFileDialog.DontResolveSymlinks)
             if self.settings.value("use_qt_widget", False, type=bool):
                 options = options | QtWidgets.QFileDialog.DontUseNativeDialog
             inputDir = QtWidgets.QFileDialog.getExistingDirectory(
                 self,
                 self.tr("选择待标注图片文件夹") + " - " + __APPNAME__,
                 recentPath,
-                options, )
+                options,
+            )
             if not osp.exists(inputDir):
                 return
 
@@ -1487,14 +1565,12 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
         self.video_first = None
 
         # tiff数据判断类型
-        if path.lower().endswith((".tif", ".tiff")) and self.rs_tiff_support is None:
+        if path.lower().endswith(
+            (".tif", ".tiff")) and self.rs_tiff_support is None:
             tiff_checked_dialog = CustomDialog(
-                self, 
-                self.tr("tiff格式检查"),
-                self.tr("检测到当前图像为tiff格式，请指定其为遥感数据还是医疗数据"),
-                self.tr("遥感数据"),
-                self.tr("医疗数据")
-            )
+                self, self.tr("tiff格式检查"),
+                self.tr("检测到当前图像为tiff格式，请指定其为遥感数据还是医疗数据"), self.tr("遥感数据"),
+                self.tr("医疗数据"))
             if (tiff_checked_dialog.exec_()):
                 self.rs_tiff_support = tiff_checked_dialog.rs_support
 
@@ -1520,7 +1596,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                 res = self.warn(
                     self.tr("未启用医疗组件"),
                     self.tr("加载医疗影像需启用医疗组件，是否立即启用？"),
-                    QMessageBox.Yes | QMessageBox.Cancel, )
+                    QMessageBox.Yes | QMessageBox.Cancel,
+                )
                 if res == QMessageBox.Cancel:
                     return False
                 self.toggleWidget(5)
@@ -1548,13 +1625,15 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
             image = med.windowlize(image, self.ww, self.wc)
 
         # 遥感图像
-        if path.lower().endswith(tuple(self.formats[
-                2])) and self.rs_tiff_support:  # imghdr.what(path) == "tiff":
+        if path.lower().endswith(
+                tuple(self.formats[2])
+        ) and self.rs_tiff_support:  # imghdr.what(path) == "tiff":
             if not self.dockStatus[4]:
                 res = self.warn(
                     self.tr("未打开遥感组件"),
                     self.tr("打开遥感图像需启用遥感组件，是否立即启用？"),
-                    QMessageBox.Yes | QMessageBox.Cancel, )
+                    QMessageBox.Yes | QMessageBox.Cancel,
+                )
                 if res == QMessageBox.Cancel:
                     return False
                 self.toggleWidget(4)
@@ -1564,8 +1643,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
             gi = self.raster.showGeoInfo()
             self.edtGeoinfo.setText(
                 self.tr("● 波段数：") + gi[0] + "\n" + self.tr("● 数据类型：") + gi[1] +
-                "\n" + self.tr("● 行数：") + gi[2] + "\n" + self.tr("● 列数：") + gi[
-                    3] + "\n" + "● EPSG：" + gi[4])
+                "\n" + self.tr("● 行数：") + gi[2] + "\n" + self.tr("● 列数：") +
+                gi[3] + "\n" + "● EPSG：" + gi[4])
             if max(self.rsRGB) > self.raster.geoinfo.count:
                 self.rsRGB = [1, 1, 1]
             self.raster.setBand(self.rsRGB)
@@ -1596,7 +1675,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                 res = self.warn(
                     self.tr("未启用视频组件"),
                     self.tr("加载视频需启用视频组件，是否立即启用？"),
-                    QMessageBox.Yes | QMessageBox.Cancel, )
+                    QMessageBox.Yes | QMessageBox.Cancel,
+                )
                 if res == QMessageBox.Cancel:
                     return False
                 self.toggleWidget(7)
@@ -1621,9 +1701,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
 
         # 如果没找到图片的reader
         if image is None:
-            self.warn(
-                self.tr("打开图像失败"),
-                self.tr("未找到 ") + path + self.tr(" 文件对应的读取程序"))
+            self.warn(self.tr("打开图像失败"),
+                      self.tr("未找到 ") + path + self.tr(" 文件对应的读取程序"))
             return
         self.image = image
         self.controller.setImage(image, self.type_seg)
@@ -1679,7 +1758,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                         color,
                         self.opacity,
                         ann["id"],
-                        is_rect=(not self.type_seg), )  # 可以创建rect
+                        is_rect=(not self.type_seg),
+                    )  # 可以创建rect
                     self.scene.addItem(poly)
                     self.scene.polygon_items.append(poly)
                     for p in points:
@@ -1712,6 +1792,7 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
         self.setDirty(False)
 
     def createRects(self, save_hand=False):
+
         def get_p_size(p):
             pp = p.points
             x_min = int(min(pp[0].x(), pp[1].x(), pp[2].x(), pp[3].x()))
@@ -1761,8 +1842,9 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                     resLsit.append(lab)
 
         # 面积大小排序
-        box_list = sorted(
-            resLsit, key=lambda rbox: rbox[2][0] * rbox[2][1], reverse=True)
+        box_list = sorted(resLsit,
+                          key=lambda rbox: rbox[2][0] * rbox[2][1],
+                          reverse=True)
         # 清除全部
         self.delAllPolygon()
         # 添加
@@ -1824,7 +1906,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
         res = self.warn(
             self.tr("完成最后一个目标？"),
             self.tr("是否完成最后一个目标的标注，不完成不会进行保存。"),
-            QMessageBox.Yes | QMessageBox.Cancel, )
+            QMessageBox.Yes | QMessageBox.Cancel,
+        )
         if res == QMessageBox.Yes:
             self.finishObject()
             self.exportLabel()
@@ -1844,7 +1927,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                     res = self.warn(
                         self.tr("保存标签？"),
                         self.tr("标签尚未保存，是否保存标签"),
-                        QMessageBox.Yes | QMessageBox.Cancel, )
+                        QMessageBox.Yes | QMessageBox.Cancel,
+                    )
                     if res == QMessageBox.Yes:
                         self.exportLabel()
                 self.setDirty(False)
@@ -1890,7 +1974,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                     ext = ".png"
                 savePath = osp.join(
                     self.outputDir,
-                    name + ext, )
+                    name + ext,
+                )
                 if self.video_images is not None and self.video_masks is not None:
                     savePath = osp.join(self.outputDir, name)
                     os.makedirs(savePath, exist_ok=True)
@@ -1910,7 +1995,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                 res = self.warn(
                     self.tr("文件夹已经存在"),
                     self.tr("该文件夹下不为空，您确定继续保存在此路径下吗？"),
-                    QMessageBox.Yes | QMessageBox.Cancel, )
+                    QMessageBox.Yes | QMessageBox.Cancel,
+                )
                 if res == QMessageBox.Cancel:
                     return
             os.makedirs(savePath, exist_ok=True)
@@ -1942,8 +2028,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                     # print(pseudo.shape, mask.shape)
                     for lab in self.controller.labelList:
                         pseudo[mask == lab.idx, :] = lab.color[::-1]
-                    cv2.imwrite(
-                        os.path.join(mask_dir, '{:05d}.png'.format(i)), pseudo)
+                    cv2.imwrite(os.path.join(mask_dir, '{:05d}.png'.format(i)),
+                                pseudo)
                     # Save overlay
                     overlay = overlay_davis(self.video_images[i],
                                             self.video_masks[i], self.opacity,
@@ -2019,15 +2105,15 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
             # 4.4 保存labelme相同格式的json文件
             if self.save_status["json_labelme"]:
                 polygons = self.scene.polygon_items
-                labels = dict(
-                    version="1.1",
-                    flags={},
-                    shapes=[],
-                    imagePath=self.imagePath,
-                    imageData=base64.b64encode(
-                        self.ndarray2bytes(self.image)).decode("utf-8"),
-                    imageHeight=self.image.shape[0],
-                    imageWidth=self.image.shape[1])
+                labels = dict(version="1.1",
+                              flags={},
+                              shapes=[],
+                              imagePath=self.imagePath,
+                              imageData=base64.b64encode(
+                                  self.ndarray2bytes(
+                                      self.image)).decode("utf-8"),
+                              imageHeight=self.image.shape[0],
+                              imageWidth=self.image.shape[1])
 
                 for polygon in polygons:
                     l = self.controller.labelList[polygon.labelIndex - 1]
@@ -2042,8 +2128,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                         label["points"].append(p)
                     labels["shapes"].append(label)
 
-                if not osp.exists(
-                        osp.join(os.path.dirname(savePath), "labelme")):
+                if not osp.exists(osp.join(os.path.dirname(savePath),
+                                           "labelme")):
                     os.makedirs(osp.join(os.path.dirname(savePath), "labelme"))
                 ri = savePath.replace("\\", "/").rindex('/')
                 fileName = savePath[ri + 1:]
@@ -2062,8 +2148,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
             # 4.5 保存coco
             if self.save_status["coco"]:
                 if not self.coco.hasImage(osp.basename(self.imagePath)):
-                    imgId = self.coco.addImage(
-                        osp.basename(self.imagePath), s[1], s[0])
+                    imgId = self.coco.addImage(osp.basename(self.imagePath),
+                                               s[1], s[0])
                 else:
                     imgId = self.coco.imgNameToId[osp.basename(self.imagePath)]
                 for polygon in self.scene.polygon_items:
@@ -2073,8 +2159,9 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                             points.append(val)
 
                     if not polygon.coco_id:
-                        annId = self.coco.addAnnotation(
-                            imgId, polygon.labelIndex, points)
+                        annId = self.coco.addAnnotation(imgId,
+                                                        polygon.labelIndex,
+                                                        points)
                         polygon.coco_id = annId
                     else:
                         self.coco.updateAnnotation(polygon.coco_id, imgId,
@@ -2087,9 +2174,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                 saveDir = (self.outputDir if self.outputDir is not None else
                            osp.dirname(savePath))
                 cocoPath = osp.join(saveDir, "annotations.json")
-                open(
-                    cocoPath, "w",
-                    encoding="utf-8").write(json.dumps(self.coco.dataset))
+                open(cocoPath, "w",
+                     encoding="utf-8").write(json.dumps(self.coco.dataset))
         else:  # 检测保存
             self.save_voc_format(savePath=savePath, shape=s)
             if self.save_status["coco"]:
@@ -2110,7 +2196,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
             self,
             self.tr("保存标签文件路径"),
             osp.dirname(self.imagePath),
-            filters, )
+            filters,
+        )
         dlg.setDefaultSuffix("png")
         dlg.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
         dlg.setOption(QtWidgets.QFileDialog.DontConfirmOverwrite, False)
@@ -2119,14 +2206,16 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
             savePath = dlg.getExistingDirectory(
                 self,
                 self.tr("选择标签文件保存路径"),
-                osp.splitext(osp.basename(self.imagePath))[0], )
+                osp.splitext(osp.basename(self.imagePath))[0],
+            )
             name, ext = osp.splitext(osp.basename(self.imagePath))
             savePath = osp.join(savePath, name)
         else:
             savePath, _ = dlg.getSaveFileName(
                 self,
                 self.tr("选择标签文件保存路径"),
-                osp.splitext(osp.basename(self.imagePath))[0] + ".png", )
+                osp.splitext(osp.basename(self.imagePath))[0] + ".png",
+            )
         return savePath
 
     def eximgsInit(self):
@@ -2142,15 +2231,16 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
     def changeOutputDir(self, outputDir=None):
         # 1. 弹框选择标签路径
         if outputDir is None:
-            options = (QtWidgets.QFileDialog.ShowDirsOnly |
-                       QtWidgets.QFileDialog.DontResolveSymlinks)
+            options = (QtWidgets.QFileDialog.ShowDirsOnly
+                       | QtWidgets.QFileDialog.DontResolveSymlinks)
             if self.settings.value("use_qt_widget", False, type=bool):
                 options = options | QtWidgets.QFileDialog.DontUseNativeDialog
             outputDir = QtWidgets.QFileDialog.getExistingDirectory(
                 self,
                 self.tr("选择标签保存路径") + " - " + __APPNAME__,
                 self.settings.value("output_dir", "."),
-                options, )
+                options,
+            )
         if not osp.exists(outputDir):
             return False
         self.settings.setValue("output_dir", outputDir)
@@ -2161,8 +2251,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
             if self.type_seg:
                 defaultPath = osp.join(self.outputDir, "annotations.json")
             else:
-                defaultPath = osp.join(
-                    osp.join(self.outputDir, "COCO"), "annotations.json")
+                defaultPath = osp.join(osp.join(self.outputDir, "COCO"),
+                                       "annotations.json")
             if osp.exists(defaultPath):
                 f = open(defaultPath, "a")
                 f.close()
@@ -2278,12 +2368,12 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
             color,
             self.opacity,
             is_rect=True,
-            hand_rect=hand_rect, )
+            hand_rect=hand_rect,
+        )
         self.scene.addItem(rect)
         self.scene.polygon_items.append(rect)
-        rect.addRect(
-            QtCore.QPointF(p[0], p[1]),
-            QtCore.QSizeF(size[0], size[1]), hand_rect)
+        rect.addRect(QtCore.QPointF(p[0], p[1]),
+                     QtCore.QSizeF(size[0], size[1]), hand_rect)
         self.setDirty(True)  # 开启保存
 
     def canvasDraw(self):
@@ -2304,7 +2394,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
             return
         image = self.controller.get_visualization(
             alpha_blend=self.opacity,
-            click_radius=self.clickRadius, )
+            click_radius=self.clickRadius,
+        )
         height, width, _ = image.shape
         bytesPerLine = 3 * width
         image = QImage(image.data, width, height, bytesPerLine,
@@ -2377,7 +2468,7 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
         if type == "coco" and self.save_status["coco"]:
             self.initCoco()
 
-    def initCoco(self, coco_path: str=None):
+    def initCoco(self, coco_path: str = None):
         if not coco_path:
             if not self.outputDir or not osp.exists(self.outputDir):
                 coco_path = None
@@ -2406,7 +2497,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                 self.warn(
                     self.tr("无法导入GDAL或rasterio"),
                     self.tr("使用遥感工具需要安装GDAL和rasterio！"),
-                    QMessageBox.Yes, )
+                    QMessageBox.Yes,
+                )
             self.statusbar.showMessage(self.tr("打开遥感工具失败，请安装GDAL和rasterio"))
             self.dockStatus[4] = False
 
@@ -2416,7 +2508,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                 self.warn(
                     self.tr("无法导入SimpleITK"),
                     self.tr("使用医疗工具需要安装SimpleITK！"),
-                    QMessageBox.Yes, )
+                    QMessageBox.Yes,
+                )
             self.statusbar.showMessage(self.tr("打开医疗工具失败，请安装SimpleITK"))
             self.dockStatus[5] = False
 
@@ -2430,7 +2523,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                 self.warn(
                     self.tr("无法导入VTK"),
                     self.tr("使用3D显示工具需要安装VTK！"),
-                    QMessageBox.Yes, )
+                    QMessageBox.Yes,
+                )
             self.statusbar.showMessage(self.tr("打开3D显示工具失败，请安装VTK"))
             self.dockStatus[9] = False
 
@@ -2519,8 +2613,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
             except TypeError:
                 pass
             self.bandCombos[i].clear()
-            self.bandCombos[i].addItems(
-                [("band_" + str(j + 1)) for j in range(bands)])
+            self.bandCombos[i].addItems([("band_" + str(j + 1))
+                                         for j in range(bands)])
             try:
                 self.bandCombos[i].setCurrentIndex(self.rsRGB[i] - 1)
             except IndexError:
@@ -2551,8 +2645,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
             for c in range(grid_col_count):
                 self.gridTable.setItem(r, c, QtWidgets.QTableWidgetItem())
                 self.gridTable.item(r, c).setBackground(self.GRID_COLOR["idle"])
-                self.gridTable.item(r, c).setFlags(
-                    Qt.ItemIsSelectable)  # 无法高亮选择
+                self.gridTable.item(r,
+                                    c).setFlags(Qt.ItemIsSelectable)  # 无法高亮选择
         # 初始显示第一个
         self.grid.curr_idx = (0, 0)
         self.gridTable.item(0, 0).setBackground(self.GRID_COLOR["overlying"])
@@ -2578,12 +2672,12 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
         # load mask
         for jlab in self.grid.json_labels:
             pts = np.int32([np.array(jlab["points"])])
-            cv2.fillPoly(
-                self.grid.mask_grids[jlab["row"]][jlab["col"]],
-                pts=pts,
-                color=jlab["labelIdx"])
+            cv2.fillPoly(self.grid.mask_grids[jlab["row"]][jlab["col"]],
+                         pts=pts,
+                         color=jlab["labelIdx"])
 
     def changeGrid(self, row, col):
+
         def find_in_json(r, c, json_labels):
             idxs = []
             for idx, json_label in enumerate(json_labels):
@@ -2598,11 +2692,11 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
             self.saveGrid()  # 切换时自动保存上一块
             last_r, last_c = self.grid.curr_idx
             if self.grid.mask_grids[last_r][last_c] is None:
-                self.gridTable.item(
-                    last_r, last_c).setBackground(self.GRID_COLOR["idle"])
+                self.gridTable.item(last_r, last_c).setBackground(
+                    self.GRID_COLOR["idle"])
             else:
-                self.gridTable.item(
-                    last_r, last_c).setBackground(self.GRID_COLOR["finised"])
+                self.gridTable.item(last_r, last_c).setBackground(
+                    self.GRID_COLOR["finised"])
         self.delAllPolygon()
         image, _ = self.grid.getGrid(row, col)
         self.controller.setImage(image)
@@ -2624,7 +2718,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                     self.setDirty,
                     color,
                     color,
-                    self.opacity, )
+                    self.opacity,
+                )
                 self.scene.addItem(poly)
                 self.scene.polygon_items.append(poly)
                 for p in points:
@@ -2684,8 +2779,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                 geoinfo.dtype = self.raster.geoinfo.dtype
                 geoinfo.crs = self.raster.geoinfo.crs
                 geoinfo.geotf = tf
-                self.raster.saveMask(self.grid.mask_grids[row][col], save_lab_path,
-                                    geoinfo)  # 保存mask
+                self.raster.saveMask(self.grid.mask_grids[row][col],
+                                     save_lab_path, geoinfo)  # 保存mask
                 self.raster.saveMask(im, save_ima_path, geoinfo, 3)  # 保存图像
 
     def turnGrid(self, delta):
@@ -2729,9 +2824,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
         self.delAllPolygon()  # 清理
         mask = self.grid.splicingList(save_path)
         json_path = save_path.replace(".png", "_grid_saved.json")
-        open(
-            json_path, "w",
-            encoding="utf-8").write(json.dumps(self.grid.json_labels, cls=JSEncoder))
+        open(json_path, "w", encoding="utf-8").write(
+            json.dumps(self.grid.json_labels, cls=JSEncoder))
         if self.grid.__class__.__name__ == "RSGrids":
             self.image, geo_tf = self.raster.getArray()
             if geo_tf is None:
@@ -2744,8 +2838,9 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
         # -- RS Show polygon demo --
         if self.show_rs_poly.isChecked():
             h, w = self.image.shape[:2]
-            th_mask = cv2.resize(
-                mask, dsize=(w, h), interpolation=cv2.INTER_NEAREST)
+            th_mask = cv2.resize(mask,
+                                 dsize=(w, h),
+                                 interpolation=cv2.INTER_NEAREST)
             indexs = np.unique(th_mask)[1:]
             for i in indexs:
                 i_mask = np.zeros_like(th_mask, dtype="uint8")
@@ -2762,8 +2857,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
         for r in range(grid_row_count):
             for c in range(grid_col_count):
                 try:
-                    self.gridTable.item(
-                        r, c).setBackground(self.GRID_COLOR["idle"])
+                    self.gridTable.item(r, c).setBackground(
+                        self.GRID_COLOR["idle"])
                 except:
                     pass
         self.raster = None
@@ -2852,9 +2947,9 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
     def saveLayout(self):
         # 保存界面
         self.settings.setValue("layout_status", QByteArray(self.saveState()))
-        self.settings.setValue(
-            "save_status",
-            [(k, self.save_status[k]) for k in self.save_status.keys()])
+        self.settings.setValue("save_status",
+                               [(k, self.save_status[k])
+                                for k in self.save_status.keys()])
         # 如果设置了保存路径，把标签也保存下
         if self.outputDir is not None and len(self.controller.labelList) != 0:
             self.exportLabelList(osp.join(self.outputDir, "autosave_label.txt"))
@@ -2870,7 +2965,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
 
     def enterEISegMed3D(self):
         webbrowser.open(
-            "https://github.com/PaddlePaddle/PaddleSeg/tree/develop/EISeg/med3d")
+            "https://github.com/PaddlePaddle/PaddleSeg/tree/develop/EISeg/med3d"
+        )
 
     def quickStart(self):
         # self.saveImage(True)
@@ -3012,7 +3108,7 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
         self.videoPlay.setText(self.tr("播放"))
         self.videoPlay.setIcon(
             QtGui.QIcon(osp.join(pjpath, "resource/Play.png")))
-            
+
     def _video_play(self):
         self.timer.start(1000 // self.ratio)
         self.videoPlay.setText(self.tr("暂停"))
@@ -3057,9 +3153,10 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
         self.one_hot_mask = one_hot_mask.transpose([2, 0, 1]).unsqueeze(1)
 
         start = time.time()
-        self.video_masks = self.video.interact(
-            self.one_hot_mask, self.video.cursur, self.progress_total_cb,
-            self.progress_step_cb)
+        self.video_masks = self.video.interact(self.one_hot_mask,
+                                               self.video.cursur,
+                                               self.progress_total_cb,
+                                               self.progress_step_cb)
         end = time.time()
         print("propagation time cost", end - start)
         self.statusbar.showMessage(self.tr("传播完成!"), 5000)
@@ -3075,8 +3172,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
         for lab in self.controller.labelList:
             color_map.append(lab.color)
         if self.TDDock.isVisible():
-            self.vtkWidget.show_array(
-                np.uint8(self.video_masks), (1., 1., 1.), color_map)
+            self.vtkWidget.show_array(np.uint8(self.video_masks), (1., 1., 1.),
+                                      color_map)
 
     def progress_step_cb(self):
         self.progress_num += 1
@@ -3091,6 +3188,7 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
         self.progress_step_cb()
 
     def toggleMode(self, index):
+
         def change_docks(show_tuple):
             for sm, (k, v) in zip(self.menus.showMenu,
                                   self.dockWidgets.items()):
@@ -3119,7 +3217,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                 self.menus.labelMenu,
                 self.menus.functionMenu,
                 self.menus.showMenu,
-                self.menus.helpMenu, )
+                self.menus.helpMenu,
+            )
             hide_list = []
             for ht in hide_tuple:
                 if isinstance(ht[1], int):
@@ -3127,8 +3226,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                 elif isinstance(ht[1], tuple):
                     hide_list.extend([(ht[0], j) for j in ht[1]])
                 else:  # None
-                    hide_list.extend(
-                        [(ht[0], j) for j in range(len(mms[ht[0]]))])
+                    hide_list.extend([(ht[0], j)
+                                      for j in range(len(mms[ht[0]]))])
             for i, m in enumerate(mms):
                 for j, ac in enumerate(m):
                     if ac is not None:
@@ -3162,9 +3261,13 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
             change_toolbar(toolbar_list)
             change_menubar((
                 (0, 7),
-                (2, tuple(
-                    [i for i in range(18) if i not in [1, 2, 3, 9, 10, 11, 13, 14, 15, 16, 17]])),
-                (3, tuple(range(3, 10))), ))
+                (2,
+                 tuple([
+                     i for i in range(18)
+                     if i not in [1, 2, 3, 9, 10, 11, 13, 14, 15, 16, 17]
+                 ])),
+                (3, tuple(range(3, 10))),
+            ))
             self.scene.setDetMode(True)
             self.canvas.setDetMode(True)
             # 加载标签对应
@@ -3214,7 +3317,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
         k = 1
         for r in range(self.labelListTable.rowCount()):
             if not self.labelListTable.isRowHidden(r):
-                self.labelListTable.item(r, 0).setFlags(Qt.ItemIsEnabled | Qt.ItemIsEditable)
+                self.labelListTable.item(r, 0).setFlags(Qt.ItemIsEnabled
+                                                        | Qt.ItemIsEditable)
                 self.labelListTable.item(r, 0).setText(str(k))
                 self.labelListTable.item(r, 0).setFlags(
                     self.labelListTable.item(r, 0).flags() & ~Qt.ItemIsEditable)
@@ -3286,8 +3390,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                 os.makedirs(osp.join(os.path.dirname(savePath), "YOLO"))
             ri = savePath.replace("\\", "/").rindex('/')
             fileName = savePath[ri + 1:]
-            savePath = osp.join(
-                osp.join(os.path.dirname(savePath), "YOLO"), fileName)
+            savePath = osp.join(osp.join(os.path.dirname(savePath), "YOLO"),
+                                fileName)
 
             if self.origExt:
                 txtPath = savePath + ".txt"
@@ -3330,8 +3434,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
             os.makedirs(osp.join(os.path.dirname(savePath), "VOC"))
         ri = savePath.replace("\\", "/").rindex('/')
         fileName = savePath[ri + 1:]
-        savePath = osp.join(
-            osp.join(os.path.dirname(savePath), "VOC"), fileName)
+        savePath = osp.join(osp.join(os.path.dirname(savePath), "VOC"),
+                            fileName)
 
         if self.origExt:
             xmlPath = savePath + ".xml"
@@ -3351,8 +3455,8 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
 
         if self.save_status["coco"]:
             if not self.coco.hasImage(osp.basename(self.imagePath)):
-                imgId = self.coco.addImage(
-                    osp.basename(self.imagePath), s[1], s[0])
+                imgId = self.coco.addImage(osp.basename(self.imagePath), s[1],
+                                           s[0])
             else:
                 imgId = self.coco.imgNameToId[osp.basename(self.imagePath)]
             for polygon in self.scene.polygon_items:
@@ -3380,23 +3484,19 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
             saveDir = osp.join(osp.join(saveDir, "COCO"))
 
             cocoPath = osp.join(saveDir, "annotations.json")
-            open(
-                cocoPath, "w",
-                encoding="utf-8").write(json.dumps(self.coco.dataset))
+            open(cocoPath, "w",
+                 encoding="utf-8").write(json.dumps(self.coco.dataset))
 
     def use_preannotation_or_not(self):
-        res = self.warn(
-            self.tr("预标注是否启用提醒"),
-            self.tr("启用预标注？"), QMessageBox.Yes | QMessageBox.No)
+        res = self.warn(self.tr("预标注是否启用提醒"), self.tr("启用预标注？"),
+                        QMessageBox.Yes | QMessageBox.No)
         if res == QMessageBox.Yes:
-            self.warn(
-                self.tr("启用预标注流程提醒"),
-                self.tr("请先加载检测模型，然后点击预标注设置按钮，最后再打开图像文件！"))
+            self.warn(self.tr("启用预标注流程提醒"),
+                      self.tr("请先加载检测模型，然后点击预标注设置按钮，最后再打开图像文件！"))
             return True
         else:
-            self.warn(
-                self.tr("启用手动标注流程提醒"),
-                self.tr("请先点击新建标签或是导入标签，然后打开图像文件，即可开始手动画框标注！"))
+            self.warn(self.tr("启用手动标注流程提醒"),
+                      self.tr("请先点击新建标签或是导入标签，然后打开图像文件，即可开始手动画框标注！"))
             return False
 
     def ndarray2bytes(self, img_arr):
@@ -3417,22 +3517,24 @@ class APP_EISeg(QMainWindow, Ui_EISeg):
                 f.write(label + "\n")
 
     def loadMaskImage(self):
-        options = (QtWidgets.QFileDialog.ShowDirsOnly |
-                   QtWidgets.QFileDialog.DontResolveSymlinks)
+        options = (QtWidgets.QFileDialog.ShowDirsOnly
+                   | QtWidgets.QFileDialog.DontResolveSymlinks)
         if self.settings.value("use_qt_widget", False, type=bool):
             options = options | QtWidgets.QFileDialog.DontUseNativeDialog
         imgDir = QtWidgets.QFileDialog.getExistingDirectory(
             self,
             self.tr("选择图片文件夹") + " - " + __APPNAME__,
             "",
-            options, )
+            options,
+        )
         if not osp.exists(imgDir):
             return
         maskDir = QtWidgets.QFileDialog.getExistingDirectory(
             self,
             self.tr("选择标签文件夹") + " - " + __APPNAME__,
             "",
-            options, )
+            options,
+        )
         if not osp.exists(maskDir):
             return
         try:

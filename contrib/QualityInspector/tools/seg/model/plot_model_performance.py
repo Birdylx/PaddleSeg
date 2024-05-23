@@ -270,7 +270,7 @@ class ModelPerformance():
         # model_info['mIoU'] = 65.00
         # model_info['preprocess_time'] = 137.7497
         # model_info['Inference Time (ms)'] = 29.1146
-        # model_info['postprocess_time'] = 0.0123  
+        # model_info['postprocess_time'] = 0.0123
         # model_info['FLOPs (G)'] = 253.75
         # model_info['Params (M)'] = 13.41
         # model_infos['U-Net'] = model_info
@@ -309,7 +309,7 @@ class ModelPerformance():
 
         # Add some fonts.
         # if 'OCRNet' in model_infos:
-        #         plt.text(55, 82.3,'OCRNet', fontdict={'size':11, 'color':'red'}) 
+        #         plt.text(55, 82.3,'OCRNet', fontdict={'size':11, 'color':'red'})
         # if 'BiseNetV2' in model_infos:
         #         plt.text(14, 74.5, 'BiseNetV2', fontdict={'size':11, 'color':'red'})
         # if 'DeepLabV3p' in model_infos:
@@ -322,14 +322,18 @@ class ModelPerformance():
         # plt.text(31.365,78.13,'HarDNet',fontdict={'size':11,'color':'m'})
         # plt.text(35.986,81.49,'SFNet',fontdict={'size':11,'color':'green'})
 
-        plt.legend(
-            marks, labels, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0)
+        plt.legend(marks,
+                   labels,
+                   bbox_to_anchor=(1.05, 1),
+                   loc=2,
+                   borderaxespad=0)
 
         plt.subplots_adjust(right=0.7)
         plt.grid(
             b=None,
             which='major',
-            axis='both', )
+            axis='both',
+        )
 
         # Add a line on the figure. Could connect DeepLab series or UNet series.
         # plt.plot([29.1, 70, 90.3],[67.2, 81.4, 81.6], linewidth=1, color='orange')

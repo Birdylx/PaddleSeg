@@ -106,29 +106,27 @@ def analyse(model,
             data = preprocess(im_path, transforms)
 
             if aug_pred:
-                pred, _ = infer.aug_inference(
-                    model,
-                    data['img'],
-                    trans_info=data['trans_info'],
-                    scales=scales,
-                    flip_horizontal=flip_horizontal,
-                    flip_vertical=flip_vertical,
-                    is_slide=is_slide,
-                    stride=stride,
-                    crop_size=crop_size)
+                pred, _ = infer.aug_inference(model,
+                                              data['img'],
+                                              trans_info=data['trans_info'],
+                                              scales=scales,
+                                              flip_horizontal=flip_horizontal,
+                                              flip_vertical=flip_vertical,
+                                              is_slide=is_slide,
+                                              stride=stride,
+                                              crop_size=crop_size)
             else:
-                pred, _ = infer.inference(
-                    model,
-                    data['img'],
-                    trans_info=data['trans_info'],
-                    is_slide=is_slide,
-                    stride=stride,
-                    crop_size=crop_size)
+                pred, _ = infer.inference(model,
+                                          data['img'],
+                                          trans_info=data['trans_info'],
+                                          is_slide=is_slide,
+                                          stride=stride,
+                                          crop_size=crop_size)
             pred = paddle.squeeze(pred)
 
             # calculate miou for the image
-            label = paddle.to_tensor(
-                np.asarray(Image.open(label_path)), dtype=pred.dtype)
+            label = paddle.to_tensor(np.asarray(Image.open(label_path)),
+                                     dtype=pred.dtype)
             intersect_area, pred_area, label_area = metrics.calculate_area(
                 pred, label, val_dataset.num_classes)
             class_iou_per_img, miou_per_img = metrics.mean_iou(
@@ -149,8 +147,10 @@ def analyse(model,
                 im_file = im_file[1:]
 
             # save added image
-            added_image = utils.visualize.visualize(
-                im_path, pred, color_map, weight=0.6)
+            added_image = utils.visualize.visualize(im_path,
+                                                    pred,
+                                                    color_map,
+                                                    weight=0.6)
             added_image_path = os.path.join(added_saved_dir, im_file)
             mkdir(added_image_path)
             cv2.imwrite(added_image_path, added_image)
@@ -159,7 +159,8 @@ def analyse(model,
             # save pseudo color prediction
             pred_mask = utils.visualize.get_pseudo_color_map(pred, color_map)
             pred_saved_path = os.path.join(
-                pred_saved_dir, os.path.splitext(im_file)[0] + ".png")
+                pred_saved_dir,
+                os.path.splitext(im_file)[0] + ".png")
             mkdir(pred_saved_path)
             pred_mask.save(pred_saved_path)
             results[im_path]['prediction_path'] = pred_saved_path

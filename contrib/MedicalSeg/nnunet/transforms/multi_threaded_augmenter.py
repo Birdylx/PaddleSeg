@@ -48,6 +48,7 @@ def prefetch_data(queue,
 
 
 class MultiThreadedAugmenter:
+
     def __init__(self,
                  data_loader,
                  transform,
@@ -92,11 +93,10 @@ class MultiThreadedAugmenter:
     def initialize(self):
         self._queue = Queue(maxsize=self.queue_maxsize)
         self._processes = [
-            Process(
-                target=prefetch_data,
-                name="MultiThreadedAugmenter_{}".format(i),
-                args=(self._queue, self.data_loader, self.transform,
-                      self.queue_maxsize / 2, i, self.wait_time))
+            Process(target=prefetch_data,
+                    name="MultiThreadedAugmenter_{}".format(i),
+                    args=(self._queue, self.data_loader, self.transform,
+                          self.queue_maxsize / 2, i, self.wait_time))
             for i in range(self.num_processes)
         ]
         for proc in self._processes:

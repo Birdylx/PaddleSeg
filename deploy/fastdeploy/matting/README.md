@@ -6,44 +6,44 @@
 ## 2. 硬件支持列表
 
 |硬件类型|该硬件是否支持|使用指南|Python|C++|  
-|:---:|:---:|:---:|:---:|:---:|   
-|X86 CPU|✅|[链接](cpu-gpu)|✅|✅|     
-|NVIDIA GPU|✅|[链接](cpu-gpu)|✅|✅|     
-|飞腾CPU|✅|[链接](cpu-gpu)|✅|✅|     
-|ARM CPU|✅|[链接](cpu-gpu)|✅|✅|     
-|Intel GPU(集成显卡)|✅|[链接](cpu-gpu)|✅|✅|     
-|Intel GPU(独立显卡)|✅|[链接](cpu-gpu)|✅|✅|    
-|昆仑|✅|[链接](kunlunxin)|✅|✅|     
-|昇腾|✅|[链接](ascend)|✅|✅|     
+|:---:|:---:|:---:|:---:|:---:|  
+|X86 CPU|✅|[链接](cpu-gpu)|✅|✅|  
+|NVIDIA GPU|✅|[链接](cpu-gpu)|✅|✅|  
+|飞腾CPU|✅|[链接](cpu-gpu)|✅|✅|  
+|ARM CPU|✅|[链接](cpu-gpu)|✅|✅|  
+|Intel GPU(集成显卡)|✅|[链接](cpu-gpu)|✅|✅|  
+|Intel GPU(独立显卡)|✅|[链接](cpu-gpu)|✅|✅|  
+|昆仑|✅|[链接](kunlunxin)|✅|✅|  
+|昇腾|✅|[链接](ascend)|✅|✅|  
 
 ## 3. 详细使用文档
 - X86 CPU
   - [部署模型准备](cpu-gpu)  
-  - [Python部署示例](cpu-gpu/python/) 
+  - [Python部署示例](cpu-gpu/python/)
   - [C++部署示例](cpu-gpu/cpp/)
 - NVIDIA GPU
   - [部署模型准备](cpu-gpu)  
-  - [Python部署示例](cpu-gpu/python/) 
+  - [Python部署示例](cpu-gpu/python/)
   - [C++部署示例](cpu-gpu/cpp/)
 - 飞腾CPU
   - [部署模型准备](cpu-gpu)  
-  - [Python部署示例](cpu-gpu/python/) 
+  - [Python部署示例](cpu-gpu/python/)
   - [C++部署示例](cpu-gpu/cpp/)
 - ARM CPU
   - [部署模型准备](cpu-gpu)  
-  - [Python部署示例](cpu-gpu/python/) 
+  - [Python部署示例](cpu-gpu/python/)
   - [C++部署示例](cpu-gpu/cpp/)  
 - Intel GPU
   - [部署模型准备](cpu-gpu)  
-  - [Python部署示例](cpu-gpu/python/) 
+  - [Python部署示例](cpu-gpu/python/)
   - [C++部署示例](cpu-gpu/cpp/)
 - 昆仑 XPU
   - [部署模型准备](kunlunxin)  
-  - [Python部署示例](kunlunxin/README.md) 
+  - [Python部署示例](kunlunxin/README.md)
   - [C++部署示例](kunlunxin/README.md)
 - 昇腾 Ascend
   - [部署模型准备](ascend)  
-  - [Python部署示例](ascend/README.md) 
+  - [Python部署示例](ascend/README.md)
   - [C++部署示例](ascend/README.md)
 
 ## 4. 常见问题

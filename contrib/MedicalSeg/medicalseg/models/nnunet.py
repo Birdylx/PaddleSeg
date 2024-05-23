@@ -55,18 +55,19 @@ class NNUNet(nn.Layer):
     """
 
     def __init__(
-            self,
-            plan_path,
-            num_classes=0,
-            pretrained=None,
-            stage=None,
-            cascade=False,
-            deep_supervision=True,
-            feat_map_mul_on_downscale=2,
-            use_dropout=False,
-            upscale_logits=False,
-            convolutional_pooling=True,
-            convolutional_upsampling=True, ):
+        self,
+        plan_path,
+        num_classes=0,
+        pretrained=None,
+        stage=None,
+        cascade=False,
+        deep_supervision=True,
+        feat_map_mul_on_downscale=2,
+        use_dropout=False,
+        upscale_logits=False,
+        convolutional_pooling=True,
+        convolutional_upsampling=True,
+    ):
         super().__init__()
         self.plan_path = plan_path
         self.stage = stage
@@ -169,6 +170,7 @@ class NNUNet(nn.Layer):
 
 
 class StackedConvLayers(nn.Layer):
+
     def __init__(self,
                  input_feature_channels,
                  output_feature_channels,
@@ -326,11 +328,13 @@ class Generic_UNet(nn.Layer):
             if conv_kernel_sizes is None:
                 conv_kernel_sizes = [(3, 3, 3)] * (num_pool + 1)
         else:
-            raise ValueError("Unknown convolution dimensionality, conv op: {}.".
-                             format(str(conv_op)))
+            raise ValueError(
+                "Unknown convolution dimensionality, conv op: {}.".format(
+                    str(conv_op)))
 
-        self.input_shape_must_be_divisible_by = np.prod(
-            pool_op_kernel_sizes, 0, dtype=np.int64)
+        self.input_shape_must_be_divisible_by = np.prod(pool_op_kernel_sizes,
+                                                        0,
+                                                        dtype=np.int64)
         self.pool_op_kernel_sizes = pool_op_kernel_sizes
         self.conv_kernel_sizes = conv_kernel_sizes
         self.max_num_features = max_num_features
@@ -358,20 +362,19 @@ class Generic_UNet(nn.Layer):
             self.conv_kwargs['padding'] = self.conv_pad_sizes[d]
 
             self.conv_blocks_context.append(
-                StackedConvLayers(
-                    input_features,
-                    output_features,
-                    num_conv_per_stage,
-                    self.conv_op,
-                    self.conv_kwargs,
-                    self.norm_op,
-                    self.norm_op_kwargs,
-                    self.dropout_op,
-                    self.dropout_op_kwargs,
-                    self.nonlin,
-                    self.nonlin_kwargs,
-                    first_stride,
-                    basic_block=basic_block))
+                StackedConvLayers(input_features,
+                                  output_features,
+                                  num_conv_per_stage,
+                                  self.conv_op,
+                                  self.conv_kwargs,
+                                  self.norm_op,
+                                  self.norm_op_kwargs,
+                                  self.dropout_op,
+                                  self.dropout_op_kwargs,
+                                  self.nonlin,
+                                  self.nonlin_kwargs,
+                                  first_stride,
+                                  basic_block=basic_block))
             if not self.convolutional_pooling:
                 self.pool_layers.append(pool_op(pool_op_kernel_sizes[d]))
             input_features = output_features
@@ -393,41 +396,39 @@ class Generic_UNet(nn.Layer):
         self.conv_kwargs['padding'] = self.conv_pad_sizes[num_pool]
         self.conv_blocks_context.append(
             nn.Sequential(
-                StackedConvLayers(
-                    input_features,
-                    output_features,
-                    num_conv_per_stage - 1,
-                    self.conv_op,
-                    self.conv_kwargs,
-                    self.norm_op,
-                    self.norm_op_kwargs,
-                    self.dropout_op,
-                    self.dropout_op_kwargs,
-                    self.nonlin,
-                    self.nonlin_kwargs,
-                    first_stride,
-                    basic_block=basic_block),
-                StackedConvLayers(
-                    output_features,
-                    final_num_features,
-                    1,
-                    self.conv_op,
-                    self.conv_kwargs,
-                    self.norm_op,
-                    self.norm_op_kwargs,
-                    self.dropout_op,
-                    self.dropout_op_kwargs,
-                    self.nonlin,
-                    self.nonlin_kwargs,
-                    basic_block=basic_block)))
+                StackedConvLayers(input_features,
+                                  output_features,
+                                  num_conv_per_stage - 1,
+                                  self.conv_op,
+                                  self.conv_kwargs,
+                                  self.norm_op,
+                                  self.norm_op_kwargs,
+                                  self.dropout_op,
+                                  self.dropout_op_kwargs,
+                                  self.nonlin,
+                                  self.nonlin_kwargs,
+                                  first_stride,
+                                  basic_block=basic_block),
+                StackedConvLayers(output_features,
+                                  final_num_features,
+                                  1,
+                                  self.conv_op,
+                                  self.conv_kwargs,
+                                  self.norm_op,
+                                  self.norm_op_kwargs,
+                                  self.dropout_op,
+                                  self.dropout_op_kwargs,
+                                  self.nonlin,
+                                  self.nonlin_kwargs,
+                                  basic_block=basic_block)))
 
         if not use_dropout:
             self.dropout_op_kwargs['p'] = 0.0
 
         for u in range(num_pool):
             nfeatures_from_down = final_num_features
-            nfeatures_from_skip = self.conv_blocks_context[-(2 + u
-                                                             )].output_channels
+            nfeatures_from_skip = self.conv_blocks_context[-(2 +
+                                                             u)].output_channels
             n_features_after_tu_and_concat = nfeatures_from_skip * 2
 
             if u != num_pool - 1 and not self.convolutional_upsampling:
@@ -438,70 +439,64 @@ class Generic_UNet(nn.Layer):
 
             if not self.convolutional_upsampling:
                 self.upsample_ops.append(
-                    nn.Upsample(
-                        scale_factor=pool_op_kernel_sizes[-(u + 1)],
-                        mode=upsample_mode))
+                    nn.Upsample(scale_factor=pool_op_kernel_sizes[-(u + 1)],
+                                mode=upsample_mode))
             else:
                 self.upsample_ops.append(
-                    transpconv(
-                        nfeatures_from_down,
-                        nfeatures_from_skip,
-                        pool_op_kernel_sizes[-(u + 1)],
-                        pool_op_kernel_sizes[-(u + 1)],
-                        bias_attr=False))
+                    transpconv(nfeatures_from_down,
+                               nfeatures_from_skip,
+                               pool_op_kernel_sizes[-(u + 1)],
+                               pool_op_kernel_sizes[-(u + 1)],
+                               bias_attr=False))
 
             self.conv_kwargs['kernel_size'] = self.conv_kernel_sizes[-(u + 1)]
             self.conv_kwargs['padding'] = self.conv_pad_sizes[-(u + 1)]
             self.conv_blocks_localization.append(
                 nn.Sequential(
-                    StackedConvLayers(
-                        n_features_after_tu_and_concat,
-                        nfeatures_from_skip,
-                        num_conv_per_stage - 1,
-                        self.conv_op,
-                        self.conv_kwargs,
-                        self.norm_op,
-                        self.norm_op_kwargs,
-                        self.dropout_op,
-                        self.dropout_op_kwargs,
-                        self.nonlin,
-                        self.nonlin_kwargs,
-                        basic_block=basic_block),
-                    StackedConvLayers(
-                        nfeatures_from_skip,
-                        final_num_features,
-                        1,
-                        self.conv_op,
-                        self.conv_kwargs,
-                        self.norm_op,
-                        self.norm_op_kwargs,
-                        self.dropout_op,
-                        self.dropout_op_kwargs,
-                        self.nonlin,
-                        self.nonlin_kwargs,
-                        basic_block=basic_block)))
+                    StackedConvLayers(n_features_after_tu_and_concat,
+                                      nfeatures_from_skip,
+                                      num_conv_per_stage - 1,
+                                      self.conv_op,
+                                      self.conv_kwargs,
+                                      self.norm_op,
+                                      self.norm_op_kwargs,
+                                      self.dropout_op,
+                                      self.dropout_op_kwargs,
+                                      self.nonlin,
+                                      self.nonlin_kwargs,
+                                      basic_block=basic_block),
+                    StackedConvLayers(nfeatures_from_skip,
+                                      final_num_features,
+                                      1,
+                                      self.conv_op,
+                                      self.conv_kwargs,
+                                      self.norm_op,
+                                      self.norm_op_kwargs,
+                                      self.dropout_op,
+                                      self.dropout_op_kwargs,
+                                      self.nonlin,
+                                      self.nonlin_kwargs,
+                                      basic_block=basic_block)))
 
         for ds in range(len(self.conv_blocks_localization)):
             self.seg_heads.append(
-                conv_op(
-                    self.conv_blocks_localization[ds][-1].output_channels,
-                    num_classes,
-                    1,
-                    1,
-                    0,
-                    1,
-                    1,
-                    bias_attr=seg_output_use_bias))
+                conv_op(self.conv_blocks_localization[ds][-1].output_channels,
+                        num_classes,
+                        1,
+                        1,
+                        0,
+                        1,
+                        1,
+                        bias_attr=seg_output_use_bias))
 
         self.upscale_logits_ops = []
         cum_upsample = np.cumprod(np.vstack(pool_op_kernel_sizes), axis=0)[::-1]
         for usl in range(num_pool - 1):
             if self.upscale_logits:
                 self.upscale_logits_ops.append(
-                    nn.Upsample(
-                        scale_factor=tuple(
-                            [int(i) for i in cum_upsample[usl + 1]]),
-                        mode=upsample_mode))
+                    nn.Upsample(scale_factor=tuple(
+                        [int(i) for i in cum_upsample[usl + 1]]),
+                                mode=upsample_mode))
             else:
                 self.upscale_logits_ops.append(layers.Identity())
 
@@ -533,8 +528,7 @@ class Generic_UNet(nn.Layer):
 
         if self._deep_supervision and self.training:
             return [[outputs[-1]] + [
-                up_op(feat)
-                for up_op, feat in zip(
+                up_op(feat) for up_op, feat in zip(
                     list(self.upscale_logits_ops)[::-1], outputs[:-1][::-1])
             ]]
         else:

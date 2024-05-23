@@ -28,16 +28,16 @@ from medicalseg.cvlibs import manager
 
 # green block in Fig.1
 class TranspConv3DBlock(nn.Layer):
+
     def __init__(self, in_planes, out_planes):
         super(TranspConv3DBlock, self).__init__()
-        self.block = nn.Conv3DTranspose(
-            in_planes,
-            out_planes,
-            kernel_size=2,
-            stride=2,
-            padding=0,
-            output_padding=0,
-            bias_attr=False)
+        self.block = nn.Conv3DTranspose(in_planes,
+                                        out_planes,
+                                        kernel_size=2,
+                                        stride=2,
+                                        padding=0,
+                                        output_padding=0,
+                                        bias_attr=False)
 
     def forward(self, x):
         y = self.block(x)
@@ -45,6 +45,7 @@ class TranspConv3DBlock(nn.Layer):
 
 
 class TranspConv3DConv3D(nn.Layer):
+
     def __init__(self, in_planes, out_planes, layers=1, conv_block=False):
         """
         blue box in Fig.1
@@ -55,19 +56,19 @@ class TranspConv3DConv3D(nn.Layer):
             conv_block: whether to include a conv block after each transpose conv. deafaults to False
         """
         super(TranspConv3DConv3D, self).__init__()
-        self.blocks = nn.LayerList([TranspConv3DBlock(in_planes, out_planes), ])
+        self.blocks = nn.LayerList([
+            TranspConv3DBlock(in_planes, out_planes),
+        ])
         if conv_block:
-            self.blocks.append(
-                Conv3DBlock(
-                    out_planes, out_planes, double=False))
+            self.blocks.append(Conv3DBlock(out_planes, out_planes,
+                                           double=False))
 
         if int(layers) >= 2:
             for _ in range(int(layers) - 1):
                 self.blocks.append(TranspConv3DBlock(out_planes, out_planes))
                 if conv_block:
                     self.blocks.append(
-                        Conv3DBlock(
-                            out_planes, out_planes, double=False))
+                        Conv3DBlock(out_planes, out_planes, double=False))
 
     def forward(self, x):
         for blk in self.blocks:
@@ -77,6 +78,7 @@ class TranspConv3DConv3D(nn.Layer):
 
 # yellow block in Fig.1
 class Conv3DBlock(nn.Layer):
+
     def __init__(self,
                  in_planes,
                  out_planes,
@@ -92,36 +94,32 @@ class Conv3DBlock(nn.Layer):
         padding = (kernel_size - 1) // 2
         if double:
             self.conv_block = nn.Sequential(
-                nn.Conv3D(
-                    in_planes,
-                    out_planes,
-                    kernel_size=kernel_size,
-                    stride=1,
-                    padding=padding),
-                norm(out_planes),
+                nn.Conv3D(in_planes,
+                          out_planes,
+                          kernel_size=kernel_size,
+                          stride=1,
+                          padding=padding), norm(out_planes),
                 nn.LeakyReLU(negative_slope=0.01),
-                nn.Conv3D(
-                    out_planes,
-                    out_planes,
-                    kernel_size=kernel_size,
-                    stride=1,
-                    padding=padding),
-                norm(out_planes))
+                nn.Conv3D(out_planes,
+                          out_planes,
+                          kernel_size=kernel_size,
+                          stride=1,
+                          padding=padding), norm(out_planes))
         else:
             self.conv_block = nn.Sequential(
-                nn.Conv3D(
-                    in_planes,
-                    out_planes,
-                    kernel_size=kernel_size,
-                    stride=1,
-                    padding=padding),
-                norm(out_planes))
+                nn.Conv3D(in_planes,
+                          out_planes,
+                          kernel_size=kernel_size,
+                          stride=1,
+                          padding=padding), norm(out_planes))
 
         if self.skip and self.downsample:
             self.conv_down = nn.Sequential(
-                nn.Conv3D(
-                    in_planes, out_planes, kernel_size=1, stride=1, padding=0),
-                norm(out_planes))
+                nn.Conv3D(in_planes,
+                          out_planes,
+                          kernel_size=1,
+                          stride=1,
+                          padding=0), norm(out_planes))
 
     def forward(self, x):
         y = self.conv_block(x)
@@ -134,6 +132,7 @@ class Conv3DBlock(nn.Layer):
 
 
 class AbsPositionalEncoding1D(nn.Layer):
+
     def __init__(self, tokens, dim):
         super(AbsPositionalEncoding1D, self).__init__()
         params = paddle.randn(shape=[1, tokens, dim])
@@ -153,6 +152,7 @@ class AbsPositionalEncoding1D(nn.Layer):
 
 
 class Embeddings3D(nn.Layer):
+
     def __init__(self,
                  input_dim,
                  embed_dim,
@@ -164,14 +164,13 @@ class Embeddings3D(nn.Layer):
                              (patch_size * patch_size * patch_size))
         self.patch_size = patch_size
         self.embed_dim = embed_dim
-        self.patch_embeddings = nn.Conv3D(
-            in_channels=input_dim,
-            out_channels=embed_dim,
-            kernel_size=patch_size,
-            stride=patch_size,
-            bias_attr=False)
-        self.position_embeddings = AbsPositionalEncoding1D(self.n_patches,
-                                                           embed_dim)
+        self.patch_embeddings = nn.Conv3D(in_channels=input_dim,
+                                          out_channels=embed_dim,
+                                          kernel_size=patch_size,
+                                          stride=patch_size,
+                                          bias_attr=False)
+        self.position_embeddings = AbsPositionalEncoding1D(
+            self.n_patches, embed_dim)
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x):
@@ -203,6 +202,7 @@ def compute_mhsa(q, k, v, scale_factor=1, mask=None):
 
 
 class MultiHeadSelfAttention(nn.Layer):
+
     def __init__(self, dim, heads=8, dim_head=None):
         """
         Implementation of multi-head attention layer of the original transformer model.
@@ -240,9 +240,9 @@ class MultiHeadSelfAttention(nn.Layer):
 
         # re-compose: merge heads with dim_head
 
-        out = paddle.flatten(
-            paddle.transpose(
-                out, perm=[0, 2, 1, 3]), start_axis=2, stop_axis=3)
+        out = paddle.flatten(paddle.transpose(out, perm=[0, 2, 1, 3]),
+                             start_axis=2,
+                             stop_axis=3)
 
         return self.W_0(out)
 
@@ -298,6 +298,7 @@ class TransformerBlock(nn.Layer):
 
 
 class TransformerEncoder(nn.Layer):
+
     def __init__(self, embed_dim, num_heads, num_layers, dropout,
                  extract_layers, dim_linear_block):
         super().__init__()
@@ -308,12 +309,11 @@ class TransformerEncoder(nn.Layer):
         self.block_list = nn.LayerList()
         for _ in range(num_layers):
             self.block_list.append(
-                TransformerBlock(
-                    dim=embed_dim,
-                    heads=num_heads,
-                    dim_linear_block=dim_linear_block,
-                    dropout=dropout,
-                    prenorm=True))
+                TransformerBlock(dim=embed_dim,
+                                 heads=num_heads,
+                                 dim_linear_block=dim_linear_block,
+                                 dropout=dropout,
+                                 prenorm=True))
 
     def forward(self, x):
         extract_layers = []
@@ -328,6 +328,7 @@ class TransformerEncoder(nn.Layer):
 # based on https://arxiv.org/abs/2103.10504
 @manager.MODELS.add_component
 class UNETR(nn.Layer):
+
     def __init__(self,
                  img_shape=(128, 128, 128),
                  in_channels=4,
@@ -377,33 +378,36 @@ class UNETR(nn.Layer):
 
         self.norm = nn.BatchNorm3d if norm == 'batch' else nn.InstanceNorm3D
 
-        self.embed = Embeddings3D(
-            input_dim=in_channels,
-            embed_dim=embed_dim,
-            cube_size=img_shape,
-            patch_size=patch_size,
-            dropout=dropout)
+        self.embed = Embeddings3D(input_dim=in_channels,
+                                  embed_dim=embed_dim,
+                                  cube_size=img_shape,
+                                  patch_size=patch_size,
+                                  dropout=dropout)
 
-        self.transformer = TransformerEncoder(
-            embed_dim,
-            num_heads,
-            self.num_layers,
-            dropout,
-            ext_layers,
-            dim_linear_block=dim_linear_block)
+        self.transformer = TransformerEncoder(embed_dim,
+                                              num_heads,
+                                              self.num_layers,
+                                              dropout,
+                                              ext_layers,
+                                              dim_linear_block=dim_linear_block)
 
-        self.init_conv = Conv3DBlock(
-            in_channels, base_filters, double=True, norm=self.norm)
+        self.init_conv = Conv3DBlock(in_channels,
+                                     base_filters,
+                                     double=True,
+                                     norm=self.norm)
 
         # blue blocks in Fig.1
-        self.z3_blue_conv = TranspConv3DConv3D(
-            in_planes=embed_dim, out_planes=base_filters * 2, layers=3)
+        self.z3_blue_conv = TranspConv3DConv3D(in_planes=embed_dim,
+                                               out_planes=base_filters * 2,
+                                               layers=3)
 
-        self.z6_blue_conv = TranspConv3DConv3D(
-            in_planes=embed_dim, out_planes=base_filters * 4, layers=2)
+        self.z6_blue_conv = TranspConv3DConv3D(in_planes=embed_dim,
+                                               out_planes=base_filters * 4,
+                                               layers=2)
 
-        self.z9_blue_conv = TranspConv3DConv3D(
-            in_planes=embed_dim, out_planes=base_filters * 8, layers=1)
+        self.z9_blue_conv = TranspConv3DConv3D(in_planes=embed_dim,
+                                               out_planes=base_filters * 8,
+                                               layers=1)
 
         # Green blocks in Fig.1
         self.z12_deconv = TranspConv3DBlock(embed_dim, base_filters * 8)
@@ -413,20 +417,27 @@ class UNETR(nn.Layer):
         self.z3_deconv = TranspConv3DBlock(base_filters * 2, base_filters)
 
         # Yellow blocks in Fig.1
-        self.z9_conv = Conv3DBlock(
-            base_filters * 8 * 2, base_filters * 8, double=True, norm=self.norm)
-        self.z6_conv = Conv3DBlock(
-            base_filters * 4 * 2, base_filters * 4, double=True, norm=self.norm)
-        self.z3_conv = Conv3DBlock(
-            base_filters * 2 * 2, base_filters * 2, double=True, norm=self.norm)
+        self.z9_conv = Conv3DBlock(base_filters * 8 * 2,
+                                   base_filters * 8,
+                                   double=True,
+                                   norm=self.norm)
+        self.z6_conv = Conv3DBlock(base_filters * 4 * 2,
+                                   base_filters * 4,
+                                   double=True,
+                                   norm=self.norm)
+        self.z3_conv = Conv3DBlock(base_filters * 2 * 2,
+                                   base_filters * 2,
+                                   double=True,
+                                   norm=self.norm)
         # out convolutions
         self.out_conv = nn.Sequential(
             # last yellow conv block
-            Conv3DBlock(
-                base_filters * 2, base_filters, double=True, norm=self.norm),
+            Conv3DBlock(base_filters * 2,
+                        base_filters,
+                        double=True,
+                        norm=self.norm),
             # grey block, final classification layer
-            nn.Conv3D(
-                base_filters, num_classes, kernel_size=1, stride=1))
+            nn.Conv3D(base_filters, num_classes, kernel_size=1, stride=1))
 
     def forward(self, x):
         transf_input = self.embed(x)

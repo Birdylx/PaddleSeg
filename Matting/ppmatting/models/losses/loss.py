@@ -22,6 +22,7 @@ import cv2
 
 @manager.LOSSES.add_component
 class MRSD(nn.Layer):
+
     def __init__(self, eps=1e-6):
         super().__init__()
         self.eps = eps
@@ -54,6 +55,7 @@ class MRSD(nn.Layer):
 
 @manager.LOSSES.add_component
 class GradientLoss(nn.Layer):
+
     def __init__(self, eps=1e-6):
         super().__init__()
         self.kernel_x, self.kernel_y = self.sobel_kernel()
@@ -68,8 +70,8 @@ class GradientLoss(nn.Layer):
             logit = logit * mask
             label = label * mask
             loss = paddle.sum(
-                F.l1_loss(self.sobel(logit), self.sobel(label), 'none')) / (
-                    mask.sum() + self.eps)
+                F.l1_loss(self.sobel(logit), self.sobel(label),
+                          'none')) / (mask.sum() + self.eps)
         else:
             loss = F.l1_loss(self.sobel(logit), self.sobel(label), 'mean')
 
@@ -115,8 +117,9 @@ class LaplacianLoss(nn.Layer):
 
     def __init__(self):
         super().__init__()
-        self.gauss_kernel = self.build_gauss_kernel(
-            size=5, sigma=1.0, n_channels=1)
+        self.gauss_kernel = self.build_gauss_kernel(size=5,
+                                                    sigma=1.0,
+                                                    n_channels=1)
 
     def forward(self, logit, label, mask=None):
         if len(label.shape) == 3:

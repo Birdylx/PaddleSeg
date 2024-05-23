@@ -10,13 +10,14 @@ Usage: python analyze_infer_log.py --log_path /path/to/load/log --save_path /pat
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Analyze logs')
-    parser.add_argument(
-        "--log_path", help="The path of log file.", type=str, required=True)
-    parser.add_argument(
-        "--save_path",
-        help="The path of log file.",
-        default="info.txt",
-        type=str)
+    parser.add_argument("--log_path",
+                        help="The path of log file.",
+                        type=str,
+                        required=True)
+    parser.add_argument("--save_path",
+                        help="The path of log file.",
+                        default="info.txt",
+                        type=str)
     return parser.parse_args()
 
 
@@ -49,8 +50,8 @@ def analyze(log_path):
         time_value = None
 
         cur_num = end_num
-        while cur_num >= start_num and (miou_value is None or
-                                        time_value is None):
+        while cur_num >= start_num and (miou_value is None
+                                        or time_value is None):
             line = logs[cur_num]
             cur_num -= 1
             if miou_value is None:

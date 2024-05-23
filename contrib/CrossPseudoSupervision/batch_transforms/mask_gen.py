@@ -36,6 +36,7 @@ class MaskGenerator(object):
 
 @manager.BATCH_TRANSFORMS.add_component
 class BoxMaskGenerator(MaskGenerator):
+
     def __init__(self,
                  prop_range,
                  n_boxes=1,
@@ -69,19 +70,17 @@ class BoxMaskGenerator(MaskGenerator):
 
         if self.prop_by_area:
             # Choose the proportion of each mask that should be above the threshold
-            mask_props = rng.uniform(
-                self.prop_range[0],
-                self.prop_range[1],
-                size=(n_masks, self.n_boxes))
+            mask_props = rng.uniform(self.prop_range[0],
+                                     self.prop_range[1],
+                                     size=(n_masks, self.n_boxes))
 
             # Zeros will cause NaNs, so detect and suppress them
             zero_mask = mask_props == 0.0
 
             if self.random_aspect_ratio:
                 y_props = np.exp(
-                    rng.uniform(
-                        low=0.0, high=1.0,
-                        size=(n_masks, self.n_boxes)) * np.log(mask_props))
+                    rng.uniform(low=0.0, high=1.0, size=(n_masks, self.n_boxes))
+                    * np.log(mask_props))
                 x_props = mask_props / y_props
             else:
                 y_props = x_props = np.sqrt(mask_props)
@@ -93,38 +92,36 @@ class BoxMaskGenerator(MaskGenerator):
             x_props[zero_mask] = 0
         else:
             if self.random_aspect_ratio:
-                y_props = rng.uniform(
-                    self.prop_range[0],
-                    self.prop_range[1],
-                    size=(n_masks, self.n_boxes))
-                x_props = rng.uniform(
-                    self.prop_range[0],
-                    self.prop_range[1],
-                    size=(n_masks, self.n_boxes))
+                y_props = rng.uniform(self.prop_range[0],
+                                      self.prop_range[1],
+                                      size=(n_masks, self.n_boxes))
+                x_props = rng.uniform(self.prop_range[0],
+                                      self.prop_range[1],
+                                      size=(n_masks, self.n_boxes))
             else:
-                x_props = y_props = rng.uniform(
-                    self.prop_range[0],
-                    self.prop_range[1],
-                    size=(n_masks, self.n_boxes))
+                x_props = y_props = rng.uniform(self.prop_range[0],
+                                                self.prop_range[1],
+                                                size=(n_masks, self.n_boxes))
             fac = np.sqrt(1.0 / self.n_boxes)
             y_props *= fac
             x_props *= fac
 
         sizes = np.round(
-            np.stack(
-                [y_props, x_props],
-                axis=2) * np.array(mask_shape)[None, None, :])
+            np.stack([y_props, x_props], axis=2) *
+            np.array(mask_shape)[None, None, :])
 
         if self.within_bounds:
-            positions = np.round((np.array(mask_shape) - sizes) * rng.uniform(
-                low=0.0, high=1.0, size=sizes.shape))
+            positions = np.round(
+                (np.array(mask_shape) - sizes) *
+                rng.uniform(low=0.0, high=1.0, size=sizes.shape))
             rectangles = np.append(positions, positions + sizes, axis=2)
         else:
             centres = np.round(
-                np.array(mask_shape) * rng.uniform(
-                    low=0.0, high=1.0, size=sizes.shape))
-            rectangles = np.append(
-                centres - sizes * 0.5, centres + sizes * 0.5, axis=2)
+                np.array(mask_shape) *
+                rng.uniform(low=0.0, high=1.0, size=sizes.shape))
+            rectangles = np.append(centres - sizes * 0.5,
+                                   centres + sizes * 0.5,
+                                   axis=2)
 
         if self.invert:
             masks = np.zeros((n_masks, 1) + tuple(mask_shape))
@@ -132,8 +129,10 @@ class BoxMaskGenerator(MaskGenerator):
             masks = np.ones((n_masks, 1) + tuple(mask_shape))
         for i, sample_rectangles in enumerate(rectangles):
             for y0, x0, y1, x1 in sample_rectangles:
-                masks[i, 0, int(y0):int(y1), int(x0):int(x1)] = 1 - masks[
-                    i, 0, int(y0):int(y1), int(x0):int(x1)]
+                masks[i, 0, int(y0):int(y1),
+                      int(x0):int(x1)] = 1 - masks[i, 0,
+                                                   int(y0):int(y1),
+                                                   int(x0):int(x1)]
         return masks
 
     def paddle_masks_from_params(self, t_params, mask_shape):
@@ -154,8 +153,8 @@ class AddMaskParamsToBatch(object):
     def __call__(self, batch):
         sample = batch[0]
         mask_size = sample['img'].shape[1:3]
-        params = self.mask_gen.generate_params(
-            n_masks=len(batch), mask_shape=mask_size)
+        params = self.mask_gen.generate_params(n_masks=len(batch),
+                                               mask_shape=mask_size)
         for sample, p in zip(batch, params):
             sample['mask_params'] = p.astype(np.float32)
         return batch

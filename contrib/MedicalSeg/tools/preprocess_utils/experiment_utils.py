@@ -38,9 +38,9 @@ def get_shape_must_be_divisible_by(net_numpool_per_axis):
 
 
 def get_network_numpool(patch_size, maxpool_cap=999, min_feature_map_size=4):
-    network_numpool_per_axis = np.floor(
-        [np.log(i / min_feature_map_size) / np.log(2)
-         for i in patch_size]).astype(int)
+    network_numpool_per_axis = np.floor([
+        np.log(i / min_feature_map_size) / np.log(2) for i in patch_size
+    ]).astype(int)
     network_numpool_per_axis = [
         min(i, maxpool_cap) for i in network_numpool_per_axis
     ]
@@ -103,9 +103,8 @@ def get_pool_and_conv_props(spacing, patch_size, min_feature_map_size,
         for a in range(dim):
             my_spacing = current_spacing[a]
             partners = [
-                i for i in range(dim)
-                if current_spacing[i] / my_spacing < 2 and my_spacing /
-                current_spacing[i] < 2
+                i for i in range(dim) if current_spacing[i] /
+                my_spacing < 2 and my_spacing / current_spacing[i] < 2
             ]
             if len(partners) > len(axes):
                 axes = partners
@@ -159,11 +158,10 @@ def compute_approx_vram_consumption(patch_size,
     npool = len(pool_op_kernel_sizes)
 
     map_size = np.array(patch_size)
-    tmp = np.int64((conv_per_stage * 2 + 1) * np.prod(
-        map_size, dtype=np.int64) * base_num_features + num_modalities *
-                   np.prod(
-                       map_size, dtype=np.int64) + num_classes * np.prod(
-                           map_size, dtype=np.int64))
+    tmp = np.int64((conv_per_stage * 2 + 1) *
+                   np.prod(map_size, dtype=np.int64) * base_num_features +
+                   num_modalities * np.prod(map_size, dtype=np.int64) +
+                   num_classes * np.prod(map_size, dtype=np.int64))
 
     num_feat = base_num_features
 

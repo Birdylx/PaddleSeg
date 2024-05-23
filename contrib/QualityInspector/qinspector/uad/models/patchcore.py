@@ -57,6 +57,7 @@ def get_projection(fin, fout, method='ortho'):
 
 
 class PaDiMPlus(nn.Layer):
+
     def __init__(self, arch='resnet18', pretrained=True, k=10, method='sample'):
         super().__init__()
         if isinstance(arch, type(None)) or isinstance(pretrained, type(None)):
@@ -116,12 +117,12 @@ class PaDiMPlus(nn.Layer):
         else:
             if return_HWBC:
                 x = x.transpose((2, 3, 0, 1))
-                return x @self.projection
+                return x @ self.projection
                 result = []  # paddle.zeros((B, self.k, H, W))
                 for i in range(H):
                     # result[i] = paddle.einsum('chw, cd -> dhw', x[i], self.projection)
                     # result[i,:,:,:] = x[i] @self.projection.T
-                    result.append(x[i] @self.projection.T)
+                    result.append(x[i] @ self.projection.T)
                 result = paddle.stack(result)
                 return result
             result = []  # paddle.zeros((B, self.k, H, W))
@@ -129,7 +130,8 @@ class PaDiMPlus(nn.Layer):
             for i in range(B):
                 # result[i] = paddle.einsum('chw, cd -> dhw', x[i], self.projection)
                 # result[i] = (self.projection.T @ x[i]).reshape((self.k, H, W))
-                result.append((self.projection.T @x[i]).reshape((self.k, H, W)))
+                result.append((self.projection.T @ x[i]).reshape(
+                    (self.k, H, W)))
             result = paddle.stack(result)
             return result
 
@@ -222,8 +224,8 @@ class PaDiMPlus(nn.Layer):
         I = paddle.eye(C)
         for i in tqdm(range(H), desc='compute distribution stats'):
             inv_covariance.append(
-                paddle.einsum('wbc, wbd -> wcd', embedding[i], embedding[i]) / (
-                    B - 1) + 0.01 * I)
+                paddle.einsum('wbc, wbd -> wcd', embedding[i], embedding[i]) /
+                (B - 1) + 0.01 * I)
             inv_covariance[-1] = cholesky_inverse(
                 inv_covariance[-1])  # paddle.inverse(inv_covariance[-1])#
         inv_covariance = paddle.stack(inv_covariance).reshape(
@@ -254,8 +256,8 @@ class PaDiMPlus(nn.Layer):
         self.inv_covariance -= paddle.einsum('hwc, hwd -> hwcd', self.mean,
                                              self.mean)
         # covariance = (covariance - B*paddle.einsum('chw, dhw -> hwcd', mean, mean))/(B-1)
-        self.compute_inv(
-            self.mean.transpose((2, 0, 1)), self.inv_covariance, eps)
+        self.compute_inv(self.mean.transpose((2, 0, 1)), self.inv_covariance,
+                         eps)
 
     def compute_inv_(self, mean, covariance, eps=0.01):
         c = mean.shape[0]
@@ -288,6 +290,7 @@ class PaDiMPlus(nn.Layer):
 
 @register
 class PatchCore(PaDiMPlus):
+
     def load(self, state):
         self.memory_bank = state['memory_bank']
 
@@ -375,17 +378,15 @@ class PatchCore(PaDiMPlus):
         score_map = postporcess_score_map(distances, out_shape, gaussian_blur)
         return score_map, np.array(image_score)
 
-    def nearest_neighbors(self, embedding, n_neighbors: int=9):
+    def nearest_neighbors(self, embedding, n_neighbors: int = 9):
         """Compare embedding Features with the memory bank to get Nearest Neighbours distance
         """
         B, HW, C = embedding.shape
         n_coreset = self.memory_bank.shape[0]
         distances = []  # paddle.zeros((B, HW, n_coreset))
         for i in range(B):
-            distances.append(
-                cdist(
-                    embedding[i, :, :], self.memory_bank,
-                    p=2.0))  # euclidean norm
+            distances.append(cdist(embedding[i, :, :], self.memory_bank,
+                                   p=2.0))  # euclidean norm
         distances = paddle.stack(distances, 0)
         distances, _ = distances.topk(k=n_neighbors, axis=-1, largest=False)
         return distances  # B,
@@ -408,9 +409,10 @@ def postporcess_score_map(distances,
                           out_shape,
                           gaussian_blur=True,
                           mode='bilinear'):
-    score_map = F.interpolate(
-        distances.unsqueeze_(1), size=out_shape, mode=mode,
-        align_corners=False).squeeze_(1).numpy()
+    score_map = F.interpolate(distances.unsqueeze_(1),
+                              size=out_shape,
+                              mode=mode,
+                              align_corners=False).squeeze_(1).numpy()
     if gaussian_blur:
         # apply gaussian smoothing on the score map
         for i in range(score_map.shape[0]):

@@ -99,11 +99,10 @@ class TritonPythonModel:
 
             # PaddleSeg preprocess has two outputs
             dlpack_tensor = outputs[0].to_dlpack()
-            output_tensor_0 = pb_utils.Tensor.from_dlpack(self.output_names[0],
-                                                          dlpack_tensor)
+            output_tensor_0 = pb_utils.Tensor.from_dlpack(
+                self.output_names[0], dlpack_tensor)
             output_tensor_1 = pb_utils.Tensor(
-                self.output_names[1], np.array(
-                    [im_info], dtype=np.object_))
+                self.output_names[1], np.array([im_info], dtype=np.object_))
             inference_response = pb_utils.InferenceResponse(
                 output_tensors=[output_tensor_0, output_tensor_1])
             responses.append(inference_response)

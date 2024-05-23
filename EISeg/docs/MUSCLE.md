@@ -1,5 +1,5 @@
 <div align="center">
-	<img src="https://user-images.githubusercontent.com/50255927/189930324-0f3992cd-47f8-487c-b20e-5a59f28f978f.png" align="middle" alt="LOGO" height="60"/><img src="https://user-images.githubusercontent.com/35907364/179460858-7dfb19b1-cabf-4f8a-9e81-eb15b6cc7d5f.png" align="middle" alt="LOGO" height="60"/><img src="https://user-images.githubusercontent.com/50255927/189930342-d32b90e5-ef80-44fb-9eab-c9df25ca0d12.png" align="middle" alt="LOGO" height="60" />
+    <img src="https://user-images.githubusercontent.com/50255927/189930324-0f3992cd-47f8-487c-b20e-5a59f28f978f.png" align="middle" alt="LOGO" height="60"/><img src="https://user-images.githubusercontent.com/35907364/179460858-7dfb19b1-cabf-4f8a-9e81-eb15b6cc7d5f.png" align="middle" alt="LOGO" height="60"/><img src="https://user-images.githubusercontent.com/50255927/189930342-d32b90e5-ef80-44fb-9eab-c9df25ca0d12.png" align="middle" alt="LOGO" height="60" />
 </div>
 
 
@@ -138,7 +138,7 @@ MUSCLE聚合了从不同人体部位收集的多个Xray图像数据集，并作�
 - 主干网络
     - ResNet-18、 ResNet-50
 - 医学影像分析任务
-    - 肺炎分类任务 (Pneumonia), 
+    - 肺炎分类任务 (Pneumonia),
     - 骨骼异常分类任务 (MURA)
     - 肺部分割任务 (Lung)
     - 结核病Bounding Box检测 (TBX)
@@ -152,7 +152,7 @@ MUSCLE聚合了从不同人体部位收集的多个Xray图像数据集，并作�
     - **MD-MoCo**: 模型主干网络只使用在多数据源的Xray图像进行MoCo学习的参数进行初始化
     - **MUSCLE−−**: 模型的初始化策略和MUSCLE一致，但是不采用我们设计的跨任务记忆与循环和重组学习计划模块
 
-### 不同身体部位的Xray数据集的结果 
+### 不同身体部位的Xray数据集的结果
 
 注意：Pneumonia是由**胸片**图像构成的数据集，而MURA由**骨骼**图像构成
 <table class="tg">
@@ -203,7 +203,7 @@ MUSCLE聚合了从不同人体部位收集的多个Xray图像数据集，并作�
     <td class="tg-2b7s">97.26</td>
     <td class="tg-8d8j">97.42</td>
     <td class="tg-8d8j">96.84</td>
-    <td class="tg-2b7s">99.61(99.32-99.83)	</td>
+    <td class="tg-2b7s">99.61(99.32-99.83)    </td>
   </tr>
   <tr>
     <td class="tg-2b7s" rowspan="5">ResNet-50</td>
@@ -320,7 +320,7 @@ MUSCLE聚合了从不同人体部位收集的多个Xray图像数据集，并作�
 
 ![image](https://user-images.githubusercontent.com/50255927/189317679-e3c22309-899b-4f8f-a689-d81e406376b5.png)
 
-### 不同任务的结果 
+### 不同任务的结果
 
 注意：Lung为肺部**分割**任务，而TBX为**检测**任务
 <table class="tg">

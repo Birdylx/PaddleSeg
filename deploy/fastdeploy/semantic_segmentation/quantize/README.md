@@ -1,6 +1,6 @@
 [English](README.md) | 简体中文  
 
-# PaddleSeg 量化模型部署-FastDeploy 
+# PaddleSeg 量化模型部署-FastDeploy
 
 FastDeploy已支持部署量化模型,并提供一键模型自动化压缩的工具.
 用户可以使用一键模型自动化压缩工具,自行对模型量化后部署, 也可以直接下载FastDeploy提供的量化模型进行部署.
@@ -27,15 +27,13 @@ FastDeploy 量化模型部署的过程大致都与FP32模型类似，只是模�
 |硬件类型|该硬件是否支持|使用指南|Python|C++|
 |:---:|:---:|:---:|:---:|:---:|
 |X86 CPU|✅|[链接](cpu-gpu)|✅|✅|
-|NVIDIA GPU|✅|[链接](cpu-gpu)|✅|✅| 
+|NVIDIA GPU|✅|[链接](cpu-gpu)|✅|✅|
 |飞腾CPU|✅|[链接](cpu-gpu)|✅|✅|
-|ARM CPU|✅|[链接](cpu-gpu)|✅|✅| 
+|ARM CPU|✅|[链接](cpu-gpu)|✅|✅|
 |Intel GPU(集成显卡)|✅|[链接](cpu-gpu)|✅|✅|  
-|Intel GPU(独立显卡)|✅|[链接](cpu-gpu)|✅|✅|    
+|Intel GPU(独立显卡)|✅|[链接](cpu-gpu)|✅|✅|  
 |昆仑|✅|[链接](kunlun)|✅|✅|
 |昇腾|✅|[链接](ascend)|✅|✅|
 |瑞芯微|✅|[链接](rockchip)|✅|✅|  
-|晶晨|✅|[链接](amlogic)|--|✅|      
-|算能|✅|[链接](sophgo)|✅|✅|       
-
-
+|晶晨|✅|[链接](amlogic)|--|✅|  
+|算能|✅|[链接](sophgo)|✅|✅|  

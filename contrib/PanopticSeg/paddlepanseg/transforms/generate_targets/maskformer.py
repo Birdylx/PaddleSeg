@@ -17,6 +17,7 @@ from paddlepanseg.cvlibs import manager
 
 @manager.TRANSFORMS.add_component
 class GenerateMaskFormerTrainTargets(object):
+
     def __call__(self, data):
         raw_label = data['label']
         segments_info = data['ann']

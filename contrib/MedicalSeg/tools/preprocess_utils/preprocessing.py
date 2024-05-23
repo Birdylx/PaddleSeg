@@ -30,25 +30,23 @@ def resize_segmentation(segmentation, new_shape, order=3):
     ), "New shape must have same dimensionality as segmentation, but got {} and {}.".format(
         segmentation.shape, new_shape)
     if order == 0:
-        return resize(
-            segmentation.astype(float),
-            new_shape,
-            order,
-            mode="edge",
-            clip=True,
-            anti_aliasing=False).astype(tpe)
+        return resize(segmentation.astype(float),
+                      new_shape,
+                      order,
+                      mode="edge",
+                      clip=True,
+                      anti_aliasing=False).astype(tpe)
     else:
         reshaped = np.zeros(new_shape, dtype=segmentation.dtype)
 
         for i, c in enumerate(unique_labels):
             mask = segmentation == c
-            reshaped_multihot = resize(
-                mask.astype(float),
-                new_shape,
-                order,
-                mode="edge",
-                clip=True,
-                anti_aliasing=False)
+            reshaped_multihot = resize(mask.astype(float),
+                                       new_shape,
+                                       order,
+                                       mode="edge",
+                                       clip=True,
+                                       anti_aliasing=False)
             reshaped[reshaped_multihot >= 0.5] = c
         return reshaped
 
@@ -113,25 +111,23 @@ def resample_patient(data,
             pass
 
     if data is not None:
-        data_reshaped = resample_data_or_seg(
-            data,
-            new_shape,
-            False,
-            axis,
-            order_data,
-            do_separate_z,
-            order_z=order_z_data)
+        data_reshaped = resample_data_or_seg(data,
+                                             new_shape,
+                                             False,
+                                             axis,
+                                             order_data,
+                                             do_separate_z,
+                                             order_z=order_z_data)
     else:
         data_reshaped = None
     if seg is not None:
-        seg_reshaped = resample_data_or_seg(
-            seg,
-            new_shape,
-            True,
-            axis,
-            order_seg,
-            do_separate_z,
-            order_z=order_z_seg)
+        seg_reshaped = resample_data_or_seg(seg,
+                                            new_shape,
+                                            True,
+                                            axis,
+                                            order_seg,
+                                            do_separate_z,
+                                            order_z=order_z_seg)
     else:
         seg_reshaped = None
     return data_reshaped, seg_reshaped
@@ -177,8 +173,8 @@ def resample_data_or_seg(data,
                 for slice_id in range(shape[axis]):
                     if axis == 0:
                         reshaped_data.append(
-                            resize_fn(data[c, slice_id], new_shape_2d, order, **
-                                      kwargs))
+                            resize_fn(data[c, slice_id], new_shape_2d, order,
+                                      **kwargs))
                     elif axis == 1:
                         reshaped_data.append(
                             resize_fn(data[c, :, slice_id], new_shape_2d, order,
@@ -205,11 +201,10 @@ def resample_data_or_seg(data,
                     coord_map = np.array([map_rows, map_cols, map_dims])
                     if not is_seg or order_z == 0:
                         reshaped_final_data.append(
-                            map_coordinates(
-                                reshaped_data,
-                                coord_map,
-                                order=order_z,
-                                mode='nearest')[None])
+                            map_coordinates(reshaped_data,
+                                            coord_map,
+                                            order=order_z,
+                                            mode='nearest')[None])
                     else:
                         unique_labels = np.unique(reshaped_data)
                         reshaped = np.zeros(new_shape, dtype=dtype_data)
@@ -240,6 +235,7 @@ def resample_data_or_seg(data,
 
 
 class GenericPreprocessor:
+
     def __init__(self,
                  normalization_scheme_per_modality,
                  use_nonzero_mask,
@@ -258,9 +254,8 @@ class GenericPreprocessor:
             join_paths(cropped_output_dir, "%s.npz" % case_identifier))['data']
         data = all_data[:-1].astype(np.float32)
         seg = all_data[-1:]
-        with open(
-                join_paths(cropped_output_dir, "%s.pkl" % case_identifier),
-                'rb') as f:
+        with open(join_paths(cropped_output_dir, "%s.pkl" % case_identifier),
+                  'rb') as f:
             properties = pickle.load(f)
         return data, seg, properties
 
@@ -270,8 +265,8 @@ class GenericPreprocessor:
                                properties,
                                seg=None,
                                force_separate_z=None):
-        original_spacing_transposed = np.array(properties["original_spacing"])[
-            self.transpose_forward]
+        original_spacing_transposed = np.array(
+            properties["original_spacing"])[self.transpose_forward]
         before = {
             'spacing': properties["original_spacing"],
             'spacing_transposed': original_spacing_transposed,
@@ -279,18 +274,17 @@ class GenericPreprocessor:
         }
         data[np.isnan(data)] = 0
 
-        data, seg = resample_patient(
-            data,
-            seg,
-            np.array(original_spacing_transposed),
-            target_spacing,
-            3,
-            1,
-            force_separate_z=force_separate_z,
-            order_z_data=0,
-            order_z_seg=0,
-            separate_z_anisotropy_threshold=self.
-            resample_separate_z_anisotropy_threshold)
+        data, seg = resample_patient(data,
+                                     seg,
+                                     np.array(original_spacing_transposed),
+                                     target_spacing,
+                                     3,
+                                     1,
+                                     force_separate_z=force_separate_z,
+                                     order_z_data=0,
+                                     order_z_seg=0,
+                                     separate_z_anisotropy_threshold=self.
+                                     resample_separate_z_anisotropy_threshold)
         after = {
             'spacing': target_spacing,
             'data.shape (data is resampled)': data.shape
@@ -355,11 +349,11 @@ class GenericPreprocessor:
                              target_spacing,
                              seg_file=None,
                              force_separate_z=None):
-        data, seg, properties = ImageCropper.crop_from_list_of_files(data_files,
-                                                                     seg_file)
+        data, seg, properties = ImageCropper.crop_from_list_of_files(
+            data_files, seg_file)
 
-        data = data.transpose((0, * [i + 1 for i in self.transpose_forward]))
-        seg = seg.transpose((0, * [i + 1 for i in self.transpose_forward]))
+        data = data.transpose((0, *[i + 1 for i in self.transpose_forward]))
+        seg = seg.transpose((0, *[i + 1 for i in self.transpose_forward]))
 
         data, seg, properties = self.resample_and_normalize(
             data,
@@ -375,8 +369,8 @@ class GenericPreprocessor:
         data, seg, properties = self.load_cropped(cropped_output_dir,
                                                   case_identifier)
 
-        data = data.transpose((0, * [i + 1 for i in self.transpose_forward]))
-        seg = seg.transpose((0, * [i + 1 for i in self.transpose_forward]))
+        data = data.transpose((0, *[i + 1 for i in self.transpose_forward]))
+        seg = seg.transpose((0, *[i + 1 for i in self.transpose_forward]))
 
         data, seg, properties = self.resample_and_normalize(
             data, target_spacing, properties, seg, force_separate_z)
@@ -397,20 +391,20 @@ class GenericPreprocessor:
                 target_num_samples,
                 int(np.ceil(len(all_locs) * min_percent_coverage)))
 
-            selected = all_locs[rndst.choice(
-                len(all_locs), target_num_samples, replace=False)]
+            selected = all_locs[rndst.choice(len(all_locs),
+                                             target_num_samples,
+                                             replace=False)]
             class_locs[c] = selected
             print(c, target_num_samples)
         properties['class_locations'] = class_locs
 
         print("saving: ",
               join_paths(output_folder_stage, "%s.npz" % case_identifier))
-        np.savez_compressed(
-            join_paths(output_folder_stage, "%s.npz" % case_identifier),
-            data=all_data.astype(np.float32))
-        with open(
-                join_paths(output_folder_stage, "%s.pkl" % case_identifier),
-                'wb') as f:
+        np.savez_compressed(join_paths(output_folder_stage,
+                                       "%s.npz" % case_identifier),
+                            data=all_data.astype(np.float32))
+        with open(join_paths(output_folder_stage, "%s.pkl" % case_identifier),
+                  'wb') as f:
             pickle.dump(properties, f)
 
     def run(self,
@@ -425,10 +419,9 @@ class GenericPreprocessor:
         print("output_folder:", output_folder)
         list_of_cropped_npz_files = [
             join_paths(input_folder_with_cropped_npz, file_name)
-            for file_name in os.listdir(input_folder_with_cropped_npz)
-            if os.path.isfile(
-                join_paths(input_folder_with_cropped_npz, file_name)) and
-            file_name.endswith('.npz')
+            for file_name in os.listdir(input_folder_with_cropped_npz) if
+            os.path.isfile(join_paths(input_folder_with_cropped_npz, file_name))
+            and file_name.endswith('.npz')
         ]
         list_of_cropped_npz_files.sort()
         os.makedirs(output_folder, exist_ok=True)
@@ -459,14 +452,16 @@ class GenericPreprocessor:
 
 
 class PreprocessorFor2D(GenericPreprocessor):
+
     def __init__(self,
                  normalization_scheme_per_modality,
                  use_nonzero_mask,
                  transpose_forward: (tuple, list),
                  intensityproperties=None):
-        super(PreprocessorFor2D, self).__init__(
-            normalization_scheme_per_modality, use_nonzero_mask,
-            transpose_forward, intensityproperties)
+        super(PreprocessorFor2D,
+              self).__init__(normalization_scheme_per_modality,
+                             use_nonzero_mask, transpose_forward,
+                             intensityproperties)
 
     def run(self,
             target_spacings,
@@ -480,10 +475,9 @@ class PreprocessorFor2D(GenericPreprocessor):
         print("output_folder:", output_folder)
         list_of_cropped_npz_files = [
             join_paths(input_folder_with_cropped_npz, file_name)
-            for file_name in os.listdir(input_folder_with_cropped_npz)
-            if os.path.isfile(
-                join_paths(input_folder_with_cropped_npz, file_name)) and
-            file_name.endswith('.npz')
+            for file_name in os.listdir(input_folder_with_cropped_npz) if
+            os.path.isfile(join_paths(input_folder_with_cropped_npz, file_name))
+            and file_name.endswith('.npz')
         ]
         list_of_cropped_npz_files.sort()
         assert len(list_of_cropped_npz_files) != 0, "set list of files first"
@@ -516,26 +510,25 @@ class PreprocessorFor2D(GenericPreprocessor):
                                properties,
                                seg=None,
                                force_separate_z=None):
-        original_spacing_transposed = np.array(properties["original_spacing"])[
-            self.transpose_forward]
+        original_spacing_transposed = np.array(
+            properties["original_spacing"])[self.transpose_forward]
         before = {
             'spacing': properties["original_spacing"],
             'spacing_transposed': original_spacing_transposed,
             'data.shape (data is transposed)': data.shape
         }
         target_spacing[0] = original_spacing_transposed[0]
-        data, seg = resample_patient(
-            data,
-            seg,
-            np.array(original_spacing_transposed),
-            target_spacing,
-            3,
-            1,
-            force_separate_z=force_separate_z,
-            order_z_data=0,
-            order_z_seg=0,
-            separate_z_anisotropy_threshold=self.
-            resample_separate_z_anisotropy_threshold)
+        data, seg = resample_patient(data,
+                                     seg,
+                                     np.array(original_spacing_transposed),
+                                     target_spacing,
+                                     3,
+                                     1,
+                                     force_separate_z=force_separate_z,
+                                     order_z_data=0,
+                                     order_z_seg=0,
+                                     separate_z_anisotropy_threshold=self.
+                                     resample_separate_z_anisotropy_threshold)
         after = {
             'spacing': target_spacing,
             'data.shape (data is resampled)': data.shape

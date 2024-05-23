@@ -38,80 +38,46 @@ class SegNet(nn.Layer):
         # Encoder Module
 
         self.enco1 = nn.Sequential(
-            layers.ConvBNReLU(
-                in_channels, 64, 3, padding=1),
-            layers.ConvBNReLU(
-                64, 64, 3, padding=1))
+            layers.ConvBNReLU(in_channels, 64, 3, padding=1),
+            layers.ConvBNReLU(64, 64, 3, padding=1))
 
-        self.enco2 = nn.Sequential(
-            layers.ConvBNReLU(
-                64, 128, 3, padding=1),
-            layers.ConvBNReLU(
-                128, 128, 3, padding=1))
+        self.enco2 = nn.Sequential(layers.ConvBNReLU(64, 128, 3, padding=1),
+                                   layers.ConvBNReLU(128, 128, 3, padding=1))
 
-        self.enco3 = nn.Sequential(
-            layers.ConvBNReLU(
-                128, 256, 3, padding=1),
-            layers.ConvBNReLU(
-                256, 256, 3, padding=1),
-            layers.ConvBNReLU(
-                256, 256, 3, padding=1))
+        self.enco3 = nn.Sequential(layers.ConvBNReLU(128, 256, 3, padding=1),
+                                   layers.ConvBNReLU(256, 256, 3, padding=1),
+                                   layers.ConvBNReLU(256, 256, 3, padding=1))
 
-        self.enco4 = nn.Sequential(
-            layers.ConvBNReLU(
-                256, 512, 3, padding=1),
-            layers.ConvBNReLU(
-                512, 512, 3, padding=1),
-            layers.ConvBNReLU(
-                512, 512, 3, padding=1))
+        self.enco4 = nn.Sequential(layers.ConvBNReLU(256, 512, 3, padding=1),
+                                   layers.ConvBNReLU(512, 512, 3, padding=1),
+                                   layers.ConvBNReLU(512, 512, 3, padding=1))
 
-        self.enco5 = nn.Sequential(
-            layers.ConvBNReLU(
-                512, 512, 3, padding=1),
-            layers.ConvBNReLU(
-                512, 512, 3, padding=1),
-            layers.ConvBNReLU(
-                512, 512, 3, padding=1))
+        self.enco5 = nn.Sequential(layers.ConvBNReLU(512, 512, 3, padding=1),
+                                   layers.ConvBNReLU(512, 512, 3, padding=1),
+                                   layers.ConvBNReLU(512, 512, 3, padding=1))
 
         # Decoder Module
 
-        self.deco1 = nn.Sequential(
-            layers.ConvBNReLU(
-                512, 512, 3, padding=1),
-            layers.ConvBNReLU(
-                512, 512, 3, padding=1),
-            layers.ConvBNReLU(
-                512, 512, 3, padding=1))
+        self.deco1 = nn.Sequential(layers.ConvBNReLU(512, 512, 3, padding=1),
+                                   layers.ConvBNReLU(512, 512, 3, padding=1),
+                                   layers.ConvBNReLU(512, 512, 3, padding=1))
 
-        self.deco2 = nn.Sequential(
-            layers.ConvBNReLU(
-                512, 512, 3, padding=1),
-            layers.ConvBNReLU(
-                512, 512, 3, padding=1),
-            layers.ConvBNReLU(
-                512, 256, 3, padding=1))
+        self.deco2 = nn.Sequential(layers.ConvBNReLU(512, 512, 3, padding=1),
+                                   layers.ConvBNReLU(512, 512, 3, padding=1),
+                                   layers.ConvBNReLU(512, 256, 3, padding=1))
 
-        self.deco3 = nn.Sequential(
-            layers.ConvBNReLU(
-                256, 256, 3, padding=1),
-            layers.ConvBNReLU(
-                256, 256, 3, padding=1),
-            layers.ConvBNReLU(
-                256, 128, 3, padding=1))
+        self.deco3 = nn.Sequential(layers.ConvBNReLU(256, 256, 3, padding=1),
+                                   layers.ConvBNReLU(256, 256, 3, padding=1),
+                                   layers.ConvBNReLU(256, 128, 3, padding=1))
 
-        self.deco4 = nn.Sequential(
-            layers.ConvBNReLU(
-                128, 128, 3, padding=1),
-            layers.ConvBNReLU(
-                128, 128, 3, padding=1),
-            layers.ConvBNReLU(
-                128, 64, 3, padding=1))
+        self.deco4 = nn.Sequential(layers.ConvBNReLU(128, 128, 3, padding=1),
+                                   layers.ConvBNReLU(128, 128, 3, padding=1),
+                                   layers.ConvBNReLU(128, 64, 3, padding=1))
 
         self.deco5 = nn.Sequential(
-            layers.ConvBNReLU(
-                64, 64, 3, padding=1),
-            nn.Conv2D(
-                64, num_classes, kernel_size=3, padding=1), )
+            layers.ConvBNReLU(64, 64, 3, padding=1),
+            nn.Conv2D(64, num_classes, kernel_size=3, padding=1),
+        )
 
         self.pretrained = pretrained
 
@@ -144,20 +110,32 @@ class SegNet(nn.Layer):
         x, ind5 = F.max_pool2d(x, kernel_size=2, stride=2, return_mask=True)
         size5 = x.shape
 
-        x = F.max_unpool2d(
-            x, indices=ind5, kernel_size=2, stride=2, output_size=size4)
+        x = F.max_unpool2d(x,
+                           indices=ind5,
+                           kernel_size=2,
+                           stride=2,
+                           output_size=size4)
         x = self.deco1(x)
 
-        x = F.max_unpool2d(
-            x, indices=ind4, kernel_size=2, stride=2, output_size=size3)
+        x = F.max_unpool2d(x,
+                           indices=ind4,
+                           kernel_size=2,
+                           stride=2,
+                           output_size=size3)
         x = self.deco2(x)
 
-        x = F.max_unpool2d(
-            x, indices=ind3, kernel_size=2, stride=2, output_size=size2)
+        x = F.max_unpool2d(x,
+                           indices=ind3,
+                           kernel_size=2,
+                           stride=2,
+                           output_size=size2)
         x = self.deco3(x)
 
-        x = F.max_unpool2d(
-            x, indices=ind2, kernel_size=2, stride=2, output_size=size1)
+        x = F.max_unpool2d(x,
+                           indices=ind2,
+                           kernel_size=2,
+                           stride=2,
+                           output_size=size1)
         x = self.deco4(x)
 
         x = F.max_unpool2d(x, indices=ind1, kernel_size=2, stride=2)

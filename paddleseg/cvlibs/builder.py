@@ -32,7 +32,7 @@ class Builder(object):
         comp_list (list, optional): A list of component classes. Default: None
     """
 
-    def __init__(self, config: Config, comp_list: Optional[list]=None):
+    def __init__(self, config: Config, comp_list: Optional[list] = None):
         super().__init__()
         self.config = config
         self.comp_list = comp_list
@@ -44,8 +44,8 @@ class Builder(object):
         cfg = copy.deepcopy(cfg)
         if 'type' not in cfg:
             raise RuntimeError(
-                "It is not possible to create a component object from {}, as 'type' is not specified.".
-                format(cfg))
+                "It is not possible to create a component object from {}, as 'type' is not specified."
+                .format(cfg))
 
         class_type = cfg.pop('type')
         com_class = self.load_component_class(class_type)
@@ -83,8 +83,8 @@ class Builder(object):
         for com in self.comp_list:
             if class_type in com.components_dict:
                 return com[class_type]
-        raise RuntimeError("The specified component ({}) was not found.".format(
-            class_type))
+        raise RuntimeError(
+            "The specified component ({}) was not found.".format(class_type))
 
     @classmethod
     def is_meta_type(cls, obj):
@@ -118,8 +118,9 @@ class SegBuilder(Builder):
         assert model_cfg != {}, \
             'No model specified in the configuration file.'
 
-        if self.config.train_dataset_cfg[
-                'type'] not in ['Dataset', 'SegDataset']:
+        if self.config.train_dataset_cfg['type'] not in [
+                'Dataset', 'SegDataset'
+        ]:
             # check and synchronize the num_classes in model config and dataset class
             assert hasattr(self.train_dataset_class, 'NUM_CLASSES'), \
                 'If train_dataset class is not `Dataset`, it must have `NUM_CLASSES` attr.'
@@ -224,6 +225,7 @@ class SegBuilder(Builder):
         return self._build_loss('distill_loss', loss_cfg)
 
     def _build_loss(self, loss_name, loss_cfg: dict):
+
         def _check_helper(loss_cfg, ignore_index):
             if 'ignore_index' not in loss_cfg:
                 loss_cfg['ignore_index'] = ignore_index
@@ -237,8 +239,9 @@ class SegBuilder(Builder):
                     'train_dataset ignore_index = {}'.format(loss_cfg['ignore_index'], ignore_index)
 
         # check and synchronize the ignore_index in model config and dataset class
-        if self.config.train_dataset_cfg[
-                'type'] not in ['Dataset', 'SegDataset']:
+        if self.config.train_dataset_cfg['type'] not in [
+                'Dataset', 'SegDataset'
+        ]:
             assert hasattr(self.train_dataset_class, 'IGNORE_INDEX'), \
                 'If train_dataset class is not `Dataset`, it must have `IGNORE_INDEX` attr.'
             ignore_index = getattr(self.train_dataset_class, 'IGNORE_INDEX')

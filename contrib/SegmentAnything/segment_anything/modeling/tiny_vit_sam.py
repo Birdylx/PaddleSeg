@@ -10,21 +10,23 @@ from .common import LayerNorm2d
 
 
 class TinyViT(nn.Layer):
+
     def __init__(
-            self,
-            img_size=224,
-            in_chans=3,
-            num_classes=1000,
-            embed_dims=[96, 192, 384, 768],
-            depths=[2, 2, 6, 2],
-            num_heads=[3, 6, 12, 24],
-            window_sizes=[7, 7, 14, 7],
-            mlp_ratio=4.0,
-            drop_rate=0.0,
-            drop_path_rate=0.1,
-            mbconv_expand_ratio=4.0,
-            local_conv_size=3,
-            layer_lr_decay=1.0, ):
+        self,
+        img_size=224,
+        in_chans=3,
+        num_classes=1000,
+        embed_dims=[96, 192, 384, 768],
+        depths=[2, 2, 6, 2],
+        num_heads=[3, 6, 12, 24],
+        window_sizes=[7, 7, 14, 7],
+        mlp_ratio=4.0,
+        drop_rate=0.0,
+        drop_path_rate=0.1,
+        mbconv_expand_ratio=4.0,
+        local_conv_size=3,
+        layer_lr_decay=1.0,
+    ):
         super().__init__()
         self.img_size = img_size
         self.num_classes = num_classes
@@ -38,7 +40,8 @@ class TinyViT(nn.Layer):
             in_chans=in_chans,
             embed_dim=embed_dims[0],
             resolution=img_size,
-            activation=activation, )
+            activation=activation,
+        )
 
         patches_resolution = self.patch_embed.patches_resolution
         self.patches_resolution = patches_resolution
@@ -54,20 +57,24 @@ class TinyViT(nn.Layer):
             kwargs = dict(
                 dim=embed_dims[i_layer],
                 input_resolution=(
-                    patches_resolution[0] // (2**(i_layer - 1 if i_layer == 3
-                                                  else i_layer)),
+                    patches_resolution[0] //
+                    (2**(i_layer - 1 if i_layer == 3 else i_layer)),
                     patches_resolution[1] //
-                    (2**(i_layer - 1 if i_layer == 3 else i_layer)), ),
+                    (2**(i_layer - 1 if i_layer == 3 else i_layer)),
+                ),
                 depth=depths[i_layer],
                 drop_path=dpr[sum(depths[:i_layer]):sum(depths[:i_layer + 1])],
-                downsample=PatchMerging
-                if (i_layer < self.num_layers - 1) else None,
-                out_dim=embed_dims[min(i_layer + 1, len(embed_dims) - 1)],
-                activation=activation, )
+                downsample=PatchMerging if
+                (i_layer < self.num_layers - 1) else None,
+                out_dim=embed_dims[min(i_layer + 1,
+                                       len(embed_dims) - 1)],
+                activation=activation,
+            )
             if i_layer == 0:
                 layer = ConvLayer(
                     conv_expand_ratio=mbconv_expand_ratio,
-                    **kwargs, )
+                    **kwargs,
+                )
             else:
                 layer = BasicLayer(
                     num_heads=num_heads[i_layer],
@@ -75,7 +82,8 @@ class TinyViT(nn.Layer):
                     mlp_ratio=self.mlp_ratio,
                     drop=drop_rate,
                     local_conv_size=local_conv_size,
-                    **kwargs, )
+                    **kwargs,
+                )
             self.layers.append(layer)
 
         # Classifier head
@@ -91,15 +99,18 @@ class TinyViT(nn.Layer):
                 embed_dims[-1],
                 256,
                 kernel_size=1,
-                bias_attr=False, ),
+                bias_attr=False,
+            ),
             LayerNorm2d(256),
             nn.Conv2D(
                 256,
                 256,
                 kernel_size=3,
                 padding=1,
-                bias_attr=False, ),
-            LayerNorm2d(256), )
+                bias_attr=False,
+            ),
+            LayerNorm2d(256),
+        )
 
     def set_layer_lr_decay(self, layer_lr_decay):
         decay_rate = layer_lr_decay
@@ -167,6 +178,7 @@ class TinyViT(nn.Layer):
 
 
 class Conv2d_BN(nn.Sequential):
+
     def __init__(self,
                  a,
                  b,
@@ -179,13 +191,13 @@ class Conv2d_BN(nn.Sequential):
         super().__init__()
         self.add_sublayer(
             "c",
-            nn.Conv2D(
-                a, b, ks, stride, pad, dilation, groups, bias_attr=False))
+            nn.Conv2D(a, b, ks, stride, pad, dilation, groups, bias_attr=False))
         bn = nn.BatchNorm2D(b)
         self.add_sublayer("bn", bn)
 
 
 class PatchEmbed(nn.Layer):
+
     def __init__(self, in_chans, embed_dim, resolution, activation):
         super().__init__()
         if isinstance(resolution, int):
@@ -200,13 +212,15 @@ class PatchEmbed(nn.Layer):
         self.seq = nn.Sequential(
             Conv2d_BN(in_chans, n // 2, 3, 2, 1),
             activation(),
-            Conv2d_BN(n // 2, n, 3, 2, 1), )
+            Conv2d_BN(n // 2, n, 3, 2, 1),
+        )
 
     def forward(self, x):
         return self.seq(x)
 
 
 class MBConv(nn.Layer):
+
     def __init__(self, in_chans, out_chans, expand_ratio, activation,
                  drop_path):
         super().__init__()
@@ -223,11 +237,14 @@ class MBConv(nn.Layer):
             ks=3,
             stride=1,
             pad=1,
-            groups=self.hidden_chans, )
+            groups=self.hidden_chans,
+        )
         self.act2 = activation()
 
-        self.conv3 = Conv2d_BN(
-            self.hidden_chans, out_chans, ks=1, bn_weight_init=0.0)
+        self.conv3 = Conv2d_BN(self.hidden_chans,
+                               out_chans,
+                               ks=1,
+                               bn_weight_init=0.0)
         self.act3 = activation()
 
         # self.drop_path = DropPath(
@@ -253,6 +270,7 @@ class MBConv(nn.Layer):
 
 
 class PatchMerging(nn.Layer):
+
     def __init__(self, input_resolution, dim, out_dim, activation):
         super().__init__()
 
@@ -285,16 +303,18 @@ class PatchMerging(nn.Layer):
 
 
 class ConvLayer(nn.Layer):
+
     def __init__(
-            self,
-            dim,
-            input_resolution,
-            depth,
-            activation,
-            drop_path=0.0,
-            downsample=None,
-            out_dim=None,
-            conv_expand_ratio=4.0, ):
+        self,
+        dim,
+        input_resolution,
+        depth,
+        activation,
+        drop_path=0.0,
+        downsample=None,
+        out_dim=None,
+        conv_expand_ratio=4.0,
+    ):
         super().__init__()
         self.dim = dim
         self.input_resolution = input_resolution
@@ -307,17 +327,16 @@ class ConvLayer(nn.Layer):
                 dim,
                 conv_expand_ratio,
                 activation,
-                drop_path[i] if isinstance(drop_path, list) else drop_path, )
-            for i in range(depth)
+                drop_path[i] if isinstance(drop_path, list) else drop_path,
+            ) for i in range(depth)
         ])
 
         # patch merging layer
         if downsample is not None:
-            self.downsample = downsample(
-                input_resolution,
-                dim=dim,
-                out_dim=out_dim,
-                activation=activation)
+            self.downsample = downsample(input_resolution,
+                                         dim=dim,
+                                         out_dim=out_dim,
+                                         activation=activation)
         else:
             self.downsample = None
 
@@ -330,13 +349,15 @@ class ConvLayer(nn.Layer):
 
 
 class Mlp(nn.Layer):
+
     def __init__(
-            self,
-            in_features,
-            hidden_features=None,
-            out_features=None,
-            act_layer=nn.GELU,
-            drop=0.0, ):
+        self,
+        in_features,
+        hidden_features=None,
+        out_features=None,
+        act_layer=nn.GELU,
+        drop=0.0,
+    ):
         super().__init__()
         out_features = out_features or in_features
         hidden_features = hidden_features or in_features
@@ -358,6 +379,7 @@ class Mlp(nn.Layer):
 
 
 class Attention(nn.Layer):
+
     def __init__(self,
                  dim,
                  key_dim,
@@ -393,12 +415,13 @@ class Attention(nn.Layer):
         self.attention_biases = self.create_parameter(
             shape=(num_heads, len(attention_offsets)),
             dtype="float32",
-            default_initializer=nn.initializer.Constant(0.0), )
+            default_initializer=nn.initializer.Constant(0.0),
+        )
         self.register_buffer(
             "attention_bias_idxs",
-            paddle.to_tensor(
-                idxs, dtype=paddle.int64).reshape((N, N)),
-            persistable=False, )
+            paddle.to_tensor(idxs, dtype=paddle.int64).reshape((N, N)),
+            persistable=False,
+        )
 
     @paddle.no_grad()
     def build_ab(self):
@@ -419,17 +442,18 @@ class Attention(nn.Layer):
 
         qkv = self.qkv(x)
         # (B, N, num_heads, d)
-        q, k, v = qkv.reshape((B, N, self.num_heads, -1)).split(
-            [self.key_dim, self.key_dim, self.d], axis=3)
+        q, k, v = qkv.reshape((B, N, self.num_heads,
+                               -1)).split([self.key_dim, self.key_dim, self.d],
+                                          axis=3)
         # (B, num_heads, N, d)
         q = q.transpose((0, 2, 1, 3))
         k = k.transpose((0, 2, 1, 3))
         v = v.transpose((0, 2, 1, 3))
 
         # only for infer
-        attn = (q @k.transpose((0, 1, 3, 2))) * self.scale + self.ab
+        attn = (q @ k.transpose((0, 1, 3, 2))) * self.scale + self.ab
         attn = F.softmax(attn, axis=-1)
-        x = (attn @v).transpose((0, 2, 1, 3)).reshape((B, N, self.dh))
+        x = (attn @ v).transpose((0, 2, 1, 3)).reshape((B, N, self.dh))
         x = self.proj(x)
         return x
 
@@ -451,16 +475,17 @@ class TinyViTBlock(nn.Layer):
     """
 
     def __init__(
-            self,
-            dim,
-            input_resolution,
-            num_heads,
-            window_size=7,
-            mlp_ratio=4.0,
-            drop=0.0,
-            drop_path=0.0,
-            local_conv_size=3,
-            activation=nn.GELU, ):
+        self,
+        dim,
+        input_resolution,
+        num_heads,
+        window_size=7,
+        mlp_ratio=4.0,
+        drop=0.0,
+        drop_path=0.0,
+        local_conv_size=3,
+        activation=nn.GELU,
+    ):
         super().__init__()
         self.dim = dim
         self.input_resolution = input_resolution
@@ -476,12 +501,11 @@ class TinyViTBlock(nn.Layer):
         head_dim = dim // num_heads
 
         window_resolution = (window_size, window_size)
-        self.attn = Attention(
-            dim,
-            head_dim,
-            num_heads,
-            attn_ratio=1,
-            resolution=window_resolution)
+        self.attn = Attention(dim,
+                              head_dim,
+                              num_heads,
+                              attn_ratio=1,
+                              resolution=window_resolution)
 
         mlp_hidden_dim = int(dim * mlp_ratio)
         mlp_activation = activation
@@ -489,11 +513,16 @@ class TinyViTBlock(nn.Layer):
             in_features=dim,
             hidden_features=mlp_hidden_dim,
             act_layer=mlp_activation,
-            drop=drop, )
+            drop=drop,
+        )
 
         pad = local_conv_size // 2
-        self.local_conv = Conv2d_BN(
-            dim, dim, ks=local_conv_size, stride=1, pad=pad, groups=dim)
+        self.local_conv = Conv2d_BN(dim,
+                                    dim,
+                                    ks=local_conv_size,
+                                    stride=1,
+                                    pad=pad,
+                                    groups=dim)
 
     def forward(self, x):
         H, W = self.input_resolution
@@ -515,13 +544,15 @@ class TinyViTBlock(nn.Layer):
             nH = pH // self.window_size
             nW = pW // self.window_size
             # window partition
-            x = (x.reshape((B, nH, self.window_size, nW, self.window_size, C))
-                 .transpose((0, 1, 3, 2, 4, 5)).reshape(
-                     (B * nH * nW, self.window_size * self.window_size, C)))
+            x = (x.reshape(
+                (B, nH, self.window_size, nW, self.window_size, C)).transpose(
+                    (0, 1, 3, 2, 4, 5)).reshape(
+                        (B * nH * nW, self.window_size * self.window_size, C)))
             x = self.attn(x)
             # window reverse
-            x = (x.reshape((B, nH, nW, self.window_size, self.window_size, C))
-                 .transpose((0, 1, 3, 2, 4, 5)).reshape((B, pH, pW, C)))
+            x = (x.reshape(
+                (B, nH, nW, self.window_size, self.window_size, C)).transpose(
+                    (0, 1, 3, 2, 4, 5)).reshape((B, pH, pW, C)))
 
             if padding:
                 x = x[:, :H, :W]
@@ -559,19 +590,20 @@ class BasicLayer(nn.Layer):
     """
 
     def __init__(
-            self,
-            dim,
-            input_resolution,
-            depth,
-            num_heads,
-            window_size,
-            mlp_ratio=4.0,
-            drop=0.0,
-            drop_path=0.0,
-            downsample=None,
-            local_conv_size=3,
-            activation=nn.GELU,
-            out_dim=None, ):
+        self,
+        dim,
+        input_resolution,
+        depth,
+        num_heads,
+        window_size,
+        mlp_ratio=4.0,
+        drop=0.0,
+        drop_path=0.0,
+        downsample=None,
+        local_conv_size=3,
+        activation=nn.GELU,
+        out_dim=None,
+    ):
         super().__init__()
         self.dim = dim
         self.input_resolution = input_resolution
@@ -589,16 +621,16 @@ class BasicLayer(nn.Layer):
                 drop_path=drop_path[i]
                 if isinstance(drop_path, list) else drop_path,
                 local_conv_size=local_conv_size,
-                activation=activation, ) for i in range(depth)
+                activation=activation,
+            ) for i in range(depth)
         ])
 
         # patch merging layer
         if downsample is not None:
-            self.downsample = downsample(
-                input_resolution,
-                dim=dim,
-                out_dim=out_dim,
-                activation=activation)
+            self.downsample = downsample(input_resolution,
+                                         dim=dim,
+                                         out_dim=out_dim,
+                                         activation=activation)
         else:
             self.downsample = None
 

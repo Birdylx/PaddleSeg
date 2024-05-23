@@ -23,6 +23,7 @@ from .path_utils import join_paths
 
 
 class DatasetAnalyzer:
+
     def __init__(self,
                  folder_with_cropped_data,
                  overwrite=True,
@@ -121,9 +122,10 @@ class DatasetAnalyzer:
             results = OrderedDict()
             for mod_id in range(num_modalities):
                 results[mod_id] = OrderedDict()
-                voxels = p.starmap(self._get_voxels_in_foreground,
-                                   zip(self.patient_identifiers, [mod_id] *
-                                       len(self.patient_identifiers)))
+                voxels = p.starmap(
+                    self._get_voxels_in_foreground,
+                    zip(self.patient_identifiers,
+                        [mod_id] * len(self.patient_identifiers)))
                 all_voxels = []
                 for voxel in voxels:
                     all_voxels += voxel

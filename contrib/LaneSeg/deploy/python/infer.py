@@ -36,12 +36,13 @@ import paddleseg.transforms.transforms as T
 
 
 class DeployConfig:
+
     def __init__(self, path):
         with codecs.open(path, 'r', 'utf-8') as file:
             self.dic = yaml.load(file, Loader=yaml.FullLoader)
 
-        self._transforms = self._load_transforms(self.dic['Deploy'][
-            'transforms'])
+        self._transforms = self._load_transforms(
+            self.dic['Deploy']['transforms'])
         self._dir = os.path.dirname(path)
 
     @property
@@ -67,6 +68,7 @@ class DeployConfig:
 
 
 class Predictor:
+
     def __init__(self, args):
         """
         Prepare for prediction.
@@ -142,42 +144,41 @@ class Predictor:
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Test')
-    parser.add_argument(
-        "--config", dest="cfg", help="The config file.", default=None, type=str)
+    parser.add_argument("--config",
+                        dest="cfg",
+                        help="The config file.",
+                        default=None,
+                        type=str)
     parser.add_argument(
         '--image_path',
         dest='image_path',
         help='The directory or path or file list of the images to be predicted.',
         type=str,
         default=None)
-    parser.add_argument(
-        '--save_dir',
-        dest='save_dir',
-        help='The directory for saving the predict result.',
-        type=str,
-        default='./output')
-    parser.add_argument(
-        '--cpu_threads',
-        default=10,
-        type=int,
-        help='Number of threads to predict when using cpu.')
-    parser.add_argument(
-        '--enable_mkldnn',
-        default=False,
-        type=eval,
-        choices=[True, False],
-        help='Enable to use mkldnn to speed up when using cpu.')
+    parser.add_argument('--save_dir',
+                        dest='save_dir',
+                        help='The directory for saving the predict result.',
+                        type=str,
+                        default='./output')
+    parser.add_argument('--cpu_threads',
+                        default=10,
+                        type=int,
+                        help='Number of threads to predict when using cpu.')
+    parser.add_argument('--enable_mkldnn',
+                        default=False,
+                        type=eval,
+                        choices=[True, False],
+                        help='Enable to use mkldnn to speed up when using cpu.')
     parser.add_argument(
         '--use_cpu',
         dest='use_cpu',
         help='Whether to use X86 CPU for inference. Uses GPU in default.',
         action='store_false')
 
-    parser.add_argument(
-        '--print_detail',
-        dest='print_detail',
-        help='Print GLOG information of Paddle Inference.',
-        action='store_false')
+    parser.add_argument('--print_detail',
+                        dest='print_detail',
+                        help='Print GLOG information of Paddle Inference.',
+                        action='store_false')
 
     return parser.parse_args()
 

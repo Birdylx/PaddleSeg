@@ -26,90 +26,81 @@ from models import PanopticDeepLab
 def parse_args():
     parser = argparse.ArgumentParser(description='Model training')
     # params of training
-    parser.add_argument(
-        "--config", dest="cfg", help="The config file.", default=None, type=str)
-    parser.add_argument(
-        '--iters',
-        dest='iters',
-        help='iters for training',
-        type=int,
-        default=None)
-    parser.add_argument(
-        '--batch_size',
-        dest='batch_size',
-        help='Mini batch size of one gpu or cpu',
-        type=int,
-        default=None)
-    parser.add_argument(
-        '--learning_rate',
-        dest='learning_rate',
-        help='Learning rate',
-        type=float,
-        default=None)
+    parser.add_argument("--config",
+                        dest="cfg",
+                        help="The config file.",
+                        default=None,
+                        type=str)
+    parser.add_argument('--iters',
+                        dest='iters',
+                        help='iters for training',
+                        type=int,
+                        default=None)
+    parser.add_argument('--batch_size',
+                        dest='batch_size',
+                        help='Mini batch size of one gpu or cpu',
+                        type=int,
+                        default=None)
+    parser.add_argument('--learning_rate',
+                        dest='learning_rate',
+                        help='Learning rate',
+                        type=float,
+                        default=None)
     parser.add_argument(
         '--save_interval',
         dest='save_interval',
         help='How many iters to save a model snapshot once during training.',
         type=int,
         default=1000)
-    parser.add_argument(
-        '--resume_model',
-        dest='resume_model',
-        help='The path of resume model',
-        type=str,
-        default=None)
-    parser.add_argument(
-        '--save_dir',
-        dest='save_dir',
-        help='The directory for saving the model snapshot',
-        type=str,
-        default='./output')
-    parser.add_argument(
-        '--keep_checkpoint_max',
-        dest='keep_checkpoint_max',
-        help='Maximum number of checkpoints to save',
-        type=int,
-        default=5)
-    parser.add_argument(
-        '--num_workers',
-        dest='num_workers',
-        help='Num workers for data loader',
-        type=int,
-        default=0)
-    parser.add_argument(
-        '--do_eval',
-        dest='do_eval',
-        help='Eval while training',
-        action='store_true')
-    parser.add_argument(
-        '--log_iters',
-        dest='log_iters',
-        help='Display logging information at every log_iters',
-        default=10,
-        type=int)
+    parser.add_argument('--resume_model',
+                        dest='resume_model',
+                        help='The path of resume model',
+                        type=str,
+                        default=None)
+    parser.add_argument('--save_dir',
+                        dest='save_dir',
+                        help='The directory for saving the model snapshot',
+                        type=str,
+                        default='./output')
+    parser.add_argument('--keep_checkpoint_max',
+                        dest='keep_checkpoint_max',
+                        help='Maximum number of checkpoints to save',
+                        type=int,
+                        default=5)
+    parser.add_argument('--num_workers',
+                        dest='num_workers',
+                        help='Num workers for data loader',
+                        type=int,
+                        default=0)
+    parser.add_argument('--do_eval',
+                        dest='do_eval',
+                        help='Eval while training',
+                        action='store_true')
+    parser.add_argument('--log_iters',
+                        dest='log_iters',
+                        help='Display logging information at every log_iters',
+                        default=10,
+                        type=int)
     parser.add_argument(
         '--use_vdl',
         dest='use_vdl',
         help='Whether to record the data to VisualDL during training',
         action='store_true')
-    parser.add_argument(
-        '--threshold',
-        dest='threshold',
-        help='Threshold applied to center heatmap score',
-        type=float,
-        default=0.1)
-    parser.add_argument(
-        '--nms_kernel',
-        dest='nms_kernel',
-        help='NMS max pooling kernel size',
-        type=int,
-        default=7)
-    parser.add_argument(
-        '--top_k',
-        dest='top_k',
-        help='Top k centers to keep',
-        type=int,
-        default=200)
+    parser.add_argument('--threshold',
+                        dest='threshold',
+                        help='Threshold applied to center heatmap score',
+                        type=float,
+                        default=0.1)
+    parser.add_argument('--nms_kernel',
+                        dest='nms_kernel',
+                        help='NMS max pooling kernel size',
+                        type=int,
+                        default=7)
+    parser.add_argument('--top_k',
+                        dest='top_k',
+                        help='Top k centers to keep',
+                        type=int,
+                        default=200)
 
     return parser.parse_args()
 
@@ -128,11 +119,10 @@ def main(args):
     if not args.cfg:
         raise RuntimeError('No configuration file specified.')
 
-    cfg = Config(
-        args.cfg,
-        learning_rate=args.learning_rate,
-        iters=args.iters,
-        batch_size=args.batch_size)
+    cfg = Config(args.cfg,
+                 learning_rate=args.learning_rate,
+                 iters=args.iters,
+                 batch_size=args.batch_size)
 
     train_dataset = cfg.train_dataset
     if train_dataset is None:
@@ -167,7 +157,8 @@ def main(args):
         keep_checkpoint_max=args.keep_checkpoint_max,
         threshold=args.threshold,
         nms_kernel=args.nms_kernel,
-        top_k=args.top_k, )
+        top_k=args.top_k,
+    )
 
 
 if __name__ == '__main__':

@@ -3,7 +3,7 @@
 
 本目录下提供`infer.cc`快速完成PP-LiteSeg在昆仑芯 XPU 上部署的示例。
 
-## 1. 部署环境准备 
+## 1. 部署环境准备
 在部署前，需自行编译基于昆仑芯XPU的预测库，参考文档[昆仑芯XPU部署环境编译安装](https://github.com/PaddlePaddle/FastDeploy/blob/develop/docs/cn/build_and_install#自行编译安装)
 
 ## 2. 部署模型准备  
@@ -13,7 +13,7 @@
 以Linux上推理为例，在本目录执行如下命令即可完成编译测试。
 ```bash
 # 下载部署示例代码
-git clone https://github.com/PaddlePaddle/PaddleSeg.git 
+git clone https://github.com/PaddlePaddle/PaddleSeg.git
 # 注意：如果当前分支找不到下面的fastdeploy测试代码，请切换到develop分支
 # git checkout develop
 cd PaddleSeg/deploy/fastdeploy/semantic_segmentation/kunlunxin/cpp

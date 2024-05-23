@@ -59,11 +59,11 @@ def _get_nvcc_info(cuda_home):
         try:
             nvcc = os.path.join(cuda_home, 'bin/nvcc')
             if not IS_WINDOWS:
-                nvcc = subprocess.check_output(
-                    "{} -V".format(nvcc), shell=True).decode()
+                nvcc = subprocess.check_output("{} -V".format(nvcc),
+                                               shell=True).decode()
             else:
-                nvcc = subprocess.check_output(
-                    "\"{}\" -V".format(nvcc), shell=True).decode()
+                nvcc = subprocess.check_output("\"{}\" -V".format(nvcc),
+                                               shell=True).decode()
             nvcc = nvcc.strip().split('\n')[-1]
         except subprocess.SubprocessError:
             nvcc = "Not Available"

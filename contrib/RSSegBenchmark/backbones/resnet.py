@@ -44,8 +44,12 @@ class BasicBlock(nn.Layer):
             raise NotImplementedError(
                 "Dilation > 1 not supported in BasicBlock")
 
-        self.conv1 = nn.Conv2D(
-            inplanes, planes, 3, padding=1, stride=stride, bias_attr=False)
+        self.conv1 = nn.Conv2D(inplanes,
+                               planes,
+                               3,
+                               padding=1,
+                               stride=stride,
+                               bias_attr=False)
         self.bn1 = norm_layer(planes)
         self.relu = nn.ReLU()
         self.conv2 = nn.Conv2D(planes, planes, 3, padding=1, bias_attr=False)
@@ -93,19 +97,20 @@ class BottleneckBlock(nn.Layer):
         self.conv1 = nn.Conv2D(inplanes, width, 1, bias_attr=False)
         self.bn1 = norm_layer(width)
 
-        self.conv2 = nn.Conv2D(
-            width,
-            width,
-            3,
-            padding=dilation,
-            stride=stride,
-            groups=groups,
-            dilation=dilation,
-            bias_attr=False)
+        self.conv2 = nn.Conv2D(width,
+                               width,
+                               3,
+                               padding=dilation,
+                               stride=stride,
+                               groups=groups,
+                               dilation=dilation,
+                               bias_attr=False)
         self.bn2 = norm_layer(width)
 
-        self.conv3 = nn.Conv2D(
-            width, planes * self.expansion, 1, bias_attr=False)
+        self.conv3 = nn.Conv2D(width,
+                               planes * self.expansion,
+                               1,
+                               bias_attr=False)
         self.bn3 = norm_layer(planes * self.expansion)
         self.relu = nn.ReLU()
         self.downsample = downsample
@@ -173,13 +178,12 @@ class ResNet(nn.Layer):
         self.inplanes = 64
         self.dilation = 1
 
-        self.conv1 = nn.Conv2D(
-            in_channels,
-            self.inplanes,
-            kernel_size=7,
-            stride=2,
-            padding=3,
-            bias_attr=False)
+        self.conv1 = nn.Conv2D(in_channels,
+                               self.inplanes,
+                               kernel_size=7,
+                               stride=2,
+                               padding=3,
+                               bias_attr=False)
         self.bn1 = self._norm_layer(self.inplanes)
         self.relu = nn.ReLU()
         self.maxpool = nn.MaxPool2D(kernel_size=3, stride=2, padding=1)
@@ -203,13 +207,13 @@ class ResNet(nn.Layer):
             stride = 1
         if stride != 1 or self.inplanes != planes * block.expansion:
             downsample = nn.Sequential(
-                nn.Conv2D(
-                    self.inplanes,
-                    planes * block.expansion,
-                    1,
-                    stride=stride,
-                    bias_attr=False),
-                norm_layer(planes * block.expansion), )
+                nn.Conv2D(self.inplanes,
+                          planes * block.expansion,
+                          1,
+                          stride=stride,
+                          bias_attr=False),
+                norm_layer(planes * block.expansion),
+            )
 
         layers = []
         layers.append(
@@ -218,12 +222,11 @@ class ResNet(nn.Layer):
         self.inplanes = planes * block.expansion
         for _ in range(1, blocks):
             layers.append(
-                block(
-                    self.inplanes,
-                    planes,
-                    groups=self.groups,
-                    base_width=self.base_width,
-                    norm_layer=norm_layer))
+                block(self.inplanes,
+                      planes,
+                      groups=self.groups,
+                      base_width=self.base_width,
+                      norm_layer=norm_layer))
 
         return nn.Sequential(*layers)
 
@@ -272,32 +275,33 @@ def load_pretrained_model_ssl_resnet(model, pretrained_model):
 
         if os.path.exists(pretrained_model):
             para_state_dict = paddle.load(pretrained_model)['state_dict']
-            # para_state_dict = paddle.load(pretrained_model) 
+            # para_state_dict = paddle.load(pretrained_model)
             model_state_dict = model.state_dict()
             keys = model_state_dict.keys()
             num_params_loaded = 0
             for k in keys:
                 value = 'backbone.' + k
                 if value not in para_state_dict:
-                    logger.warning("{} is not in pretrained model".format(
-                        value))
+                    logger.warning(
+                        "{} is not in pretrained model".format(value))
                 elif list(para_state_dict[value].shape) != list(
                         model_state_dict[k].shape):
                     logger.warning(
                         "[SKIP] Shape of pretrained params {} doesn't match.(Pretrained: {}, Actual: {})"
-                        .format(k, para_state_dict[k].shape, model_state_dict[k]
-                                .shape))
+                        .format(k, para_state_dict[k].shape,
+                                model_state_dict[k].shape))
                 else:
                     model_state_dict[k] = para_state_dict[value]
                     num_params_loaded += 1
             model.set_dict(model_state_dict)
             logger.info("There are {}/{} variables loaded into {}.".format(
-                num_params_loaded,
-                len(model_state_dict), model.__class__.__name__))
+                num_params_loaded, len(model_state_dict),
+                model.__class__.__name__))
 
         else:
-            raise ValueError('The pretrained model directory is not Found: {}'.
-                             format(pretrained_model))
+            raise ValueError(
+                'The pretrained model directory is not Found: {}'.format(
+                    pretrained_model))
     else:
         logger.info(
             'No pretrained model to load, {} will be trained from scratch.'.

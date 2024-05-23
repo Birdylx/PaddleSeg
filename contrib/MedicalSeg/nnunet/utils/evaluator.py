@@ -37,7 +37,9 @@ class Evaluator:
         "Total Positives Test", "Total Positives Reference"
     ]
 
-    default_advanced_metrics = ["Hausdorff Distance 95", ]
+    default_advanced_metrics = [
+        "Hausdorff Distance 95",
+    ]
 
     def __init__(self,
                  test=None,
@@ -94,8 +96,8 @@ class Evaluator:
             self.labels = labels
         else:
             raise TypeError(
-                "Can only handle dict, list, tuple, set & numpy array, but input is of type {}".
-                format(type(labels)))
+                "Can only handle dict, list, tuple, set & numpy array, but input is of type {}"
+                .format(type(labels)))
 
     def construct_labels(self):
         if self.test is None and self.reference is None:
@@ -113,8 +115,8 @@ class Evaluator:
             self.metrics = metrics
         else:
             raise TypeError(
-                "Can only handle list, tuple, set & numpy array, but input is of type {}".
-                format(type(metrics)))
+                "Can only handle list, tuple, set & numpy array, but input is of type {}"
+                .format(type(metrics)))
 
     def add_metric(self, metric):
         if metric not in self.metrics:
@@ -223,6 +225,7 @@ class Evaluator:
 
 
 class NiftiEvaluator(Evaluator):
+
     def __init__(self, *args, **kwargs):
         self.test_nifti = None
         self.reference_nifti = None
@@ -297,9 +300,9 @@ def aggregate_scores(test_ref_pairs,
     test = [i[0] for i in test_ref_pairs]
     ref = [i[1] for i in test_ref_pairs]
     p = Pool(num_threads)
-    all_res = p.map(run_evaluation,
-                    zip(test, ref, [evaluator] * len(ref),
-                        [metric_kwargs] * len(ref)))
+    all_res = p.map(
+        run_evaluation,
+        zip(test, ref, [evaluator] * len(ref), [metric_kwargs] * len(ref)))
     p.close()
     p.join()
 
@@ -333,8 +336,8 @@ def aggregate_scores(test_ref_pairs,
         json_dict["task"] = json_task
         json_dict["author"] = json_author
         json_dict["results"] = all_scores
-        json_dict["id"] = hashlib.md5(json.dumps(json_dict).encode(
-            "utf-8")).hexdigest()[:12]
+        json_dict["id"] = hashlib.md5(
+            json.dumps(json_dict).encode("utf-8")).hexdigest()[:12]
         with open(json_output_file, 'w') as f:
             json.dump(json_dict, f, sort_keys=True, indent=4)
     return all_scores

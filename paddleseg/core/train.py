@@ -130,11 +130,10 @@ def train(model,
         logger.info('use AMP to train. AMP level = {}'.format(amp_level))
         scaler = paddle.amp.GradScaler(init_loss_scaling=1024)
         if amp_level == 'O2':
-            model, optimizer = paddle.amp.decorate(
-                models=model,
-                optimizers=optimizer,
-                level='O2',
-                save_dtype='float32')
+            model, optimizer = paddle.amp.decorate(models=model,
+                                                   optimizers=optimizer,
+                                                   level='O2',
+                                                   save_dtype='float32')
 
     if nranks > 1:
         paddle.distributed.fleet.init(is_collective=True)
@@ -142,15 +141,18 @@ def train(model,
             optimizer)  # The return is Fleet object
         ddp_model = paddle.distributed.fleet.distributed_model(model)
 
-    batch_sampler = paddle.io.DistributedBatchSampler(
-        train_dataset, batch_size=batch_size, shuffle=True, drop_last=True)
+    batch_sampler = paddle.io.DistributedBatchSampler(train_dataset,
+                                                      batch_size=batch_size,
+                                                      shuffle=True,
+                                                      drop_last=True)
 
     loader = paddle.io.DataLoader(
         train_dataset,
         batch_sampler=batch_sampler,
         num_workers=num_workers,
         return_list=True,
-        worker_init_fn=worker_init_fn, )
+        worker_init_fn=worker_init_fn,
+    )
 
     if use_vdl:
         from visualdl import LogWriter
@@ -207,14 +209,13 @@ def train(model,
                         loss_list = ddp_model._layers.loss_computation(
                             logits_list, losses, data)
                     elif nranks == 1 and hasattr(model, 'loss_computation'):
-                        loss_list = model.loss_computation(logits_list, losses,
-                                                           data)
+                        loss_list = model.loss_computation(
+                            logits_list, losses, data)
                     else:
-                        loss_list = loss_computation(
-                            logits_list=logits_list,
-                            labels=labels,
-                            edges=edges,
-                            losses=losses)
+                        loss_list = loss_computation(logits_list=logits_list,
+                                                     labels=labels,
+                                                     edges=edges,
+                                                     losses=losses)
                     loss = sum(loss_list)
 
                 scaled = scaler.scale(loss)  # scale the loss
@@ -229,17 +230,16 @@ def train(model,
 
                 if nranks > 1 and hasattr(ddp_model._layers,
                                           'loss_computation'):
-                    loss_list = ddp_model._layers.loss_computation(logits_list,
-                                                                   losses, data)
+                    loss_list = ddp_model._layers.loss_computation(
+                        logits_list, losses, data)
                 elif nranks == 1 and hasattr(model, 'loss_computation'):
                     loss_list = model.loss_computation(logits_list, losses,
                                                        data)
                 else:
-                    loss_list = loss_computation(
-                        logits_list=logits_list,
-                        labels=labels,
-                        edges=edges,
-                        losses=losses)
+                    loss_list = loss_computation(logits_list=logits_list,
+                                                 labels=labels,
+                                                 edges=edges,
+                                                 losses=losses)
                 loss = sum(loss_list)
                 loss.backward()
                 optimizer.step()
@@ -266,8 +266,8 @@ def train(model,
             else:
                 for i in range(len(loss_list)):
                     avg_loss_list[i] += float(loss_list[i])
-            batch_cost_averager.record(
-                time.time() - batch_start, num_samples=batch_size)
+            batch_cost_averager.record(time.time() - batch_start,
+                                       num_samples=batch_size)
 
             if (iter) % log_iters == 0 and local_rank == 0:
                 avg_loss /= log_iters
@@ -278,9 +278,9 @@ def train(model,
                 eta = calculate_eta(remain_iters, avg_train_batch_cost)
                 logger.info(
                     "[TRAIN] epoch: {}, iter: {}/{}, loss: {:.4f}, lr: {:.6f}, batch_cost: {:.4f}, reader_cost: {:.5f}, ips: {:.4f} samples/sec | ETA {}"
-                    .format((iter - 1
-                             ) // iters_per_epoch + 1, iter, iters, avg_loss,
-                            lr, avg_train_batch_cost, avg_train_reader_cost,
+                    .format((iter - 1) // iters_per_epoch + 1, iter, iters,
+                            avg_loss, lr, avg_train_batch_cost,
+                            avg_train_reader_cost,
                             batch_cost_averager.get_ips_average(), eta))
                 if use_vdl:
                     log_writer.add_scalar('Train/loss', avg_loss, iter)
@@ -306,20 +306,19 @@ def train(model,
             if use_ema:
                 update_ema_model(ema_model, model, step=iter)
 
-            if (iter % save_interval == 0 or
-                    iter == iters) and (val_dataset is not None):
+            if (iter % save_interval == 0 or iter == iters) and (val_dataset
+                                                                 is not None):
                 num_workers = 1 if num_workers > 0 else 0
 
                 if test_config is None:
                     test_config = {}
 
-                mean_iou, acc, _, _, _ = evaluate(
-                    model,
-                    val_dataset,
-                    num_workers=num_workers,
-                    precision=precision,
-                    amp_level=amp_level,
-                    **test_config)
+                mean_iou, acc, _, _, _ = evaluate(model,
+                                                  val_dataset,
+                                                  num_workers=num_workers,
+                                                  precision=precision,
+                                                  amp_level=amp_level,
+                                                  **test_config)
 
                 if use_ema:
                     ema_mean_iou, ema_acc, _, _, _ = evaluate(
@@ -367,11 +366,12 @@ def train(model,
                         if ema_mean_iou > best_ema_mean_iou:
                             best_ema_mean_iou = ema_mean_iou
                             best_ema_model_iter = iter
-                            best_ema_model_dir = os.path.join(save_dir,
-                                                              "ema_best_model")
-                            paddle.save(ema_model.state_dict(),
-                                        os.path.join(best_ema_model_dir,
-                                                     'ema_model.pdparams'))
+                            best_ema_model_dir = os.path.join(
+                                save_dir, "ema_best_model")
+                            paddle.save(
+                                ema_model.state_dict(),
+                                os.path.join(best_ema_model_dir,
+                                             'ema_model.pdparams'))
                         logger.info(
                             '[EVAL] The EMA model with the best validation mIoU ({:.4f}) was saved at iter {}.'
                             .format(best_ema_mean_iou, best_ema_model_iter))

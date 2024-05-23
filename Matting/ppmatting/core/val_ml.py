@@ -66,7 +66,8 @@ def evaluate_ml(model,
         batch_size=1,
         drop_last=False,
         num_workers=num_workers,
-        return_list=True, )
+        return_list=True,
+    )
 
     total_iters = len(loader)
     mse_metric = metric.MSE()
@@ -75,8 +76,9 @@ def evaluate_ml(model,
     conn_metric = metric.Conn()
 
     if print_detail:
-        logger.info("Start evaluating (total_samples: {}, total_iters: {})...".
-                    format(len(eval_dataset), total_iters))
+        logger.info(
+            "Start evaluating (total_samples: {}, total_iters: {})...".format(
+                len(eval_dataset), total_iters))
     progbar_val = progbar.Progbar(target=total_iters, verbose=1)
     reader_cost_averager = TimeAverager()
     batch_cost_averager = TimeAverager()
@@ -135,16 +137,16 @@ def evaluate_ml(model,
                 i = 1
             save_alpha_pred(alpha_pred_one, os.path.join(save_dir, save_name))
 
-        batch_cost_averager.record(
-            time.time() - batch_start, num_samples=len(alpha_gt))
+        batch_cost_averager.record(time.time() - batch_start,
+                                   num_samples=len(alpha_gt))
         batch_cost = batch_cost_averager.get_average()
         reader_cost = reader_cost_averager.get_average()
 
         if print_detail:
-            progbar_val.update(iter + 1,
-                               [('SAD', sad), ('MSE', mse), ('Grad', grad),
-                                ('Conn', conn), ('batch_cost', batch_cost),
-                                ('reader cost', reader_cost)])
+            progbar_val.update(iter + 1, [('SAD', sad), ('MSE', mse),
+                                          ('Grad', grad), ('Conn', conn),
+                                          ('batch_cost', batch_cost),
+                                          ('reader cost', reader_cost)])
 
         reader_cost_averager.reset()
         batch_cost_averager.reset()
@@ -155,8 +157,9 @@ def evaluate_ml(model,
     grad = grad_metric.evaluate()
     conn = conn_metric.evaluate()
 
-    logger.info('[EVAL] SAD: {:.4f}, MSE: {:.4f}, Grad: {:.4f}, Conn: {:.4f}'.
-                format(sad, mse, grad, conn))
+    logger.info(
+        '[EVAL] SAD: {:.4f}, MSE: {:.4f}, Grad: {:.4f}, Conn: {:.4f}'.format(
+            sad, mse, grad, conn))
     logger.info('{}'.format(ignore_cnt))
 
     return sad, mse, grad, conn

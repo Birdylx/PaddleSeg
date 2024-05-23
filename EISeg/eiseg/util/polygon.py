@@ -36,8 +36,8 @@ def get_polygon(label, sample="Dynamic", img_size=None, building=False):
         polygons = []
         relas = []
         img_shape = label.shape
-        for idx, (contour,
-                  hierarchy) in enumerate(zip(contours, hierarchys[0])):
+        for idx, (contour, hierarchy) in enumerate(zip(contours,
+                                                       hierarchys[0])):
             # print(hierarchy)
             # opencv实现边界简化
             epsilon = (0.005 * cv2.arcLength(contour, True)
@@ -51,13 +51,15 @@ def get_polygon(label, sample="Dynamic", img_size=None, building=False):
             else:
                 # -- 建筑边界简化（https://github.com/niecongchong/RS-building-regularization）
                 if contour.shape[0] >= 2:
-                    contour = boundary_regularization(contour, img_shape, epsilon)
+                    contour = boundary_regularization(contour, img_shape,
+                                                      epsilon)
             # -- 自定义（角度和距离）边界简化
             out = approx_poly_DIY(contour)
             # 给出关系
             rela = (
                 idx,  # own
-                hierarchy[-1] if hierarchy[-1] != -1 else None, )  # parent
+                hierarchy[-1] if hierarchy[-1] != -1 else None,
+            )  # parent
             polygon = []
             for p in out:
                 polygon.append(p[0])
@@ -68,8 +70,8 @@ def get_polygon(label, sample="Dynamic", img_size=None, building=False):
                 for j in range(len(relas)):
                     if relas[j][0] == relas[i][1]:  # i的父圈就是j（i是j的子圈）
                         if polygons[i] is not None and polygons[j] is not None:
-                            min_i, min_o = __find_min_point(polygons[i],
-                                                            polygons[j])
+                            min_i, min_o = __find_min_point(
+                                polygons[i], polygons[j])
                             # 改变顺序
                             polygons[i] = __change_list(polygons[i], min_i)
                             polygons[j] = __change_list(polygons[j], min_o)
@@ -102,8 +104,8 @@ def __find_min_point(i_list, o_list):
     idx_o = -1
     for i in range(len(i_list)):
         for o in range(len(o_list)):
-            dis = math.sqrt((i_list[i][0] - o_list[o][0])**2 + (i_list[i][
-                1] - o_list[o][1])**2)
+            dis = math.sqrt((i_list[i][0] - o_list[o][0])**2 +
+                            (i_list[i][1] - o_list[o][1])**2)
             if dis <= min_dis:
                 min_dis = dis
                 idx_i = i
@@ -114,12 +116,12 @@ def __find_min_point(i_list, o_list):
 # 根据三点坐标计算夹角
 def __cal_ang(p1, p2, p3):
     eps = 1e-12
-    a = math.sqrt((p2[0] - p3[0]) * (p2[0] - p3[0]) + (p2[1] - p3[1]) * (p2[1] -
-                                                                         p3[1]))
-    b = math.sqrt((p1[0] - p3[0]) * (p1[0] - p3[0]) + (p1[1] - p3[1]) * (p1[1] -
-                                                                         p3[1]))
-    c = math.sqrt((p1[0] - p2[0]) * (p1[0] - p2[0]) + (p1[1] - p2[1]) * (p1[1] -
-                                                                         p2[1]))
+    a = math.sqrt((p2[0] - p3[0]) * (p2[0] - p3[0]) + (p2[1] - p3[1]) *
+                  (p2[1] - p3[1]))
+    b = math.sqrt((p1[0] - p3[0]) * (p1[0] - p3[0]) + (p1[1] - p3[1]) *
+                  (p1[1] - p3[1]))
+    c = math.sqrt((p1[0] - p2[0]) * (p1[0] - p2[0]) + (p1[1] - p2[1]) *
+                  (p1[1] - p2[1]))
     ang = math.degrees(math.acos(
         (b**2 - a**2 - c**2) / (-2 * a * c + eps)))  # p2对应
     return ang
@@ -147,10 +149,10 @@ def approx_poly_DIY(contour, min_dist=10, ang_err=5):
                 # print(ang_i, ang_j)  # 角度值为-180到+180
                 if abs(ang_i - ang_j) < ang_err:
                     # 删除距离两点小的
-                    dist_i = __cal_dist(cs[last], cs[i]) + __cal_dist(cs[i],
-                                                                      cs[next])
-                    dist_j = __cal_dist(cs[last], cs[j]) + __cal_dist(cs[j],
-                                                                      cs[next])
+                    dist_i = __cal_dist(cs[last], cs[i]) + __cal_dist(
+                        cs[i], cs[next])
+                    dist_j = __cal_dist(cs[last], cs[j]) + __cal_dist(
+                        cs[j], cs[next])
                     if dist_j < dist_i:
                         del cs[j]
                     else:

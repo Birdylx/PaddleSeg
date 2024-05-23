@@ -117,6 +117,7 @@ class _MatrixDecomposition2DBase(nn.Layer, metaclass=ABCMeta):
 
 
 class NMF2D(_MatrixDecomposition2DBase):
+
     def __init__(self, args=dict()):
         super().__init__(args)
 

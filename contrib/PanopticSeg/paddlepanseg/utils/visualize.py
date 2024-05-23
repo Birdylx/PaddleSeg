@@ -206,8 +206,8 @@ def visualize_panoptic(panoptic,
         # Return an immutable object
         return tuple(np.maximum(0, np.minimum(255, color)))
 
-    colored_panoptic = np.zeros(
-        (panoptic.shape[0], panoptic.shape[1], 3), dtype=np.uint8)
+    colored_panoptic = np.zeros((panoptic.shape[0], panoptic.shape[1], 3),
+                                dtype=np.uint8)
     if colormap is None:
         colormap = _COLORS * 255
     taken_colors = set((0, 0, 0))

@@ -47,50 +47,52 @@ def parse_args():
         "CASENAME_XXXX.nii.gz where XXXX is the modality "
         "identifier (0000, 0001, etc)",
         required=True)
-    parser.add_argument(
-        '--output_folder', required=True, help="folder for saving predictions")
+    parser.add_argument('--output_folder',
+                        required=True,
+                        help="folder for saving predictions")
     parser.add_argument(
         '--model_type',
         required=True,
         type=str,
-        help="Model type, only support '2d', '3d', 'cascade_lowres', 'cascade_fullres'."
+        help=
+        "Model type, only support '2d', '3d', 'cascade_lowres', 'cascade_fullres'."
     )
 
-    parser.add_argument(
-        '--plan_path', required=True, type=str, help='the path to plan_path')
-    parser.add_argument(
-        '--model_paths',
-        nargs='+',
-        required=True,
-        help="The multi pdmodel paths.")
-    parser.add_argument(
-        '--param_paths',
-        nargs='+',
-        required=True,
-        help="The multi pdiparams paths.")
-    parser.add_argument(
-        '--postprocessing_json_path',
-        required=True,
-        default=None,
-        type=str,
-        help='the path to postprocessing json.')
-    parser.add_argument(
-        '--folds',
-        required=False,
-        type=int,
-        default=5,
-        help='number of folds, default: 5.')
+    parser.add_argument('--plan_path',
+                        required=True,
+                        type=str,
+                        help='the path to plan_path')
+    parser.add_argument('--model_paths',
+                        nargs='+',
+                        required=True,
+                        help="The multi pdmodel paths.")
+    parser.add_argument('--param_paths',
+                        nargs='+',
+                        required=True,
+                        help="The multi pdiparams paths.")
+    parser.add_argument('--postprocessing_json_path',
+                        required=True,
+                        default=None,
+                        type=str,
+                        help='the path to postprocessing json.')
+    parser.add_argument('--folds',
+                        required=False,
+                        type=int,
+                        default=5,
+                        help='number of folds, default: 5.')
     parser.add_argument(
         '--lowres_segmentations',
         required=False,
         default=None,
-        help="If model is the highres stage of the cascade then you can use this folder to provide "
+        help=
+        "If model is the highres stage of the cascade then you can use this folder to provide "
         "predictions from the low resolution 3D U-Net.")
     parser.add_argument(
         '--save_npz',
         required=False,
         action='store_true',
-        help="use this if you want to ensemble these predictions with those of other models. Softmax "
+        help=
+        "use this if you want to ensemble these predictions with those of other models. Softmax "
         "probabilities will be saved as compressed numpy arrays in output_folder and can be "
         "merged between output_folders with nnUNet_ensemble_predictions")
 
@@ -99,7 +101,8 @@ def parse_args():
         required=False,
         default=6,
         type=int,
-        help="Determines many background processes will be used for data preprocessing. Reduce this if you "
+        help=
+        "Determines many background processes will be used for data preprocessing. Reduce this if you "
         "run into out of memory (RAM) problems. Default: 6")
 
     parser.add_argument(
@@ -107,46 +110,50 @@ def parse_args():
         required=False,
         default=2,
         type=int,
-        help="Determines many background processes will be used for segmentation export. Reduce this if you "
+        help=
+        "Determines many background processes will be used for segmentation export. Reduce this if you "
         "run into out of memory (RAM) problems. Default: 2")
 
-    parser.add_argument(
-        "--mode", type=str, default="normal", required=False, help="Hands off!")
-    parser.add_argument(
-        "--step_size",
-        type=float,
-        default=0.5,
-        required=False,
-        help="don't touch")
+    parser.add_argument("--mode",
+                        type=str,
+                        default="normal",
+                        required=False,
+                        help="Hands off!")
+    parser.add_argument("--step_size",
+                        type=float,
+                        default=0.5,
+                        required=False,
+                        help="don't touch")
     parser.add_argument(
         "--overwrite_existing",
         required=False,
         default=False,
         action="store_true",
-        help="Set this flag if the target folder contains predictions that you would like to overwrite"
+        help=
+        "Set this flag if the target folder contains predictions that you would like to overwrite"
     )
-    parser.add_argument(
-        "--disable_postprocessing",
-        required=False,
-        default=False,
-        action="store_true",
-        help="Set this flag if no need postprocessing")
+    parser.add_argument("--disable_postprocessing",
+                        required=False,
+                        default=False,
+                        action="store_true",
+                        help="Set this flag if no need postprocessing")
     parser.add_argument(
         "--disable_tta",
         required=False,
         default=False,
         action="store_true",
-        help="set this flag to disable test time data augmentation via mirroring. Speeds up inference "
+        help=
+        "set this flag to disable test time data augmentation via mirroring. Speeds up inference "
         "by roughly factor 4 (2D) or 8 (3D)")
-    parser.add_argument(
-        '--min_subgraph_size',
-        default=3,
-        type=int,
-        help='The min subgraph size in tensorrt prediction.')
+    parser.add_argument('--min_subgraph_size',
+                        default=3,
+                        type=int,
+                        help='The min subgraph size in tensorrt prediction.')
     return parser.parse_args()
 
 
 class StaticMultiFolderPredictor:
+
     def __init__(self,
                  model_paths,
                  param_paths,
@@ -156,8 +163,8 @@ class StaticMultiFolderPredictor:
         self.stage = stage
         self.plans = self.load_plans(plan_path)
         self.num_classes = self.plans['num_classes'] + 1
-        self.patch_size = np.array(self.plans['plans_per_stage'][self.stage][
-            'patch_size']).astype(int)
+        self.patch_size = np.array(
+            self.plans['plans_per_stage'][self.stage]['patch_size']).astype(int)
         if len(self.patch_size) == 2:
             self.threeD = False
             self.data_aug_params = default_2D_augmentation_params
@@ -197,9 +204,10 @@ class StaticMultiFolderPredictor:
         else:
             preprocessor_class = PreprocessorFor2D
 
-        preprocessor = preprocessor_class(
-            self.normalization_schemes, self.use_mask_for_norm,
-            self.transpose_forward, self.intensity_properties)
+        preprocessor = preprocessor_class(self.normalization_schemes,
+                                          self.use_mask_for_norm,
+                                          self.transpose_forward,
+                                          self.intensity_properties)
         d, s, properties = preprocessor.preprocess_test_case(
             input_files,
             self.plans['plans_per_stage'][self.stage]['current_spacing'])
@@ -208,14 +216,14 @@ class StaticMultiFolderPredictor:
     def multi_folds_predict_preprocessed_data_return_seg_and_softmax(
             self,
             data: np.ndarray,
-            do_mirroring: bool=True,
-            mirror_axes: Tuple[int]=None,
-            use_sliding_window: bool=True,
-            step_size: float=0.5,
-            use_gaussian: bool=True,
-            pad_border_mode: str='constant',
-            pad_kwargs: dict=None,
-            verbose: bool=True,
+            do_mirroring: bool = True,
+            mirror_axes: Tuple[int] = None,
+            use_sliding_window: bool = True,
+            step_size: float = 0.5,
+            use_gaussian: bool = True,
+            pad_border_mode: str = 'constant',
+            pad_kwargs: dict = None,
+            verbose: bool = True,
             mixed_precision=True):
         softmax_res = None
         for predictor in self.predictors:

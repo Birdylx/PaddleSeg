@@ -36,6 +36,7 @@ ACT2FN = {"gelu": F.gelu, "relu": F.relu, "swish": swish}
 
 
 class Attention(nn.Layer):
+
     def __init__(self, hidden_size, num_heads, attention_dropout_rate, vis):
         super(Attention, self).__init__()
         self.vis = vis
@@ -88,6 +89,7 @@ class Attention(nn.Layer):
 
 
 class Mlp(nn.Layer):
+
     def __init__(self, hidden_size, mlp_dim, dropout_rate):
         super(Mlp, self).__init__()
         self.fc1 = nn.Linear(hidden_size, mlp_dim)
@@ -130,11 +132,10 @@ class Embeddings(nn.Layer):
 
         self.hybrid_model = hybrid_model
         in_channels = self.hybrid_model.width * 16
-        self.patch_embeddings = nn.Conv2D(
-            in_channels=in_channels,
-            out_channels=hidden_size,
-            kernel_size=patch_size,
-            stride=patch_size)
+        self.patch_embeddings = nn.Conv2D(in_channels=in_channels,
+                                          out_channels=hidden_size,
+                                          kernel_size=patch_size,
+                                          stride=patch_size)
         self.position_embeddings = paddle.create_parameter(
             shape=[1, n_patches, hidden_size],
             dtype='float32',
@@ -156,6 +157,7 @@ class Embeddings(nn.Layer):
 
 
 class Block(nn.Layer):
+
     def __init__(self, hidden_size, mlp_dim, dropout_rate, num_heads,
                  attention_dropout_rate, vis):
         super(Block, self).__init__()
@@ -180,6 +182,7 @@ class Block(nn.Layer):
 
 
 class Encoder(nn.Layer):
+
     def __init__(self, hidden_size, num_layers, mlp_dim, dropout_rate,
                  num_heads, attention_dropout_rate, vis):
         super(Encoder, self).__init__()
@@ -202,12 +205,16 @@ class Encoder(nn.Layer):
 
 
 class Transformer(nn.Layer):
+
     def __init__(self, backbone, grid_size, hidden_size, dropout_rate,
                  num_layers, mlp_dim, num_heads, attention_dropout_rate,
                  img_size, vis):
         super(Transformer, self).__init__()
-        self.embeddings = Embeddings(
-            backbone, grid_size, hidden_size, dropout_rate, img_size=img_size)
+        self.embeddings = Embeddings(backbone,
+                                     grid_size,
+                                     hidden_size,
+                                     dropout_rate,
+                                     img_size=img_size)
         self.encoder = Encoder(hidden_size, num_layers, mlp_dim, dropout_rate,
                                num_heads, attention_dropout_rate, vis)
 
@@ -219,21 +226,24 @@ class Transformer(nn.Layer):
 
 
 class Conv2DReLU(nn.Sequential):
+
     def __init__(
-            self,
-            in_channels,
-            out_channels,
-            kernel_size,
-            padding=0,
-            stride=1,
-            use_batchnorm=True, ):
+        self,
+        in_channels,
+        out_channels,
+        kernel_size,
+        padding=0,
+        stride=1,
+        use_batchnorm=True,
+    ):
         conv = nn.Conv2D(
             in_channels,
             out_channels,
             kernel_size,
             stride=stride,
             padding=padding,
-            bias_attr=not (use_batchnorm), )
+            bias_attr=not (use_batchnorm),
+        )
         relu = nn.ReLU()
 
         bn = nn.BatchNorm2D(out_channels)
@@ -242,25 +252,29 @@ class Conv2DReLU(nn.Sequential):
 
 
 class DecoderBlock(nn.Layer):
+
     def __init__(
-            self,
-            in_channels,
-            out_channels,
-            skip_channels=0,
-            use_batchnorm=True, ):
+        self,
+        in_channels,
+        out_channels,
+        skip_channels=0,
+        use_batchnorm=True,
+    ):
         super().__init__()
         self.conv1 = Conv2DReLU(
             in_channels + skip_channels,
             out_channels,
             kernel_size=3,
             padding=1,
-            use_batchnorm=use_batchnorm, )
+            use_batchnorm=use_batchnorm,
+        )
         self.conv2 = Conv2DReLU(
             out_channels,
             out_channels,
             kernel_size=3,
             padding=1,
-            use_batchnorm=use_batchnorm, )
+            use_batchnorm=use_batchnorm,
+        )
         self.up = nn.UpsamplingBilinear2D(scale_factor=2)
 
     def forward(self, x, skip=None):
@@ -273,44 +287,44 @@ class DecoderBlock(nn.Layer):
 
 
 class SegmentationHead(nn.Sequential):
+
     def __init__(self, in_channels, out_channels, kernel_size=3, upsampling=1):
-        conv2d = nn.Conv2D(
-            in_channels,
-            out_channels,
-            kernel_size=kernel_size,
-            padding=kernel_size // 2)
+        conv2d = nn.Conv2D(in_channels,
+                           out_channels,
+                           kernel_size=kernel_size,
+                           padding=kernel_size // 2)
         upsampling = nn.UpsamplingBilinear2D(
             scale_factor=upsampling) if upsampling > 1 else nn.Identity()
         super().__init__(conv2d, upsampling)
 
 
 class DecoderCup(nn.Layer):
+
     def __init__(self, hidden_size, decoder_channels, n_skip, skip_channels):
         super().__init__()
         head_channels = 512
-        self.conv_more = Conv2DReLU(
-            hidden_size,
-            head_channels,
-            kernel_size=3,
-            padding=1,
-            use_batchnorm=True)
+        self.conv_more = Conv2DReLU(hidden_size,
+                                    head_channels,
+                                    kernel_size=3,
+                                    padding=1,
+                                    use_batchnorm=True)
         decoder_channels = decoder_channels
         in_channels = [head_channels] + list(decoder_channels[:-1])
         out_channels = decoder_channels
         self.n_skip = n_skip
         if n_skip != 0:
             skip_channels = skip_channels
-            for i in range(4 - n_skip
-                           ):  # re-select the skip channels according to n_skip
+            for i in range(
+                    4 -
+                    n_skip):  # re-select the skip channels according to n_skip
                 skip_channels[3 - i] = 0
 
         else:
             skip_channels = [0, 0, 0, 0]
 
         blocks = [
-            DecoderBlock(in_ch, out_ch, sk_ch)
-            for in_ch, out_ch, sk_ch in zip(in_channels, out_channels,
-                                            skip_channels)
+            DecoderBlock(in_ch, out_ch, sk_ch) for in_ch, out_ch, sk_ch in zip(
+                in_channels, out_channels, skip_channels)
         ]
         self.blocks = nn.LayerList(blocks)
 
@@ -331,6 +345,7 @@ class DecoderCup(nn.Layer):
 
 @manager.MODELS.add_component
 class TransUNet(nn.Layer):
+
     def __init__(self,
                  backbone,
                  classifier="seg",
@@ -353,15 +368,17 @@ class TransUNet(nn.Layer):
         self.num_classes = num_classes
         self.zero_head = zero_head
         self.classifier = classifier
-        self.transformer = Transformer(
-            backbone, patches_grid, hidden_size, dropout_rate, num_layers,
-            mlp_dim, num_heads, attention_dropout_rate, img_size, vis)
+        self.transformer = Transformer(backbone, patches_grid, hidden_size,
+                                       dropout_rate, num_layers, mlp_dim,
+                                       num_heads, attention_dropout_rate,
+                                       img_size, vis)
         self.decoder = DecoderCup(hidden_size, decoder_channels, n_skip,
                                   skip_channels)
         self.segmentation_head = SegmentationHead(
             in_channels=decoder_channels[-1],
             out_channels=num_classes,
-            kernel_size=3, )
+            kernel_size=3,
+        )
         if pretrained_path is not None:
             load_pretrained_model(self, pretrained_path)
 

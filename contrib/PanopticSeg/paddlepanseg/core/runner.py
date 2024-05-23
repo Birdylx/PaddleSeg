@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# In this package we provide PaddleSeg-style functions for training, 
+# In this package we provide PaddleSeg-style functions for training,
 # validation, prediction, and inference.
 # We do not re-use the APIs of PaddleSeg because there is a large gap
 # between semantic segmentation and panoptic segmentation.
@@ -34,6 +34,7 @@ EMPTY = _Empty()
 
 
 class Runner(metaclass=abc.ABCMeta):
+
     @abc.abstractmethod
     def update_lr(self, loss):
         pass
@@ -93,8 +94,9 @@ class PanSegRunner(Runner, _LazyBindingMixin):
         return net_out
 
     def infer_forward(self, data):
-        pp_out = infer.inference(
-            model=self.model, data=data, postprocessor=self.postprocessor)
+        pp_out = infer.inference(model=self.model,
+                                 data=data,
+                                 postprocessor=self.postprocessor)
         return pp_out
 
     def compute_losses(self, net_out, data):

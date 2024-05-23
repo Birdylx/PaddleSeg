@@ -27,6 +27,7 @@ models = {
 
 @register
 class ResNet_PaDiM(nn.Layer):
+
     def __init__(self, arch='resnet18', pretrained=True):
         super(ResNet_PaDiM, self).__init__()
         assert arch in models.keys(), 'arch {} not supported'.format(arch)

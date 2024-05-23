@@ -69,10 +69,11 @@ class PanopticDeepLab(nn.Layer):
             backbone.feat_channels[i] for i in backbone_indices
         ]
 
-        self.head = PanopticDeepLabHead(
-            num_classes, backbone_indices, backbone_channels, aspp_ratios,
-            aspp_out_channels, decoder_channels, align_corners,
-            low_level_channels_projects, **kwargs)
+        self.head = PanopticDeepLabHead(num_classes, backbone_indices,
+                                        backbone_channels, aspp_ratios,
+                                        aspp_out_channels, decoder_channels,
+                                        align_corners,
+                                        low_level_channels_projects, **kwargs)
 
         self.align_corners = align_corners
         self.pretrained = pretrained
@@ -91,11 +92,10 @@ class PanopticDeepLab(nn.Layer):
         # Override upsample method to correctly handle `offset`
         result = OrderedDict()
         for key in pred.keys():
-            out = F.interpolate(
-                pred[key],
-                size=input_shape,
-                mode='bilinear',
-                align_corners=self.align_corners)
+            out = F.interpolate(pred[key],
+                                size=input_shape,
+                                mode='bilinear',
+                                align_corners=self.align_corners)
             if 'offset' in key:
                 if input_shape[0] % 2 == 0:
                     scale = input_shape[0] // pred[key].shape[2]
@@ -194,6 +194,7 @@ class PanopticDeepLabHead(nn.Layer):
 
 
 class SeparableConvBNReLU(nn.Layer):
+
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -201,15 +202,17 @@ class SeparableConvBNReLU(nn.Layer):
                  padding='same',
                  **kwargs):
         super().__init__()
-        self.depthwise_conv = layers.ConvBNReLU(
-            in_channels,
-            out_channels=in_channels,
-            kernel_size=kernel_size,
-            padding=padding,
-            groups=in_channels,
-            **kwargs)
-        self.piontwise_conv = layers.ConvBNReLU(
-            in_channels, out_channels, kernel_size=1, groups=1, bias_attr=False)
+        self.depthwise_conv = layers.ConvBNReLU(in_channels,
+                                                out_channels=in_channels,
+                                                kernel_size=kernel_size,
+                                                padding=padding,
+                                                groups=in_channels,
+                                                **kwargs)
+        self.piontwise_conv = layers.ConvBNReLU(in_channels,
+                                                out_channels,
+                                                kernel_size=1,
+                                                groups=1,
+                                                bias_attr=False)
 
     def forward(self, x):
         x = self.depthwise_conv(x)
@@ -251,13 +254,12 @@ class ASPPModule(nn.Layer):
             else:
                 conv_func = layers.ConvBNReLU
 
-            block = conv_func(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                kernel_size=1 if ratio == 1 else 3,
-                dilation=ratio,
-                padding=0 if ratio == 1 else ratio,
-                bias_attr=False)
+            block = conv_func(in_channels=in_channels,
+                              out_channels=out_channels,
+                              kernel_size=1 if ratio == 1 else 3,
+                              dilation=ratio,
+                              padding=0 if ratio == 1 else ratio,
+                              bias_attr=False)
             self.aspp_blocks.append(block)
 
         out_size = len(self.aspp_blocks)
@@ -265,16 +267,18 @@ class ASPPModule(nn.Layer):
         if image_pooling:
             self.global_avg_pool = nn.Sequential(
                 nn.AdaptiveAvgPool2D(output_size=(1, 1)),
-                layers.ConvBNReLU(
-                    in_channels, out_channels, kernel_size=1, bias_attr=False))
+                layers.ConvBNReLU(in_channels,
+                                  out_channels,
+                                  kernel_size=1,
+                                  bias_attr=False))
             out_size += 1
         self.image_pooling = image_pooling
 
-        self.conv_bn_relu = layers.ConvBNReLU(
-            in_channels=out_channels * out_size,
-            out_channels=out_channels,
-            kernel_size=1,
-            bias_attr=False)
+        self.conv_bn_relu = layers.ConvBNReLU(in_channels=out_channels *
+                                              out_size,
+                                              out_channels=out_channels,
+                                              kernel_size=1,
+                                              bias_attr=False)
 
         self.dropout = nn.Dropout(p=drop_rate)  # drop rate
 
@@ -283,20 +287,18 @@ class ASPPModule(nn.Layer):
         for block in self.aspp_blocks:
             y = block(x)
             interpolate_shape = x.shape[2:]
-            y = F.interpolate(
-                y,
-                interpolate_shape,
-                mode='bilinear',
-                align_corners=self.align_corners)
+            y = F.interpolate(y,
+                              interpolate_shape,
+                              mode='bilinear',
+                              align_corners=self.align_corners)
             outputs.append(y)
 
         if self.image_pooling:
             img_avg = self.global_avg_pool(x)
-            img_avg = F.interpolate(
-                img_avg,
-                interpolate_shape,
-                mode='bilinear',
-                align_corners=self.align_corners)
+            img_avg = F.interpolate(img_avg,
+                                    interpolate_shape,
+                                    mode='bilinear',
+                                    align_corners=self.align_corners)
             outputs.append(img_avg)
 
         x = paddle.concat(outputs, axis=1)
@@ -331,14 +333,13 @@ class SinglePanopticDeepLabDecoder(nn.Layer):
                  aspp_out_channels, decoder_channels, align_corners,
                  low_level_channels_projects):
         super().__init__()
-        self.aspp = ASPPModule(
-            aspp_ratios,
-            backbone_channels[-1],
-            aspp_out_channels,
-            align_corners,
-            use_sep_conv=False,
-            image_pooling=True,
-            drop_rate=0.5)
+        self.aspp = ASPPModule(aspp_ratios,
+                               backbone_channels[-1],
+                               aspp_out_channels,
+                               align_corners,
+                               use_sep_conv=False,
+                               image_pooling=True,
+                               drop_rate=0.5)
         self.backbone_indices = backbone_indices
         self.decoder_stage = len(low_level_channels_projects)
         if self.decoder_stage != len(self.backbone_indices) - 1:
@@ -354,11 +355,10 @@ class SinglePanopticDeepLabDecoder(nn.Layer):
         # Top-down direction, i.e. starting from largest stride
         for i in range(self.decoder_stage):
             project.append(
-                layers.ConvBNReLU(
-                    backbone_channels[i],
-                    low_level_channels_projects[i],
-                    1,
-                    bias_attr=False))
+                layers.ConvBNReLU(backbone_channels[i],
+                                  low_level_channels_projects[i],
+                                  1,
+                                  bias_attr=False))
             if i == 0:
                 fuse_in_channels = aspp_out_channels + low_level_channels_projects[
                     i]
@@ -366,12 +366,11 @@ class SinglePanopticDeepLabDecoder(nn.Layer):
                 fuse_in_channels = decoder_channels + low_level_channels_projects[
                     i]
             fuse.append(
-                SeparableConvBNReLU(
-                    fuse_in_channels,
-                    decoder_channels,
-                    5,
-                    padding=2,
-                    bias_attr=False))
+                SeparableConvBNReLU(fuse_in_channels,
+                                    decoder_channels,
+                                    5,
+                                    padding=2,
+                                    bias_attr=False))
         self.project = nn.LayerList(project)
         self.fuse = nn.LayerList(fuse)
 
@@ -382,11 +381,10 @@ class SinglePanopticDeepLabDecoder(nn.Layer):
         for i in range(self.decoder_stage):
             l = feat_list[self.backbone_indices[i]]
             l = self.project[i](l)
-            x = F.interpolate(
-                x,
-                size=l.shape[-2:],
-                mode='bilinear',
-                align_corners=self.align_corners)
+            x = F.interpolate(x,
+                              size=l.shape[-2:],
+                              mode='bilinear',
+                              align_corners=self.align_corners)
             x = paddle.concat([x, l], axis=1)
             x = self.fuse[i](x)
 
@@ -416,12 +414,11 @@ class SinglePanopticDeepLabHead(nn.Layer):
         for i in range(self.num_head):
             classifier.append(
                 nn.Sequential(
-                    SeparableConvBNReLU(
-                        decoder_channels,
-                        head_channels,
-                        5,
-                        padding=2,
-                        bias_attr=False),
+                    SeparableConvBNReLU(decoder_channels,
+                                        head_channels,
+                                        5,
+                                        padding=2,
+                                        bias_attr=False),
                     nn.Conv2D(head_channels, num_classes[i], 1)))
 
         self.classifier = nn.LayerList(classifier)

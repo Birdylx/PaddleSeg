@@ -19,8 +19,9 @@ from paddleseg.cvlibs import param_init
 
 
 def c2_xavier_fill(layer):
-    param_init.kaiming_uniform(
-        layer.weight, negative_slope=1, nonlinearity='leaky_relu')
+    param_init.kaiming_uniform(layer.weight,
+                               negative_slope=1,
+                               nonlinearity='leaky_relu')
     if layer.bias is not None:
         param_init.constant_init(layer.bias, value=0)
 
@@ -33,6 +34,7 @@ def c2_msra_fill(layer):
 
 
 def th_multihead_fill(layer, qkv_same_embed_dim=False):
+
     def _init_param_as_combined_linear_weight(p):
         bound = math.sqrt(6 / (3 * p.shape[0] + p.shape[1]))
         paddle.nn.initializer.Uniform(low=-bound, high=bound)(p)
@@ -49,8 +51,9 @@ def th_multihead_fill(layer, qkv_same_embed_dim=False):
 
 
 def th_linear_fill(layer):
-    paddle.nn.initializer.KaimingUniform(
-        negative_slope=math.sqrt(5), nonlinearity='leaky_relu')(layer.weight)
+    paddle.nn.initializer.KaimingUniform(negative_slope=math.sqrt(5),
+                                         nonlinearity='leaky_relu')(
+                                             layer.weight)
     if getattr(layer, 'bias', None) is not None:
         fan_in = layer.weight.shape[0]
         bound = 1 / math.sqrt(fan_in) if fan_in > 0 else 0
@@ -58,6 +61,7 @@ def th_linear_fill(layer):
 
 
 class THLinearInitMixin(object):
+
     def init_weight(self):
         for layer in self.sublayers():
             if isinstance(layer, paddle.nn.Linear):

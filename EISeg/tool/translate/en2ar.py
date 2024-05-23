@@ -28,6 +28,7 @@ def read_ts(ts_path):
 
 
 class BaiduTranslate:
+
     def __init__(self, fromLang, toLang):
         self.url = "/api/trans/vip/translate"
         self.appid = "20200311000396156"
@@ -83,6 +84,5 @@ if __name__ == "__main__":
                 ems.translation.string = pre_str + res[1]
             else:
                 print("Can not translate: ", ems.source.string)
-    open(
-        ar_path.replace(".ts", "2.ts"), "w",
-        encoding="utf-8").write(str(en_xml))
+    open(ar_path.replace(".ts", "2.ts"), "w",
+         encoding="utf-8").write(str(en_xml))

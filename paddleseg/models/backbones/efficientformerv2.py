@@ -131,21 +131,20 @@ class EfficientFormer(nn.Layer):
 
         network = []
         for i in range(len(layers)):
-            stage = meta_blocks(
-                embed_dims[i],
-                i,
-                layers,
-                pool_size=pool_size,
-                mlp_ratio=mlp_ratios,
-                act_layer=act_layer,
-                norm_layer=norm_layer,
-                drop_rate=drop_rate,
-                drop_path_rate=drop_path_rate,
-                use_layer_scale=use_layer_scale,
-                layer_scale_init_value=layer_scale_init_value,
-                resolution=math.ceil(resolution / (2**(i + 2))),
-                vit_num=vit_num,
-                e_ratios=e_ratios)
+            stage = meta_blocks(embed_dims[i],
+                                i,
+                                layers,
+                                pool_size=pool_size,
+                                mlp_ratio=mlp_ratios,
+                                act_layer=act_layer,
+                                norm_layer=norm_layer,
+                                drop_rate=drop_rate,
+                                drop_path_rate=drop_path_rate,
+                                use_layer_scale=use_layer_scale,
+                                layer_scale_init_value=layer_scale_init_value,
+                                resolution=math.ceil(resolution / (2**(i + 2))),
+                                vit_num=vit_num,
+                                e_ratios=e_ratios)
             network.append(stage)
             if i >= len(layers) - 1:
                 break
@@ -165,7 +164,8 @@ class EfficientFormer(nn.Layer):
                         resolution=math.ceil(resolution / (2**(i + 2))),
                         asub=asub,
                         act_layer=act_layer,
-                        norm_layer=norm_layer, ))
+                        norm_layer=norm_layer,
+                    ))
 
         self.network = nn.LayerList(network)
 
@@ -205,19 +205,18 @@ class EfficientFormer(nn.Layer):
         x = self.forward_tokens(x)
         if self.mode is not 'multi_scale':
             x = [
-                paddle.concat(
-                    [
-                        F.interpolate(
-                            feat, size=x[0].shape[-2:], mode='bilinear')
-                        for feat in x
-                    ],
-                    axis=1)
+                paddle.concat([
+                    F.interpolate(feat, size=x[0].shape[-2:], mode='bilinear')
+                    for feat in x
+                ],
+                              axis=1)
             ]
             self.feat_channels = [sum(self.feat_channels)]
         return x
 
 
 class Attention4D(nn.Layer):
+
     def __init__(self,
                  dim=384,
                  key_dim=32,
@@ -235,14 +234,14 @@ class Attention4D(nn.Layer):
         if stride is not None:
             self.resolution = math.ceil(resolution / stride)
             self.stride_conv = nn.Sequential(
-                nn.Conv2D(
-                    dim,
-                    dim,
-                    kernel_size=3,
-                    stride=stride,
-                    padding=1,
-                    groups=dim),
-                nn.BatchNorm2D(dim), )
+                nn.Conv2D(dim,
+                          dim,
+                          kernel_size=3,
+                          stride=stride,
+                          padding=1,
+                          groups=dim),
+                nn.BatchNorm2D(dim),
+            )
             self.upsample = nn.Upsample(scale_factor=stride, mode='bilinear')
         else:
             self.resolution = resolution
@@ -257,31 +256,41 @@ class Attention4D(nn.Layer):
         h = self.dh + nh_kd * 2
         self.q = nn.Sequential(
             nn.Conv2D(dim, self.num_heads * self.key_dim, 1),
-            nn.BatchNorm2D(self.num_heads * self.key_dim), )
+            nn.BatchNorm2D(self.num_heads * self.key_dim),
+        )
         self.k = nn.Sequential(
             nn.Conv2D(dim, self.num_heads * self.key_dim, 1),
-            nn.BatchNorm2D(self.num_heads * self.key_dim), )
+            nn.BatchNorm2D(self.num_heads * self.key_dim),
+        )
         self.v = nn.Sequential(
             nn.Conv2D(dim, self.num_heads * self.d, 1),
-            nn.BatchNorm2D(self.num_heads * self.d), )
+            nn.BatchNorm2D(self.num_heads * self.d),
+        )
         self.v_local = nn.Sequential(
-            nn.Conv2D(
-                self.num_heads * self.d,
-                self.num_heads * self.d,
-                kernel_size=3,
-                stride=1,
-                padding=1,
-                groups=self.num_heads * self.d),
-            nn.BatchNorm2D(self.num_heads * self.d), )
-        self.talking_head1 = nn.Conv2D(
-            self.num_heads, self.num_heads, kernel_size=1, stride=1, padding=0)
-        self.talking_head2 = nn.Conv2D(
-            self.num_heads, self.num_heads, kernel_size=1, stride=1, padding=0)
+            nn.Conv2D(self.num_heads * self.d,
+                      self.num_heads * self.d,
+                      kernel_size=3,
+                      stride=1,
+                      padding=1,
+                      groups=self.num_heads * self.d),
+            nn.BatchNorm2D(self.num_heads * self.d),
+        )
+        self.talking_head1 = nn.Conv2D(self.num_heads,
+                                       self.num_heads,
+                                       kernel_size=1,
+                                       stride=1,
+                                       padding=0)
+        self.talking_head2 = nn.Conv2D(self.num_heads,
+                                       self.num_heads,
+                                       kernel_size=1,
+                                       stride=1,
+                                       padding=0)
 
         self.proj = nn.Sequential(
             act_layer(),
             nn.Conv2D(self.dh, dim, 1),
-            nn.BatchNorm2D(dim), )
+            nn.BatchNorm2D(dim),
+        )
 
         points = list(
             itertools.product(range(self.resolution), range(self.resolution)))
@@ -296,9 +305,8 @@ class Attention4D(nn.Layer):
                 idxs.append(attention_offsets[offset])
         self.register_buffer('attention_biases', paddle.zeros([num_heads, 49]))
 
-        self.register_buffer(
-            'attention_bias_idxs', paddle.ones(
-                [49, 49], dtype=paddle.int64))
+        self.register_buffer('attention_bias_idxs',
+                             paddle.ones([49, 49], dtype=paddle.int64))
 
         self.attention_biases_seg = self.create_parameter(
             shape=[num_heads, len(attention_offsets)],
@@ -313,34 +321,34 @@ class Attention4D(nn.Layer):
             H = H // 2
             W = W // 2
 
-        q = self.q(x).flatten(2).reshape(
-            [B, self.num_heads, -1, H * W]).transpose([0, 1, 3, 2])
-        k = self.k(x).flatten(2).reshape(
-            [B, self.num_heads, -1, H * W]).transpose([0, 1, 2, 3])
+        q = self.q(x).flatten(2).reshape([B, self.num_heads, -1,
+                                          H * W]).transpose([0, 1, 3, 2])
+        k = self.k(x).flatten(2).reshape([B, self.num_heads, -1,
+                                          H * W]).transpose([0, 1, 2, 3])
         v = self.v(x)
         v_local = self.v_local(v)
-        v = v.flatten(2).reshape([B, self.num_heads, -1, H * W]).transpose(
-            [0, 1, 3, 2])
+        v = v.flatten(2).reshape([B, self.num_heads, -1,
+                                  H * W]).transpose([0, 1, 3, 2])
 
-        attn = (q @k) * self.scale
-        bias = paddle.gather(
-            self.attention_biases_seg,
-            self.attention_bias_idxs_seg.flatten(),
-            axis=1).reshape([
-                self.attention_biases_seg.shape[0],
-                self.attention_bias_idxs_seg.shape[0],
-                self.attention_bias_idxs_seg.shape[1]
-            ])
+        attn = (q @ k) * self.scale
+        bias = paddle.gather(self.attention_biases_seg,
+                             self.attention_bias_idxs_seg.flatten(),
+                             axis=1).reshape([
+                                 self.attention_biases_seg.shape[0],
+                                 self.attention_bias_idxs_seg.shape[0],
+                                 self.attention_bias_idxs_seg.shape[1]
+                             ])
 
-        bias = F.interpolate(
-            bias.unsqueeze(0), size=attn.shape[-2:], mode='bicubic')
+        bias = F.interpolate(bias.unsqueeze(0),
+                             size=attn.shape[-2:],
+                             mode='bicubic')
         attn = attn + bias
 
         attn = self.talking_head1(attn)
         attn = F.softmax(attn, axis=-1)
         attn = self.talking_head2(attn)
 
-        x = (attn @v)
+        x = (attn @ v)
 
         out = x.transpose([0, 1, 3, 2]).reshape([B, self.dh, H, W]) + v_local
         if self.upsample is not None:
@@ -352,33 +360,33 @@ class Attention4D(nn.Layer):
 
 def stem(in_chs, out_chs, act_layer=nn.ReLU):
     return nn.Sequential(
-        nn.Conv2D(
-            in_chs, out_chs // 2, kernel_size=3, stride=2, padding=1),
+        nn.Conv2D(in_chs, out_chs // 2, kernel_size=3, stride=2, padding=1),
         nn.BatchNorm2D(out_chs // 2),
         act_layer(),
-        nn.Conv2D(
-            out_chs // 2, out_chs, kernel_size=3, stride=2, padding=1),
+        nn.Conv2D(out_chs // 2, out_chs, kernel_size=3, stride=2, padding=1),
         nn.BatchNorm2D(out_chs),
-        act_layer(), )
+        act_layer(),
+    )
 
 
 class LGQuery(nn.Layer):
+
     def __init__(self, in_dim, out_dim, resolution1, resolution2):
         super().__init__()
         self.resolution1 = resolution1
         self.resolution2 = resolution2
         self.pool = nn.AvgPool2D(1, 2, 0)
         self.local = nn.Sequential(
-            nn.Conv2D(
-                in_dim,
-                in_dim,
-                kernel_size=3,
-                stride=2,
-                padding=1,
-                groups=in_dim), )
+            nn.Conv2D(in_dim,
+                      in_dim,
+                      kernel_size=3,
+                      stride=2,
+                      padding=1,
+                      groups=in_dim), )
         self.proj = nn.Sequential(
             nn.Conv2D(in_dim, out_dim, 1),
-            nn.BatchNorm2D(out_dim), )
+            nn.BatchNorm2D(out_dim),
+        )
 
     def forward(self, x):
         local_q = self.local(x)
@@ -389,15 +397,17 @@ class LGQuery(nn.Layer):
 
 
 class Attention4DDownsample(nn.Layer):
+
     def __init__(
-            self,
-            dim=384,
-            key_dim=16,
-            num_heads=8,
-            attn_ratio=4,
-            resolution=7,
-            out_dim=None,
-            act_layer=None, ):
+        self,
+        dim=384,
+        key_dim=16,
+        num_heads=8,
+        attn_ratio=4,
+        resolution=7,
+        out_dim=None,
+        act_layer=None,
+    ):
         super().__init__()
         self.num_heads = num_heads
         self.scale = key_dim**-0.5
@@ -424,30 +434,32 @@ class Attention4DDownsample(nn.Layer):
 
         self.k = nn.Sequential(
             nn.Conv2D(dim, self.num_heads * self.key_dim, 1),
-            nn.BatchNorm2D(self.num_heads * self.key_dim), )
+            nn.BatchNorm2D(self.num_heads * self.key_dim),
+        )
         self.v = nn.Sequential(
             nn.Conv2D(dim, self.num_heads * self.d, 1),
-            nn.BatchNorm2D(self.num_heads * self.d), )
+            nn.BatchNorm2D(self.num_heads * self.d),
+        )
         self.v_local = nn.Sequential(
-            nn.Conv2D(
-                self.num_heads * self.d,
-                self.num_heads * self.d,
-                kernel_size=3,
-                stride=2,
-                padding=1,
-                groups=self.num_heads * self.d),
-            nn.BatchNorm2D(self.num_heads * self.d), )
+            nn.Conv2D(self.num_heads * self.d,
+                      self.num_heads * self.d,
+                      kernel_size=3,
+                      stride=2,
+                      padding=1,
+                      groups=self.num_heads * self.d),
+            nn.BatchNorm2D(self.num_heads * self.d),
+        )
 
         self.proj = nn.Sequential(
             act_layer(),
             nn.Conv2D(self.dh, self.out_dim, 1),
-            nn.BatchNorm2D(self.out_dim), )
+            nn.BatchNorm2D(self.out_dim),
+        )
 
         points = list(
             itertools.product(range(self.resolution), range(self.resolution)))
         points_ = list(
-            itertools.product(
-                range(self.resolution2), range(self.resolution2)))
+            itertools.product(range(self.resolution2), range(self.resolution2)))
         N = len(points)
         N_ = len(points_)
         attention_offsets = {}
@@ -465,9 +477,8 @@ class Attention4DDownsample(nn.Layer):
                 idxs.append(attention_offsets[offset])
 
         self.register_buffer('attention_biases', paddle.zeros([num_heads, 196]))
-        self.register_buffer(
-            'attention_bias_idxs', paddle.ones(
-                [49, 196], dtype=paddle.int64))
+        self.register_buffer('attention_bias_idxs',
+                             paddle.ones([49, 196], dtype=paddle.int64))
 
         self.attention_biases_seg = self.create_parameter(
             shape=[num_heads, len(attention_offsets)],
@@ -475,38 +486,37 @@ class Attention4DDownsample(nn.Layer):
 
         self.register_buffer(
             'attention_bias_idxs_seg',
-            paddle.to_tensor(
-                idxs, dtype=paddle.int64).reshape([N_, N]))
+            paddle.to_tensor(idxs, dtype=paddle.int64).reshape([N_, N]))
 
     def forward(self, x):
         B, C, H, W = x.shape
 
-        q = self.q(x).flatten(2).reshape(
-            [B, self.num_heads, -1, H * W // 4]).transpose([0, 1, 3, 2])
-        k = self.k(x).flatten(2).reshape(
-            [B, self.num_heads, -1, H * W]).transpose([0, 1, 2, 3])
+        q = self.q(x).flatten(2).reshape([B, self.num_heads, -1,
+                                          H * W // 4]).transpose([0, 1, 3, 2])
+        k = self.k(x).flatten(2).reshape([B, self.num_heads, -1,
+                                          H * W]).transpose([0, 1, 2, 3])
         v = self.v(x)
         v_local = self.v_local(v)
-        v = v.flatten(2).reshape([B, self.num_heads, -1, H * W]).transpose(
-            [0, 1, 3, 2])
+        v = v.flatten(2).reshape([B, self.num_heads, -1,
+                                  H * W]).transpose([0, 1, 3, 2])
 
-        attn = (q @k) * self.scale
-        bias = paddle.gather(
-            self.attention_biases_seg,
-            self.attention_bias_idxs_seg.flatten(),
-            axis=1).reshape([
-                self.attention_biases_seg.shape[0],
-                self.attention_bias_idxs_seg.shape[0],
-                self.attention_bias_idxs_seg.shape[1]
-            ])
+        attn = (q @ k) * self.scale
+        bias = paddle.gather(self.attention_biases_seg,
+                             self.attention_bias_idxs_seg.flatten(),
+                             axis=1).reshape([
+                                 self.attention_biases_seg.shape[0],
+                                 self.attention_bias_idxs_seg.shape[0],
+                                 self.attention_bias_idxs_seg.shape[1]
+                             ])
 
-        bias = F.interpolate(
-            bias.unsqueeze(0), size=attn.shape[-2:], mode='bicubic')
+        bias = F.interpolate(bias.unsqueeze(0),
+                             size=attn.shape[-2:],
+                             mode='bicubic')
         attn = attn + bias
 
         attn = F.softmax(attn, axis=-1)
 
-        x = (attn @v).transpose([0, 1, 3, 2])
+        x = (attn @ v).transpose([0, 1, 3, 2])
         out = x.reshape([B, self.dh, H // 2, W // 2]) + v_local
 
         out = self.proj(out)
@@ -514,6 +524,7 @@ class Attention4DDownsample(nn.Layer):
 
 
 class Embedding(nn.Layer):
+
     def __init__(self,
                  patch_size=3,
                  stride=2,
@@ -532,49 +543,51 @@ class Embedding(nn.Layer):
 
         if self.light:
             self.new_proj = nn.Sequential(
-                nn.Conv2D(
-                    in_chans,
-                    in_chans,
-                    kernel_size=3,
-                    stride=2,
-                    padding=1,
-                    groups=in_chans),
+                nn.Conv2D(in_chans,
+                          in_chans,
+                          kernel_size=3,
+                          stride=2,
+                          padding=1,
+                          groups=in_chans),
                 nn.BatchNorm2D(in_chans),
                 nn.Hardswish(),
-                nn.Conv2D(
-                    in_chans, embed_dim, kernel_size=1, stride=1, padding=0),
-                nn.BatchNorm2D(embed_dim), )
+                nn.Conv2D(in_chans,
+                          embed_dim,
+                          kernel_size=1,
+                          stride=1,
+                          padding=0),
+                nn.BatchNorm2D(embed_dim),
+            )
             self.skip = nn.Sequential(
-                nn.Conv2D(
-                    in_chans, embed_dim, kernel_size=1, stride=2, padding=0),
-                nn.BatchNorm2D(embed_dim))
+                nn.Conv2D(in_chans,
+                          embed_dim,
+                          kernel_size=1,
+                          stride=2,
+                          padding=0), nn.BatchNorm2D(embed_dim))
         elif self.asub:
-            self.attn = attn_block(
-                dim=in_chans,
-                out_dim=embed_dim,
-                resolution=resolution,
-                act_layer=act_layer)
+            self.attn = attn_block(dim=in_chans,
+                                   out_dim=embed_dim,
+                                   resolution=resolution,
+                                   act_layer=act_layer)
 
             patch_size = to_2tuple(patch_size)
             stride = to_2tuple(stride)
             padding = to_2tuple(padding)
-            self.conv = nn.Conv2D(
-                in_chans,
-                embed_dim,
-                kernel_size=patch_size,
-                stride=stride,
-                padding=padding)
+            self.conv = nn.Conv2D(in_chans,
+                                  embed_dim,
+                                  kernel_size=patch_size,
+                                  stride=stride,
+                                  padding=padding)
             self.bn = norm_layer(embed_dim) if norm_layer else nn.Identity()
         else:
             patch_size = to_2tuple(patch_size)
             stride = to_2tuple(stride)
             padding = to_2tuple(padding)
-            self.proj = nn.Conv2D(
-                in_chans,
-                embed_dim,
-                kernel_size=patch_size,
-                stride=stride,
-                padding=padding)
+            self.proj = nn.Conv2D(in_chans,
+                                  embed_dim,
+                                  kernel_size=patch_size,
+                                  stride=stride,
+                                  padding=padding)
             self.norm = norm_layer(embed_dim) if norm_layer else nn.Identity()
 
     def forward(self, x):
@@ -593,6 +606,7 @@ class Embedding(nn.Layer):
 
 
 class Mlp(nn.Layer):
+
     def __init__(self,
                  in_features,
                  hidden_features=None,
@@ -610,13 +624,12 @@ class Mlp(nn.Layer):
         self.drop = nn.Dropout(drop)
 
         if self.mid_conv:
-            self.mid = nn.Conv2D(
-                hidden_features,
-                hidden_features,
-                kernel_size=3,
-                stride=1,
-                padding=1,
-                groups=hidden_features)
+            self.mid = nn.Conv2D(hidden_features,
+                                 hidden_features,
+                                 kernel_size=3,
+                                 stride=1,
+                                 padding=1,
+                                 groups=hidden_features)
 
         self.norm1 = nn.BatchNorm2D(hidden_features)
         self.norm2 = nn.BatchNorm2D(out_features)
@@ -647,6 +660,7 @@ class Mlp(nn.Layer):
 
 
 class AttnFFN(nn.Layer):
+
     def __init__(self,
                  dim,
                  mlp_ratio=4.,
@@ -661,8 +675,10 @@ class AttnFFN(nn.Layer):
 
         super().__init__()
 
-        self.token_mixer = Attention4D(
-            dim, resolution=resolution, act_layer=act_layer, stride=stride)
+        self.token_mixer = Attention4D(dim,
+                                       resolution=resolution,
+                                       act_layer=act_layer,
+                                       stride=stride)
         mlp_hidden_dim = int(dim * mlp_ratio)
         self.mlp = Mlp(in_features=dim,
                        hidden_features=mlp_hidden_dim,
@@ -698,6 +714,7 @@ class AttnFFN(nn.Layer):
 
 
 class FFN(nn.Layer):
+
     def __init__(self,
                  dim,
                  pool_size=3,
@@ -752,8 +769,8 @@ def meta_blocks(dim,
                 e_ratios=None):
     blocks = []
     for block_idx in range(layers[index]):
-        block_dpr = drop_path_rate * (
-            block_idx + sum(layers[:index])) / (sum(layers) - 1)
+        block_dpr = drop_path_rate * (block_idx +
+                                      sum(layers[:index])) / (sum(layers) - 1)
         mlp_ratio = e_ratios[str(index)][block_idx]
         if index >= 2 and block_idx > layers[index] - 1 - vit_num:
             if index == 2:
@@ -771,7 +788,8 @@ def meta_blocks(dim,
                     use_layer_scale=use_layer_scale,
                     layer_scale_init_value=layer_scale_init_value,
                     resolution=resolution,
-                    stride=stride, ))
+                    stride=stride,
+                ))
         else:
             blocks.append(
                 FFN(
@@ -782,7 +800,8 @@ def meta_blocks(dim,
                     drop=drop_rate,
                     drop_path=block_dpr,
                     use_layer_scale=use_layer_scale,
-                    layer_scale_init_value=layer_scale_init_value, ))
+                    layer_scale_init_value=layer_scale_init_value,
+                ))
 
     blocks = nn.Sequential(*blocks)
     return blocks
@@ -790,51 +809,51 @@ def meta_blocks(dim,
 
 @manager.BACKBONES.add_component
 class Efficientformerv2_s0(EfficientFormer):
+
     def __init__(self, **kwargs):
-        super().__init__(
-            layers=EfficientFormer_depth['S0'],
-            embed_dims=EfficientFormer_width['S0'],
-            downsamples=[True, True, True, True],
-            drop_path_rate=0.,
-            vit_num=2,
-            e_ratios=expansion_ratios_S0,
-            **kwargs)
+        super().__init__(layers=EfficientFormer_depth['S0'],
+                         embed_dims=EfficientFormer_width['S0'],
+                         downsamples=[True, True, True, True],
+                         drop_path_rate=0.,
+                         vit_num=2,
+                         e_ratios=expansion_ratios_S0,
+                         **kwargs)
 
 
 @manager.BACKBONES.add_component
 class EfficientFormerv2_s1(EfficientFormer):
+
     def __init__(self, **kwargs):
-        super().__init__(
-            layers=EfficientFormer_depth['S1'],
-            embed_dims=EfficientFormer_width['S1'],
-            downsamples=[True, True, True, True],
-            drop_path_rate=0.,
-            vit_num=2,
-            e_ratios=expansion_ratios_S1,
-            **kwargs)
+        super().__init__(layers=EfficientFormer_depth['S1'],
+                         embed_dims=EfficientFormer_width['S1'],
+                         downsamples=[True, True, True, True],
+                         drop_path_rate=0.,
+                         vit_num=2,
+                         e_ratios=expansion_ratios_S1,
+                         **kwargs)
 
 
 @manager.BACKBONES.add_component
 class EfficientFormerv2_s2(EfficientFormer):
+
     def __init__(self, **kwargs):
-        super().__init__(
-            layers=EfficientFormer_depth['S2'],
-            embed_dims=EfficientFormer_width['S2'],
-            downsamples=[True, True, True, True],
-            drop_path_rate=0.02,
-            vit_num=4,
-            e_ratios=expansion_ratios_S2,
-            **kwargs)
+        super().__init__(layers=EfficientFormer_depth['S2'],
+                         embed_dims=EfficientFormer_width['S2'],
+                         downsamples=[True, True, True, True],
+                         drop_path_rate=0.02,
+                         vit_num=4,
+                         e_ratios=expansion_ratios_S2,
+                         **kwargs)
 
 
 @manager.BACKBONES.add_component
 class EfficientFormerv2_l(EfficientFormer):
+
     def __init__(self, **kwargs):
-        super().__init__(
-            layers=EfficientFormer_depth['L'],
-            embed_dims=EfficientFormer_width['L'],
-            downsamples=[True, True, True, True],
-            drop_path_rate=0.1,
-            vit_num=6,
-            e_ratios=expansion_ratios_L,
-            **kwargs)
+        super().__init__(layers=EfficientFormer_depth['L'],
+                         embed_dims=EfficientFormer_width['L'],
+                         downsamples=[True, True, True, True],
+                         drop_path_rate=0.1,
+                         vit_num=6,
+                         e_ratios=expansion_ratios_L,
+                         **kwargs)

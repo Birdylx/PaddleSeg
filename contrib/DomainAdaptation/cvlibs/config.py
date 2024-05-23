@@ -67,9 +67,9 @@ class Config(object):
 
     def __init__(self,
                  path: str,
-                 learning_rate: float=None,
-                 batch_size: int=None,
-                 iters: int=None):
+                 learning_rate: float = None,
+                 batch_size: int = None,
+                 iters: int = None):
         if not path:
             raise ValueError('Please specify the configuration file path.')
 
@@ -84,8 +84,9 @@ class Config(object):
         else:
             raise RuntimeError('Config file should in yaml format!')
 
-        self.update(
-            learning_rate=learning_rate, batch_size=batch_size, iters=iters)
+        self.update(learning_rate=learning_rate,
+                    batch_size=batch_size,
+                    iters=iters)
 
     def _update_dic(self, dic, base_dic):
         """
@@ -120,9 +121,9 @@ class Config(object):
         return dic
 
     def update(self,
-               learning_rate: float=None,
-               batch_size: int=None,
-               iters: int=None):
+               learning_rate: float = None,
+               batch_size: int = None,
+               iters: int = None):
         '''Update config'''
         if learning_rate:
             if 'lr_scheduler' in self.dic:
@@ -200,15 +201,19 @@ class Config(object):
         optimizer_type = args.pop('type')
 
         if optimizer_type == 'sgd':
-            return paddle.optimizer.Momentum(
-                lr, parameters=self.model.parameters(), **args)
+            return paddle.optimizer.Momentum(lr,
+                                             parameters=self.model.parameters(),
+                                             **args)
             # lr, parameters=self.model.backbone.optim_parameters(lr=lr.base_lr), **args)
         elif optimizer_type == 'adam':
-            return paddle.optimizer.Adam(
-                lr, parameters=self.model.parameters(), **args)
+            return paddle.optimizer.Adam(lr,
+                                         parameters=self.model.parameters(),
+                                         **args)
         elif optimizer_type in paddle.optimizer.__all__:
-            return getattr(paddle.optimizer, optimizer_type)(
-                lr, parameters=self.model.parameters(), **args)
+            return getattr(paddle.optimizer,
+                           optimizer_type)(lr,
+                                           parameters=self.model.parameters(),
+                                           **args)
 
         raise RuntimeError('Unknown optimizer type {}.'.format(optimizer_type))
 
@@ -222,9 +227,10 @@ class Config(object):
 
     @property
     def decay_args(self) -> dict:
-        args = self.dic.get('learning_rate', {}).get(
-            'decay', {'type': 'poly',
-                      'power': 0.9}).copy()
+        args = self.dic.get('learning_rate', {}).get('decay', {
+            'type': 'poly',
+            'power': 0.9
+        }).copy()
 
         if args['type'] == 'poly':
             args.setdefault('decay_steps', self.iters)

@@ -17,19 +17,17 @@ def parse_args():
         type=str,
         default=None,
         required=True)
-    parser.add_argument(
-        '--onnx_file',
-        dest='onnx_file',
-        help='The onnx model path.',
-        type=str,
-        default=None,
-        required=True)
-    parser.add_argument(
-        '--save_dir',
-        dest='save_dir',
-        help='The directory for saving the predict result.',
-        type=str,
-        default='./output')
+    parser.add_argument('--onnx_file',
+                        dest='onnx_file',
+                        help='The onnx model path.',
+                        type=str,
+                        default=None,
+                        required=True)
+    parser.add_argument('--save_dir',
+                        dest='save_dir',
+                        help='The directory for saving the predict result.',
+                        type=str,
+                        default='./output')
 
     return parser.parse_args()
 

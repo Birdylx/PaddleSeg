@@ -94,10 +94,9 @@ class AutoNueAutolabel(paddle.io.Dataset):
         img_files = sorted(
             glob.glob(os.path.join(img_dir, mode, '*', '*_leftImg8bit.*')))
 
-        self.file_list = [
-            [img_path, label_path]
-            for img_path, label_path in zip(img_files, label_files)
-        ]
+        self.file_list = [[
+            img_path, label_path
+        ] for img_path, label_path in zip(img_files, label_files)]
         # for ii in range(len(self.file_list)):
         #     print(self.file_list[ii])
         # print(len(self.file_list))
@@ -114,10 +113,9 @@ class AutoNueAutolabel(paddle.io.Dataset):
                 img_files = sorted(
                     glob.glob(
                         os.path.join(img_dir, 'val', '*', '*_leftImg8bit.*')))
-                val_file_list = [
-                    [img_path, label_path]
-                    for img_path, label_path in zip(img_files, label_files)
-                ]
+                val_file_list = [[
+                    img_path, label_path
+                ] for img_path, label_path in zip(img_files, label_files)]
                 self.file_list.extend(val_file_list)
                 for ii in range(len(self.file_list)):
                     print(self.file_list[ii])
@@ -138,8 +136,8 @@ class AutoNueAutolabel(paddle.io.Dataset):
 
             coarse_label_files = sorted(
                 glob.glob(os.path.join(label_dir, '*', '*')))
-            coarse_img_files = sorted(
-                glob.glob(os.path.join(img_dir, '*', '*')))
+            coarse_img_files = sorted(glob.glob(os.path.join(img_dir, '*',
+                                                             '*')))
             if len(coarse_img_files) != len(coarse_label_files):
                 raise ValueError(
                     "The number of images = {} is not equal to the number of labels = {} in Cityscapes Autolabeling dataset."

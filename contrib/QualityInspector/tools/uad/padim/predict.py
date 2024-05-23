@@ -41,21 +41,19 @@ from qinspector.cvlib.uad_configs import *
 
 def argsparser():
     parser = argparse.ArgumentParser('PaDiM')
-    parser.add_argument(
-        "--config",
-        type=str,
-        default=None,
-        help="Path of config",
-        required=True)
+    parser.add_argument("--config",
+                        type=str,
+                        default=None,
+                        help="Path of config",
+                        required=True)
     parser.add_argument("--device", type=str, default=None)
     parser.add_argument('--img_path', type=str, default=None)
     parser.add_argument('--save_path', type=str, default=None)
     parser.add_argument('--model_path', type=str, default=None)
-    parser.add_argument(
-        "--category",
-        type=str,
-        default=None,
-        help="category name for MvTec AD dataset")
+    parser.add_argument("--category",
+                        type=str,
+                        default=None,
+                        help="category name for MvTec AD dataset")
     parser.add_argument("--backbone", type=str, default=None)
     parser.add_argument("--seed", type=int, default=None)
     parser.add_argument("--threshold", type=float, default=None)
@@ -111,8 +109,9 @@ def main():
     embedding_vectors = test_outputs['layer1']
     for layer_name in ['layer2', 'layer3']:
         layer_embedding = test_outputs[layer_name]
-        layer_embedding = F.interpolate(
-            layer_embedding, size=embedding_vectors.shape[-2:], mode="nearest")
+        layer_embedding = F.interpolate(layer_embedding,
+                                        size=embedding_vectors.shape[-2:],
+                                        mode="nearest")
         embedding_vectors = paddle.concat((embedding_vectors, layer_embedding),
                                           1)
 
@@ -123,8 +122,8 @@ def main():
     B, C, H, W = embedding_vectors.shape
     embedding = embedding_vectors.reshape((B, C, H * W))
     # calculate mahalanobis distances
-    mean, covariance = paddle.to_tensor(model.distribution[
-        0]), paddle.to_tensor(model.distribution[1])
+    mean, covariance = paddle.to_tensor(
+        model.distribution[0]), paddle.to_tensor(model.distribution[1])
     inv_covariance = paddle.linalg.inv(covariance.transpose((2, 0, 1)))
 
     delta = (embedding - mean).transpose((2, 0, 1))
@@ -135,11 +134,10 @@ def main():
     distances = paddle.sqrt(distances)
 
     # upsample
-    score_map = F.interpolate(
-        distances.unsqueeze(1),
-        size=x.shape[2:],
-        mode='bilinear',
-        align_corners=False).squeeze(1).numpy()
+    score_map = F.interpolate(distances.unsqueeze(1),
+                              size=x.shape[2:],
+                              mode='bilinear',
+                              align_corners=False).squeeze(1).numpy()
     # apply gaussian smoothing on the score map
     for i in range(score_map.shape[0]):
         score_map[i] = gaussian_filter(score_map[i], sigma=4)
@@ -207,9 +205,9 @@ def plot_fig(test_img, scores, threshold, save_dir, class_name):
         }
         cb.set_label('Anomaly Score', fontdict=font)
         if i < 1:  # save one result
-            fig_img.savefig(
-                os.path.join(save_dir, class_name + '_pre_{}'.format(i)),
-                dpi=100)
+            fig_img.savefig(os.path.join(save_dir,
+                                         class_name + '_pre_{}'.format(i)),
+                            dpi=100)
 
         plt.close()
 

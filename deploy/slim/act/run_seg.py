@@ -31,26 +31,22 @@ eval_dataset = None
 
 def argsparser():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        '--config_path',
-        type=str,
-        default=None,
-        help="path of the config include data config.")
-    parser.add_argument(
-        '--act_config_path',
-        type=str,
-        default=None,
-        help="path of the auto compression config.")
-    parser.add_argument(
-        '--save_dir',
-        type=str,
-        default=None,
-        help="directory to save compressed model.")
-    parser.add_argument(
-        '--devices',
-        type=str,
-        default='gpu',
-        help="which device used to compress.")
+    parser.add_argument('--config_path',
+                        type=str,
+                        default=None,
+                        help="path of the config include data config.")
+    parser.add_argument('--act_config_path',
+                        type=str,
+                        default=None,
+                        help="path of the auto compression config.")
+    parser.add_argument('--save_dir',
+                        type=str,
+                        default=None,
+                        help="directory to save compressed model.")
+    parser.add_argument('--devices',
+                        type=str,
+                        default='gpu',
+                        help="which device used to compress.")
     return parser
 
 
@@ -67,13 +63,16 @@ def eval_function(exe, compiled_test_program, test_feed_names, test_fetch_list):
     Returns:
         miou: IoU 平均值。
     """
-    batch_sampler = paddle.io.BatchSampler(
-        eval_dataset, batch_size=1, shuffle=False, drop_last=False)
+    batch_sampler = paddle.io.BatchSampler(eval_dataset,
+                                           batch_size=1,
+                                           shuffle=False,
+                                           drop_last=False)
     loader = paddle.io.DataLoader(
         eval_dataset,
         batch_sampler=batch_sampler,
         num_workers=0,
-        return_list=True, )
+        return_list=True,
+    )
 
     total_iters = len(loader)
     intersect_area_all = 0
@@ -96,8 +95,9 @@ def eval_function(exe, compiled_test_program, test_feed_names, test_fetch_list):
         paddle.disable_static()
         logit = logits[
             0]  # logit shape is 3, except  data['trans_info'] needs to be empty
-        logit = reverse_transform(
-            paddle.to_tensor(logit), data['trans_info'], mode='bilinear')
+        logit = reverse_transform(paddle.to_tensor(logit),
+                                  data['trans_info'],
+                                  mode='bilinear')
         pred = paddle.to_tensor(logit)
         if len(
                 pred.shape
@@ -165,20 +165,21 @@ def main(args):
     eval_dataset = builder.val_dataset
     batch_size = data_cfg.batch_size
 
-    batch_sampler = paddle.io.DistributedBatchSampler(
-        train_dataset, batch_size=batch_size, shuffle=True, drop_last=True)
-    train_loader = paddle.io.DataLoader(
-        train_dataset,
-        places=[place],
-        batch_sampler=batch_sampler,
-        num_workers=0,
-        return_list=True,
-        worker_init_fn=worker_init_fn)
+    batch_sampler = paddle.io.DistributedBatchSampler(train_dataset,
+                                                      batch_size=batch_size,
+                                                      shuffle=True,
+                                                      drop_last=True)
+    train_loader = paddle.io.DataLoader(train_dataset,
+                                        places=[place],
+                                        batch_sampler=batch_sampler,
+                                        num_workers=0,
+                                        return_list=True,
+                                        worker_init_fn=worker_init_fn)
 
     input_name = get_feed_vars(
         act_config['Global']['model_dir'],
-        act_config['Global']['model_filename'], act_config['Global'][
-            'params_filename'])  # get the name of forward input
+        act_config['Global']['model_filename'], act_config['Global']
+        ['params_filename'])  # get the name of forward input
     train_dataloader = reader_wrapper(train_loader, input_name)
 
     # step2: create and instance of AutoCompression

@@ -90,33 +90,34 @@ def predict(model,
     progbar_pred = progbar.Progbar(target=len(img_lists[0]), verbose=1)
     with paddle.no_grad():
         for i, im_path in enumerate(img_lists[local_rank]):
-            data = build_info_dict(
-                _type_='sample', img=im_path, img_path=im_path)
+            data = build_info_dict(_type_='sample',
+                                   img=im_path,
+                                   img_path=im_path)
             data = transforms(data)
             # XXX: For efficiency only convert img to tensor.
             data['img'] = paddle.to_tensor(data['img']).unsqueeze(0)
 
-            pp_out = infer.inference(
-                model=model, data=data, postprocessor=postprocessor)
+            pp_out = infer.inference(model=model,
+                                     data=data,
+                                     postprocessor=postprocessor)
             # NOTE: We do not perform id conversion before visualization
             pan_pred = pp_out['pan_pred'][0, 0].numpy()
             sem_pred = pp_out['sem_pred'][0, 0].numpy()
             sem_vis = visualize_semantic(sem_pred, colormap)
             ins_vis = visualize_instance(pan_pred, ignore_ins_id=0)
-            pan_vis = visualize_panoptic(
-                pan_pred,
-                label_divisor=label_divisor,
-                colormap=colormap,
-                ignore_index=ignore_index)
+            pan_vis = visualize_panoptic(pan_pred,
+                                         label_divisor=label_divisor,
+                                         colormap=colormap,
+                                         ignore_index=ignore_index)
 
             Image.fromarray(sem_vis).convert('RGB').save(
-                osp.join(save_dir,
-                         get_save_name(im_path, image_dir, '_sem.png')))
+                osp.join(save_dir, get_save_name(im_path, image_dir,
+                                                 '_sem.png')))
             Image.fromarray(ins_vis).convert('RGB').save(
-                osp.join(save_dir,
-                         get_save_name(im_path, image_dir, '_ins.png')))
+                osp.join(save_dir, get_save_name(im_path, image_dir,
+                                                 '_ins.png')))
             Image.fromarray(pan_vis).convert('RGB').save(
-                osp.join(save_dir,
-                         get_save_name(im_path, image_dir, '_pan.png')))
+                osp.join(save_dir, get_save_name(im_path, image_dir,
+                                                 '_pan.png')))
 
             progbar_pred.update(i + 1)

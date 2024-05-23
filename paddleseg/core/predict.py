@@ -103,26 +103,24 @@ def predict(model,
             data = preprocess(im_path, transforms)
 
             if aug_pred:
-                pred, _ = infer.aug_inference(
-                    model,
-                    data['img'],
-                    trans_info=data['trans_info'],
-                    scales=scales,
-                    flip_horizontal=flip_horizontal,
-                    flip_vertical=flip_vertical,
-                    is_slide=is_slide,
-                    stride=stride,
-                    crop_size=crop_size,
-                    use_multilabel=use_multilabel)
+                pred, _ = infer.aug_inference(model,
+                                              data['img'],
+                                              trans_info=data['trans_info'],
+                                              scales=scales,
+                                              flip_horizontal=flip_horizontal,
+                                              flip_vertical=flip_vertical,
+                                              is_slide=is_slide,
+                                              stride=stride,
+                                              crop_size=crop_size,
+                                              use_multilabel=use_multilabel)
             else:
-                pred, _ = infer.inference(
-                    model,
-                    data['img'],
-                    trans_info=data['trans_info'],
-                    is_slide=is_slide,
-                    stride=stride,
-                    crop_size=crop_size,
-                    use_multilabel=use_multilabel)
+                pred, _ = infer.inference(model,
+                                          data['img'],
+                                          trans_info=data['trans_info'],
+                                          is_slide=is_slide,
+                                          stride=stride,
+                                          crop_size=crop_size,
+                                          use_multilabel=use_multilabel)
             pred = paddle.squeeze(pred)
             pred = pred.numpy().astype('uint8')
 
@@ -136,7 +134,11 @@ def predict(model,
 
             # save added image
             added_image = utils.visualize.visualize(
-                im_path, pred, color_map, weight=0.6, use_multilabel=use_multilabel)
+                im_path,
+                pred,
+                color_map,
+                weight=0.6,
+                use_multilabel=use_multilabel)
             added_image_path = os.path.join(added_saved_dir, im_file)
             mkdir(added_image_path)
             cv2.imwrite(added_image_path, added_image)
@@ -145,7 +147,8 @@ def predict(model,
             pred_mask = utils.visualize.get_pseudo_color_map(
                 pred, color_map, use_multilabel=use_multilabel)
             pred_saved_path = os.path.join(
-                pred_saved_dir, os.path.splitext(im_file)[0] + ".png")
+                pred_saved_dir,
+                os.path.splitext(im_file)[0] + ".png")
             mkdir(pred_saved_path)
             pred_mask.save(pred_saved_path)
 

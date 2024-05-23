@@ -17,8 +17,8 @@ class VideoReader(paddle.io.Dataset):
     def __init__(self, path, transforms=None):
         super().__init__()
         if not os.path.exists(path):
-            raise IOError('There is not found about video path:{} '.format(
-                path))
+            raise IOError(
+                'There is not found about video path:{} '.format(path))
         self.cap_video = cv2.VideoCapture(path)
         if not self.cap_video.isOpened():
             raise IOError('Video can not be oepned normally')
@@ -79,12 +79,11 @@ class VideoWriter:
 
         ppmatting.utils.mkdir(path)
         fourcc = cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')
-        self.cap_out = cv2.VideoWriter(
-            filename=path,
-            fourcc=fourcc,
-            fps=fps,
-            frameSize=frame_size,
-            isColor=is_color)
+        self.cap_out = cv2.VideoWriter(filename=path,
+                                       fourcc=fourcc,
+                                       fps=fps,
+                                       frameSize=frame_size,
+                                       isColor=is_color)
 
     def write(self, frames):
         """ 
@@ -97,8 +96,8 @@ class VideoWriter:
         if isinstance(frames, paddle.Tensor):
             if frames.ndim != 4:
                 raise ValueError(
-                    'The frames should have the shape like [N, C, H, W], but it is {}'.
-                    format(frames.shape))
+                    'The frames should have the shape like [N, C, H, W], but it is {}'
+                    .format(frames.shape))
             n, c, h, w = frames.shape
             if not (c == 1 or c == 3):
                 raise ValueError(

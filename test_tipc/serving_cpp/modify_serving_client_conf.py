@@ -20,11 +20,10 @@ import argparse
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Test')
-    parser.add_argument(
-        "--conf_path",
-        help="The path of conf file.",
-        type=str,
-        default="./serving_client/serving_client_conf.prototxt")
+    parser.add_argument("--conf_path",
+                        help="The path of conf file.",
+                        type=str,
+                        default="./serving_client/serving_client_conf.prototxt")
     return parser.parse_args()
 
 

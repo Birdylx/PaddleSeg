@@ -25,6 +25,7 @@ from medicalseg.utils import loss_computation
 
 @manager.DATASETS.add_component
 class Abdomen(MedicalDataset):
+
     def __init__(self,
                  dataset_root,
                  result_dir,
@@ -32,14 +33,13 @@ class Abdomen(MedicalDataset):
                  num_classes,
                  mode,
                  dataset_json_path=""):
-        super(Abdomen, self).__init__(
-            dataset_root,
-            result_dir,
-            transforms,
-            num_classes,
-            mode,
-            dataset_json_path=dataset_json_path,
-            repeat_times=1)
+        super(Abdomen, self).__init__(dataset_root,
+                                      result_dir,
+                                      transforms,
+                                      num_classes,
+                                      mode,
+                                      dataset_json_path=dataset_json_path,
+                                      repeat_times=1)
 
     def __getitem__(self, idx):
 

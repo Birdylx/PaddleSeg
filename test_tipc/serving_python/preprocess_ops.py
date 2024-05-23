@@ -73,6 +73,7 @@ class NormalizeImage(object):
 
 
 class ToCHW(object):
+
     def __init__(self):
         pass
 
@@ -98,6 +99,7 @@ def center_crop(img, size, is_color=True):
 
 
 class Compose:
+
     def __init__(self, transforms):
         self.transforms = transforms
 

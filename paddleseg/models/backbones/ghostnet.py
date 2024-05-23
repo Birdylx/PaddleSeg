@@ -30,6 +30,7 @@ __all__ = ["GhostNet_x0_5", "GhostNet_x1_0", "GhostNet_x1_3"]
 
 
 class ConvBNLayer(nn.Layer):
+
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -39,25 +40,24 @@ class ConvBNLayer(nn.Layer):
                  act="relu",
                  name=None):
         super(ConvBNLayer, self).__init__()
-        self._conv = Conv2D(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=(kernel_size - 1) // 2,
-            groups=groups,
-            weight_attr=ParamAttr(
-                initializer=KaimingNormal(), name=name + "_weights"),
-            bias_attr=False)
+        self._conv = Conv2D(in_channels=in_channels,
+                            out_channels=out_channels,
+                            kernel_size=kernel_size,
+                            stride=stride,
+                            padding=(kernel_size - 1) // 2,
+                            groups=groups,
+                            weight_attr=ParamAttr(initializer=KaimingNormal(),
+                                                  name=name + "_weights"),
+                            bias_attr=False)
         bn_name = name + "_bn"
 
         self._batch_norm = BatchNorm(
             num_channels=out_channels,
             act=act,
-            param_attr=ParamAttr(
-                name=bn_name + "_scale", regularizer=L2Decay(0.0)),
-            bias_attr=ParamAttr(
-                name=bn_name + "_offset", regularizer=L2Decay(0.0)),
+            param_attr=ParamAttr(name=bn_name + "_scale",
+                                 regularizer=L2Decay(0.0)),
+            bias_attr=ParamAttr(name=bn_name + "_offset",
+                                regularizer=L2Decay(0.0)),
             moving_mean_name=bn_name + "_mean",
             moving_variance_name=bn_name + "_variance")
 
@@ -68,25 +68,26 @@ class ConvBNLayer(nn.Layer):
 
 
 class SEBlock(nn.Layer):
+
     def __init__(self, num_channels, reduction_ratio=4, name=None):
         super(SEBlock, self).__init__()
         self.pool2d_gap = AdaptiveAvgPool2D(1)
         self._num_channels = num_channels
         stdv = 1.0 / math.sqrt(num_channels * 1.0)
         med_ch = num_channels // reduction_ratio
-        self.squeeze = Linear(
-            num_channels,
-            med_ch,
-            weight_attr=ParamAttr(
-                initializer=Uniform(-stdv, stdv), name=name + "_1_weights"),
-            bias_attr=ParamAttr(name=name + "_1_offset"))
+        self.squeeze = Linear(num_channels,
+                              med_ch,
+                              weight_attr=ParamAttr(initializer=Uniform(
+                                  -stdv, stdv),
+                                                    name=name + "_1_weights"),
+                              bias_attr=ParamAttr(name=name + "_1_offset"))
         stdv = 1.0 / math.sqrt(med_ch * 1.0)
-        self.excitation = Linear(
-            med_ch,
-            num_channels,
-            weight_attr=ParamAttr(
-                initializer=Uniform(-stdv, stdv), name=name + "_2_weights"),
-            bias_attr=ParamAttr(name=name + "_2_offset"))
+        self.excitation = Linear(med_ch,
+                                 num_channels,
+                                 weight_attr=ParamAttr(
+                                     initializer=Uniform(-stdv, stdv),
+                                     name=name + "_2_weights"),
+                                 bias_attr=ParamAttr(name=name + "_2_offset"))
 
     def forward(self, inputs):
         pool = self.pool2d_gap(inputs)
@@ -101,6 +102,7 @@ class SEBlock(nn.Layer):
 
 
 class GhostModule(nn.Layer):
+
     def __init__(self,
                  in_channels,
                  output_channels,
@@ -113,22 +115,20 @@ class GhostModule(nn.Layer):
         super(GhostModule, self).__init__()
         init_channels = int(math.ceil(output_channels / ratio))
         new_channels = int(init_channels * (ratio - 1))
-        self.primary_conv = ConvBNLayer(
-            in_channels=in_channels,
-            out_channels=init_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            groups=1,
-            act="relu" if relu else None,
-            name=name + "_primary_conv")
-        self.cheap_operation = ConvBNLayer(
-            in_channels=init_channels,
-            out_channels=new_channels,
-            kernel_size=dw_size,
-            stride=1,
-            groups=init_channels,
-            act="relu" if relu else None,
-            name=name + "_cheap_operation")
+        self.primary_conv = ConvBNLayer(in_channels=in_channels,
+                                        out_channels=init_channels,
+                                        kernel_size=kernel_size,
+                                        stride=stride,
+                                        groups=1,
+                                        act="relu" if relu else None,
+                                        name=name + "_primary_conv")
+        self.cheap_operation = ConvBNLayer(in_channels=init_channels,
+                                           out_channels=new_channels,
+                                           kernel_size=dw_size,
+                                           stride=1,
+                                           groups=init_channels,
+                                           act="relu" if relu else None,
+                                           name=name + "_cheap_operation")
 
     def forward(self, inputs):
         x = self.primary_conv(inputs)
@@ -138,6 +138,7 @@ class GhostModule(nn.Layer):
 
 
 class GhostBottleneck(nn.Layer):
+
     def __init__(self,
                  in_channels,
                  hidden_dim,
@@ -151,13 +152,12 @@ class GhostBottleneck(nn.Layer):
         self._use_se = use_se
         self._num_channels = in_channels
         self._output_channels = output_channels
-        self.ghost_module_1 = GhostModule(
-            in_channels=in_channels,
-            output_channels=hidden_dim,
-            kernel_size=1,
-            stride=1,
-            relu=True,
-            name=name + "_ghost_module_1")
+        self.ghost_module_1 = GhostModule(in_channels=in_channels,
+                                          output_channels=hidden_dim,
+                                          kernel_size=1,
+                                          stride=1,
+                                          relu=True,
+                                          name=name + "_ghost_module_1")
         if stride == 2:
             self.depthwise_conv = ConvBNLayer(
                 in_channels=hidden_dim,
@@ -171,12 +171,11 @@ class GhostBottleneck(nn.Layer):
             )
         if use_se:
             self.se_block = SEBlock(num_channels=hidden_dim, name=name + "_se")
-        self.ghost_module_2 = GhostModule(
-            in_channels=hidden_dim,
-            output_channels=output_channels,
-            kernel_size=1,
-            relu=False,
-            name=name + "_ghost_module_2")
+        self.ghost_module_2 = GhostModule(in_channels=hidden_dim,
+                                          output_channels=output_channels,
+                                          kernel_size=1,
+                                          relu=False,
+                                          name=name + "_ghost_module_2")
         if stride != 1 or in_channels != output_channels:
             self.shortcut_depthwise = ConvBNLayer(
                 in_channels=in_channels,
@@ -188,14 +187,13 @@ class GhostBottleneck(nn.Layer):
                 name=name +
                 "_shortcut_depthwise_depthwise"  # looks strange due to an old typo, will be fixed later.
             )
-            self.shortcut_conv = ConvBNLayer(
-                in_channels=in_channels,
-                out_channels=output_channels,
-                kernel_size=1,
-                stride=1,
-                groups=1,
-                act=None,
-                name=name + "_shortcut_conv")
+            self.shortcut_conv = ConvBNLayer(in_channels=in_channels,
+                                             out_channels=output_channels,
+                                             kernel_size=1,
+                                             stride=1,
+                                             groups=1,
+                                             act=None,
+                                             name=name + "_shortcut_conv")
 
     def forward(self, inputs):
         x = self.ghost_module_1(inputs)
@@ -213,6 +211,7 @@ class GhostBottleneck(nn.Layer):
 
 
 class GhostNet(nn.Layer):
+
     def __init__(self, scale, in_channels=3, pretrained=None):
         super(GhostNet, self).__init__()
         self.cfgs = [
@@ -238,14 +237,13 @@ class GhostNet(nn.Layer):
         self.pretrained = pretrained
 
         output_channels = int(self._make_divisible(16 * self.scale, 4))
-        self.conv1 = ConvBNLayer(
-            in_channels=in_channels,
-            out_channels=output_channels,
-            kernel_size=3,
-            stride=2,
-            groups=1,
-            act="relu",
-            name="conv1")
+        self.conv1 = ConvBNLayer(in_channels=in_channels,
+                                 out_channels=output_channels,
+                                 kernel_size=3,
+                                 stride=2,
+                                 groups=1,
+                                 act="relu",
+                                 name="conv1")
 
         # build inverted residual blocks
         self.out_index = [2, 4, 10, 15]
@@ -257,14 +255,13 @@ class GhostNet(nn.Layer):
             hidden_dim = int(self._make_divisible(exp_size * self.scale, 4))
             ghost_bottleneck = self.add_sublayer(
                 name="_ghostbottleneck_" + str(idx),
-                sublayer=GhostBottleneck(
-                    in_channels=in_channels,
-                    hidden_dim=hidden_dim,
-                    output_channels=output_channels,
-                    kernel_size=k,
-                    stride=s,
-                    use_se=use_se,
-                    name="_ghostbottleneck_" + str(idx)))
+                sublayer=GhostBottleneck(in_channels=in_channels,
+                                         hidden_dim=hidden_dim,
+                                         output_channels=output_channels,
+                                         kernel_size=k,
+                                         stride=s,
+                                         use_se=use_se,
+                                         name="_ghostbottleneck_" + str(idx)))
             self.ghost_bottleneck_list.append(ghost_bottleneck)
             if idx in self.out_index:
                 self.feat_channels.append(output_channels)

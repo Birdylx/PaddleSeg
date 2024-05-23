@@ -10,6 +10,7 @@ vtkImageImportFromArray = None
 
 
 class VTKWidget(QWidget):
+
     def __init__(self, parent: typing.Optional["QWidget"]) -> None:
         super().__init__(parent)
         self.setObjectName("vtkWidget")
@@ -36,7 +37,7 @@ class VTKWidget(QWidget):
         finally:
             return self.import_vtk
 
-    def init(self, clear: bool=True) -> None:
+    def init(self, clear: bool = True) -> None:
         if self.import_vtk is False:
             return
         # remove
@@ -51,13 +52,11 @@ class VTKWidget(QWidget):
         self.vlayer.addWidget(self.interactor)
         if clear:
             # set background
-            self.renderer.SetBackground(vtk.vtkNamedColors().GetColor3d(
-                "black"))
+            self.renderer.SetBackground(
+                vtk.vtkNamedColors().GetColor3d("black"))
             self.interactor.Start()
 
-    def show_array(self,
-                   data: np.ndarray,
-                   spacing: typing.Tuple,
+    def show_array(self, data: np.ndarray, spacing: typing.Tuple,
                    color_map: typing.List) -> None:
         if self.import_vtk is False:
             return
@@ -84,11 +83,8 @@ class VTKWidget(QWidget):
         contour.SetValue(0, setvalue)
         return contour
 
-    def _smoothing(self,
-                   smoothing_iterations: int,
-                   pass_band: float,
-                   feature_angle: int,
-                   contour: typing.Any) -> typing.Any:
+    def _smoothing(self, smoothing_iterations: int, pass_band: float,
+                   feature_angle: int, contour: typing.Any) -> typing.Any:
         smoother = vtk.vtkWindowedSincPolyDataFilter()
         smoother.SetInputConnection(contour.GetOutputPort())
         smoother.SetNumberOfIterations(smoothing_iterations)

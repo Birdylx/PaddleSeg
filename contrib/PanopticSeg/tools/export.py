@@ -25,15 +25,18 @@ from paddlepanseg.deploy.export import WrappedPanSegInferModel
 
 def parse_export_args(*args, **kwargs):
     parser = argparse.ArgumentParser(description="Model export")
-    parser.add_argument(
-        '--config', dest='cfg', help="Config file.", type=str, required=True)
-    parser.add_argument(
-        '--model_path', help="Path of the model for export.", type=str)
-    parser.add_argument(
-        '--save_dir',
-        help="Directory to save the exported model.",
-        type=str,
-        default="./output/inference_model")
+    parser.add_argument('--config',
+                        dest='cfg',
+                        help="Config file.",
+                        type=str,
+                        required=True)
+    parser.add_argument('--model_path',
+                        help="Path of the model for export.",
+                        type=str)
+    parser.add_argument('--save_dir',
+                        help="Directory to save the exported model.",
+                        type=str,
+                        default="./output/inference_model")
     parser.add_argument(
         '--input_shape',
         nargs='+',
@@ -70,9 +73,7 @@ def export_with_args(args):
     net = WrappedPanSegInferModel(net, postprocessor)
     net.eval()
     net = paddle.jit.to_static(
-        net,
-        input_spec=[paddle.static.InputSpec(
-            shape=shape, dtype='float32')])
+        net, input_spec=[paddle.static.InputSpec(shape=shape, dtype='float32')])
 
     save_path = os.path.join(args.save_dir, 'model')
     paddle.jit.save(net, save_path)

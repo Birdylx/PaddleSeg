@@ -245,12 +245,11 @@ def aug_inference(model,
         im = F.interpolate(im, (h, w), mode='bilinear')
         for flip in flip_comb:
             im_flip = tensor_flip(im, flip)
-            logit = inference(
-                model,
-                im_flip,
-                is_slide=is_slide,
-                crop_size=crop_size,
-                stride=stride)
+            logit = inference(model,
+                              im_flip,
+                              is_slide=is_slide,
+                              crop_size=crop_size,
+                              stride=stride)
             logit = tensor_flip(logit, flip)
             logit = F.interpolate(logit, (h_input, w_input), mode='bilinear')
 
@@ -259,8 +258,8 @@ def aug_inference(model,
 
     final_logit = F.softmax(final_logit, axis=1)
     filte = paddle.max(final_logit, axis=1, keepdim=True).numpy()
-    pred = paddle.argmax(
-        final_logit, axis=1, keepdim=True, dtype='int32').numpy()
+    pred = paddle.argmax(final_logit, axis=1, keepdim=True,
+                         dtype='int32').numpy()
     pred[filte < 0.9] = 255
     pred = paddle.to_tensor(pred)
     pred = reverse_transform(pred, ori_shape, transforms)

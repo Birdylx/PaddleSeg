@@ -69,21 +69,19 @@ class LaneRandomRotation:
                 r[0, 2] += (nw / 2) - cx
                 r[1, 2] += (nh / 2) - cy
                 dsize = (nw, nh)
-            im = cv2.warpAffine(
-                im,
-                r,
-                dsize=dsize,
-                flags=cv2.INTER_LINEAR,
-                borderMode=cv2.BORDER_CONSTANT,
-                borderValue=self.im_padding_value)
+            im = cv2.warpAffine(im,
+                                r,
+                                dsize=dsize,
+                                flags=cv2.INTER_LINEAR,
+                                borderMode=cv2.BORDER_CONSTANT,
+                                borderValue=self.im_padding_value)
             if label is not None:
-                label = cv2.warpAffine(
-                    label,
-                    r,
-                    dsize=dsize,
-                    flags=cv2.INTER_NEAREST,
-                    borderMode=cv2.BORDER_CONSTANT,
-                    borderValue=self.label_padding_value)
+                label = cv2.warpAffine(label,
+                                       r,
+                                       dsize=dsize,
+                                       flags=cv2.INTER_NEAREST,
+                                       borderMode=cv2.BORDER_CONSTANT,
+                                       borderValue=self.label_padding_value)
 
         if label is None:
             return (im, )

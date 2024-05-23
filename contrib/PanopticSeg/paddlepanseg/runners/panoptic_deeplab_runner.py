@@ -22,13 +22,13 @@ from paddlepanseg.core.runner import PanSegRunner
 
 @manager.RUNNERS.add_component
 class PanopticDeepLabRunner(PanSegRunner):
+
     def compute_losses(self, net_out, data):
         cls_critn, center_critn, offset_critn = self.criteria['types']
         cls_coef, center_coef, offset_coef = self.criteria['coef']
-        cls_loss = cls_critn(
-            net_out['sem_out'],
-            data['sem_label'],
-            semantic_weights=data['sem_seg_weights'])
+        cls_loss = cls_critn(net_out['sem_out'],
+                             data['sem_label'],
+                             semantic_weights=data['sem_seg_weights'])
         center_loss = center_critn(net_out['center'], data['center'])
         if 'center_weights' in data:
             center_weights = data['center_weights']

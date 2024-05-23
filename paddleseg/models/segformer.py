@@ -64,14 +64,14 @@ class SegFormer(nn.Layer):
         self.linear_c1 = MLP(input_dim=c1_in_channels, embed_dim=embedding_dim)
 
         self.dropout = nn.Dropout2D(0.1)
-        self.linear_fuse = layers.ConvBNReLU(
-            in_channels=embedding_dim * 4,
-            out_channels=embedding_dim,
-            kernel_size=1,
-            bias_attr=False)
+        self.linear_fuse = layers.ConvBNReLU(in_channels=embedding_dim * 4,
+                                             out_channels=embedding_dim,
+                                             kernel_size=1,
+                                             bias_attr=False)
 
-        self.linear_pred = nn.Conv2D(
-            embedding_dim, self.num_classes, kernel_size=1)
+        self.linear_pred = nn.Conv2D(embedding_dim,
+                                     self.num_classes,
+                                     kernel_size=1)
 
         self.init_weight()
 
@@ -91,27 +91,24 @@ class SegFormer(nn.Layer):
 
         _c4 = self.linear_c4(c4).transpose([0, 2, 1]).reshape(
             [0, 0, c4_shape[2], c4_shape[3]])
-        _c4 = F.interpolate(
-            _c4,
-            size=c1_shape[2:],
-            mode='bilinear',
-            align_corners=self.align_corners)
+        _c4 = F.interpolate(_c4,
+                            size=c1_shape[2:],
+                            mode='bilinear',
+                            align_corners=self.align_corners)
 
         _c3 = self.linear_c3(c3).transpose([0, 2, 1]).reshape(
             [0, 0, c3_shape[2], c3_shape[3]])
-        _c3 = F.interpolate(
-            _c3,
-            size=c1_shape[2:],
-            mode='bilinear',
-            align_corners=self.align_corners)
+        _c3 = F.interpolate(_c3,
+                            size=c1_shape[2:],
+                            mode='bilinear',
+                            align_corners=self.align_corners)
 
         _c2 = self.linear_c2(c2).transpose([0, 2, 1]).reshape(
             [0, 0, c2_shape[2], c2_shape[3]])
-        _c2 = F.interpolate(
-            _c2,
-            size=c1_shape[2:],
-            mode='bilinear',
-            align_corners=self.align_corners)
+        _c2 = F.interpolate(_c2,
+                            size=c1_shape[2:],
+                            mode='bilinear',
+                            align_corners=self.align_corners)
 
         _c1 = self.linear_c1(c1).transpose([0, 2, 1]).reshape(
             [0, 0, c1_shape[2], c1_shape[3]])
@@ -121,9 +118,8 @@ class SegFormer(nn.Layer):
         logit = self.dropout(_c)
         logit = self.linear_pred(logit)
         return [
-            F.interpolate(
-                logit,
-                size=paddle.shape(x)[2:],
-                mode='bilinear',
-                align_corners=self.align_corners)
+            F.interpolate(logit,
+                          size=paddle.shape(x)[2:],
+                          mode='bilinear',
+                          align_corners=self.align_corners)
         ]

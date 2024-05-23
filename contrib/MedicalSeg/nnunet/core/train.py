@@ -155,8 +155,8 @@ def train(model,
                 for i in range(len(loss_list)):
                     avg_loss_list[i] += loss_list[i].numpy()
 
-            batch_cost_averager.record(
-                time.time() - batch_start, num_samples=batch_size)
+            batch_cost_averager.record(time.time() - batch_start,
+                                       num_samples=batch_size)
 
             if (iter) % log_iters == 0:
                 avg_loss /= log_iters
@@ -171,9 +171,9 @@ def train(model,
                 logger.info(
                     "[TRAIN] epoch: {}, iter: {}/{}, loss: {:.4f}, DSC: {:.4f}, "
                     "lr: {:.6f}, batch_cost: {:.4f}, reader_cost: {:.5f}, ips: {:.4f} samples/sec | ETA {}"
-                    .format((iter
-                             ) // iters_per_epoch, iter, iters, avg_loss, mdice,
-                            lr, avg_train_batch_cost, avg_train_reader_cost,
+                    .format((iter) // iters_per_epoch, iter, iters, avg_loss,
+                            mdice, lr, avg_train_batch_cost,
+                            avg_train_reader_cost,
                             batch_cost_averager.get_ips_average(), eta))
 
                 if use_vdl:
@@ -197,19 +197,18 @@ def train(model,
                 reader_cost_averager.reset()
                 batch_cost_averager.reset()
 
-            if (iter % save_interval == 0 or iter == iters) and (
-                    val_dataset is not None):
+            if (iter % save_interval == 0 or iter == iters) and (val_dataset
+                                                                 is not None):
                 num_workers = 1 if num_workers > 0 else 0
 
-                result_dict = evaluate(
-                    model,
-                    val_dataset,
-                    losses,
-                    num_workers=num_workers,
-                    writer=log_writer,
-                    print_detail=True,
-                    auc_roc=False,
-                    save_dir=save_dir)
+                result_dict = evaluate(model,
+                                       val_dataset,
+                                       losses,
+                                       num_workers=num_workers,
+                                       writer=log_writer,
+                                       print_detail=True,
+                                       auc_roc=False,
+                                       save_dir=save_dir)
 
                 model.train()
 

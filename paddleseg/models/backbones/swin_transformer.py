@@ -134,8 +134,8 @@ class WindowAttention(nn.Layer):
 
         relative_coords = relative_coords.transpose([1, 2, 0])
 
-        relative_coords[:, :, 0] += self.window_size[
-            0] - 1  # shift to start from 0
+        relative_coords[:, :,
+                        0] += self.window_size[0] - 1  # shift to start from 0
         relative_coords[:, :, 1] += self.window_size[1] - 1
         relative_coords[:, :, 0] *= 2 * self.window_size[1] - 1
         relative_position_index = relative_coords.sum(-1)  # Wh*Ww, Wh*Ww
@@ -234,14 +234,13 @@ class SwinTransformerBlock(nn.Layer):
         assert 0 <= self.shift_size < self.window_size, "shift_size must in 0-window_size"
 
         self.norm1 = norm_layer(dim)
-        self.attn = WindowAttention(
-            dim,
-            window_size=to_2tuple(self.window_size),
-            num_heads=num_heads,
-            qkv_bias=qkv_bias,
-            qk_scale=qk_scale,
-            attn_drop=attn_drop,
-            proj_drop=drop)
+        self.attn = WindowAttention(dim,
+                                    window_size=to_2tuple(self.window_size),
+                                    num_heads=num_heads,
+                                    qkv_bias=qkv_bias,
+                                    qk_scale=qk_scale,
+                                    attn_drop=attn_drop,
+                                    proj_drop=drop)
 
         self.drop_path = DropPath(drop_path) if drop_path > 0. else Identity()
         self.norm2 = norm_layer(dim)
@@ -281,8 +280,9 @@ class SwinTransformerBlock(nn.Layer):
 
         # cyclic shift
         if self.shift_size > 0:
-            shifted_x = paddle.roll(
-                x, shifts=(-self.shift_size, -self.shift_size), axis=(1, 2))
+            shifted_x = paddle.roll(x,
+                                    shifts=(-self.shift_size, -self.shift_size),
+                                    axis=(1, 2))
             attn_mask = mask_matrix
         else:
             shifted_x = x
@@ -307,10 +307,9 @@ class SwinTransformerBlock(nn.Layer):
 
         # reverse cyclic shift
         if self.shift_size > 0:
-            x = paddle.roll(
-                shifted_x,
-                shifts=(self.shift_size, self.shift_size),
-                axis=(1, 2))
+            x = paddle.roll(shifted_x,
+                            shifts=(self.shift_size, self.shift_size),
+                            axis=(1, 2))
         else:
             x = shifted_x
 
@@ -411,19 +410,19 @@ class BasicLayer(nn.Layer):
 
         # build blocks
         self.blocks = nn.LayerList([
-            SwinTransformerBlock(
-                dim=dim,
-                num_heads=num_heads,
-                window_size=window_size,
-                shift_size=0 if (i % 2 == 0) else window_size // 2,
-                mlp_ratio=mlp_ratio,
-                qkv_bias=qkv_bias,
-                qk_scale=qk_scale,
-                drop=drop,
-                attn_drop=attn_drop,
-                drop_path=drop_path[i]
-                if isinstance(drop_path, list) else drop_path,
-                norm_layer=norm_layer) for i in range(depth)
+            SwinTransformerBlock(dim=dim,
+                                 num_heads=num_heads,
+                                 window_size=window_size,
+                                 shift_size=0 if
+                                 (i % 2 == 0) else window_size // 2,
+                                 mlp_ratio=mlp_ratio,
+                                 qkv_bias=qkv_bias,
+                                 qk_scale=qk_scale,
+                                 drop=drop,
+                                 attn_drop=attn_drop,
+                                 drop_path=drop_path[i] if isinstance(
+                                     drop_path, list) else drop_path,
+                                 norm_layer=norm_layer) for i in range(depth)
         ])
 
         # patch merging layer
@@ -443,11 +442,11 @@ class BasicLayer(nn.Layer):
         Wp = int(np.ceil(W / self.window_size)) * self.window_size
         img_mask = paddle.zeros((1, Hp, Wp, 1))  # 1 Hp Wp 1
         h_slices = (slice(0, -self.window_size),
-                    slice(-self.window_size, -self.shift_size),
-                    slice(-self.shift_size, None))
+                    slice(-self.window_size,
+                          -self.shift_size), slice(-self.shift_size, None))
         w_slices = (slice(0, -self.window_size),
-                    slice(-self.window_size, -self.shift_size),
-                    slice(-self.shift_size, None))
+                    slice(-self.window_size,
+                          -self.shift_size), slice(-self.shift_size, None))
         cnt = 0
         for h in h_slices:
             for w in w_slices:
@@ -493,8 +492,10 @@ class PatchEmbed(nn.Layer):
         self.in_chans = in_chans
         self.embed_dim = embed_dim
 
-        self.proj = nn.Conv2D(
-            in_chans, embed_dim, kernel_size=patch_size, stride=patch_size)
+        self.proj = nn.Conv2D(in_chans,
+                              embed_dim,
+                              kernel_size=patch_size,
+                              stride=patch_size)
         if norm_layer is not None:
             self.norm = norm_layer(embed_dim)
         else:
@@ -623,8 +624,8 @@ class SwinTransformer(nn.Layer):
                 attn_drop=attn_drop_rate,
                 drop_path=dpr[sum(depths[:i_layer]):sum(depths[:i_layer + 1])],
                 norm_layer=norm_layer,
-                downsample=PatchMerging
-                if (i_layer < self.num_layers - 1) else None)
+                downsample=PatchMerging if
+                (i_layer < self.num_layers - 1) else None)
             self.layers.append(layer)
 
         feat_channels = [int(embed_dim * 2**i) for i in range(self.num_layers)]
@@ -685,8 +686,9 @@ class SwinTransformer(nn.Layer):
         _, _, Wh, Ww = x.shape
         if self.ape:
             # interpolate the position embedding to the corresponding size
-            absolute_pos_embed = F.interpolate(
-                self.absolute_pos_embed, size=(Wh, Ww), mode='bicubic')
+            absolute_pos_embed = F.interpolate(self.absolute_pos_embed,
+                                               size=(Wh, Ww),
+                                               mode='bicubic')
             x = (x + absolute_pos_embed).flatten(2).transpose(1, 2)  # B Wh*Ww C
         else:
             x = x.flatten(2).transpose([0, 2, 1])
@@ -701,8 +703,8 @@ class SwinTransformer(nn.Layer):
                 norm_layer = getattr(self, f'norm{i}')
                 x_out = norm_layer(x_out)
 
-                out = x_out.reshape(
-                    [-1, H, W, self.feat_channels[i]]).transpose([0, 3, 1, 2])
+                out = x_out.reshape([-1, H, W, self.feat_channels[i]
+                                     ]).transpose([0, 3, 1, 2])
                 outs.append(out)
 
         return tuple(outs)
@@ -715,16 +717,16 @@ class SwinTransformer(nn.Layer):
 
 @manager.BACKBONES.add_component
 class SwinTransformer_tiny_patch4_window7_224_maskformer(SwinTransformer):
+
     def __init__(self, **kwargs):
-        super().__init__(
-            pretrain_img_size=224,
-            embed_dim=96,
-            depths=[2, 2, 6, 2],
-            num_heads=[3, 6, 12, 24],
-            window_size=7,
-            drop_path_rate=0.3,
-            patch_norm=True,
-            **kwargs)
+        super().__init__(pretrain_img_size=224,
+                         embed_dim=96,
+                         depths=[2, 2, 6, 2],
+                         num_heads=[3, 6, 12, 24],
+                         window_size=7,
+                         drop_path_rate=0.3,
+                         patch_norm=True,
+                         **kwargs)
 
         self._out_features = ["res2", "res3", "res4", "res5"]
 
@@ -761,29 +763,28 @@ class SwinTransformer_tiny_patch4_window7_224_maskformer(SwinTransformer):
 
 @manager.BACKBONES.add_component
 def SwinTransformer_tiny_patch4_window7_224(**kwargs):
-    model = SwinTransformer(
-        pretrain_img_size=224,
-        embed_dim=96,
-        depths=[2, 2, 6, 2],
-        num_heads=[3, 6, 12, 24],
-        window_size=7,
-        **kwargs)
+    model = SwinTransformer(pretrain_img_size=224,
+                            embed_dim=96,
+                            depths=[2, 2, 6, 2],
+                            num_heads=[3, 6, 12, 24],
+                            window_size=7,
+                            **kwargs)
 
     return model
 
 
 @manager.BACKBONES.add_component
 class SwinTransformer_small_patch4_window7_224_maskformer(SwinTransformer):
+
     def __init__(self, **kwargs):
-        super().__init__(
-            pretrain_img_size=224,
-            embed_dim=96,
-            depths=[2, 2, 18, 2],
-            num_heads=[3, 6, 12, 24],
-            window_size=7,
-            drop_path_rate=0.3,
-            patch_norm=True,
-            **kwargs)
+        super().__init__(pretrain_img_size=224,
+                         embed_dim=96,
+                         depths=[2, 2, 18, 2],
+                         num_heads=[3, 6, 12, 24],
+                         window_size=7,
+                         drop_path_rate=0.3,
+                         patch_norm=True,
+                         **kwargs)
 
         self._out_features = ["res2", "res3", "res4", "res5"]
 
@@ -820,42 +821,40 @@ class SwinTransformer_small_patch4_window7_224_maskformer(SwinTransformer):
 
 @manager.BACKBONES.add_component
 def SwinTransformer_small_patch4_window7_224(**kwargs):
-    model = SwinTransformer(
-        pretrain_img_size=224,
-        embed_dim=96,
-        depths=[2, 2, 18, 2],
-        num_heads=[3, 6, 12, 24],
-        window_size=7,
-        **kwargs)
+    model = SwinTransformer(pretrain_img_size=224,
+                            embed_dim=96,
+                            depths=[2, 2, 18, 2],
+                            num_heads=[3, 6, 12, 24],
+                            window_size=7,
+                            **kwargs)
 
     return model
 
 
 @manager.BACKBONES.add_component
 def SwinTransformer_base_patch4_window7_224(**kwargs):
-    model = SwinTransformer(
-        pretrain_img_size=224,
-        embed_dim=128,
-        depths=[2, 2, 18, 2],
-        num_heads=[4, 8, 16, 32],
-        window_size=7,
-        **kwargs)
+    model = SwinTransformer(pretrain_img_size=224,
+                            embed_dim=128,
+                            depths=[2, 2, 18, 2],
+                            num_heads=[4, 8, 16, 32],
+                            window_size=7,
+                            **kwargs)
 
     return model
 
 
 @manager.BACKBONES.add_component
 class SwinTransformer_base_patch4_window7_384_maskformer(SwinTransformer):
+
     def __init__(self, **kwargs):
-        super().__init__(
-            pretrain_img_size=384,
-            embed_dim=128,
-            depths=[2, 2, 18, 2],
-            num_heads=[4, 8, 16, 32],
-            window_size=12,
-            drop_path_rate=0.3,
-            patch_norm=True,
-            **kwargs)
+        super().__init__(pretrain_img_size=384,
+                         embed_dim=128,
+                         depths=[2, 2, 18, 2],
+                         num_heads=[4, 8, 16, 32],
+                         window_size=12,
+                         drop_path_rate=0.3,
+                         patch_norm=True,
+                         **kwargs)
 
         self._out_features = ["res2", "res3", "res4", "res5"]
 
@@ -892,42 +891,40 @@ class SwinTransformer_base_patch4_window7_384_maskformer(SwinTransformer):
 
 @manager.BACKBONES.add_component
 def SwinTransformer_base_patch4_window12_384(**kwargs):
-    model = SwinTransformer(
-        pretrain_img_size=384,
-        embed_dim=128,
-        depths=[2, 2, 18, 2],
-        num_heads=[4, 8, 16, 32],
-        window_size=12,
-        **kwargs)
+    model = SwinTransformer(pretrain_img_size=384,
+                            embed_dim=128,
+                            depths=[2, 2, 18, 2],
+                            num_heads=[4, 8, 16, 32],
+                            window_size=12,
+                            **kwargs)
 
     return model
 
 
 @manager.BACKBONES.add_component
 def SwinTransformer_large_patch4_window7_224(**kwargs):
-    model = SwinTransformer(
-        pretrain_img_size=224,
-        embed_dim=192,
-        depths=[2, 2, 18, 2],
-        num_heads=[6, 12, 24, 48],
-        window_size=7,
-        **kwargs)
+    model = SwinTransformer(pretrain_img_size=224,
+                            embed_dim=192,
+                            depths=[2, 2, 18, 2],
+                            num_heads=[6, 12, 24, 48],
+                            window_size=7,
+                            **kwargs)
 
     return model
 
 
 @manager.BACKBONES.add_component
 class SwinTransformer_large_patch4_window7_384_maskformer(SwinTransformer):
+
     def __init__(self, **kwargs):
-        super().__init__(
-            pretrain_img_size=384,
-            embed_dim=192,
-            depths=[2, 2, 18, 2],
-            num_heads=[6, 12, 24, 48],
-            window_size=12,
-            drop_path_rate=0.3,
-            patch_norm=True,
-            **kwargs)
+        super().__init__(pretrain_img_size=384,
+                         embed_dim=192,
+                         depths=[2, 2, 18, 2],
+                         num_heads=[6, 12, 24, 48],
+                         window_size=12,
+                         drop_path_rate=0.3,
+                         patch_norm=True,
+                         **kwargs)
 
         self._out_features = ["res2", "res3", "res4", "res5"]
 
@@ -964,12 +961,11 @@ class SwinTransformer_large_patch4_window7_384_maskformer(SwinTransformer):
 
 @manager.BACKBONES.add_component
 def SwinTransformer_large_patch4_window12_384(**kwargs):
-    model = SwinTransformer(
-        pretrain_img_size=384,
-        embed_dim=192,
-        depths=[2, 2, 18, 2],
-        num_heads=[6, 12, 24, 48],
-        window_size=12,
-        **kwargs)
+    model = SwinTransformer(pretrain_img_size=384,
+                            embed_dim=192,
+                            depths=[2, 2, 18, 2],
+                            num_heads=[6, 12, 24, 48],
+                            window_size=12,
+                            **kwargs)
 
     return model

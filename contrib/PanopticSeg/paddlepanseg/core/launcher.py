@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# In this package we provide PaddleSeg-style functions for training, 
+# In this package we provide PaddleSeg-style functions for training,
 # validation, prediction, and inference.
 # We do not re-use the APIs of PaddleSeg because there is a large gap
 # between semantic segmentation and panoptic segmentation.
@@ -25,6 +25,7 @@ __all__ = ['AMPLauncher']
 
 
 class _Launcher(metaclass=abc.ABCMeta):
+
     @abc.abstractmethod
     def train_step(self):
         pass
@@ -36,14 +37,15 @@ class _Launcher(metaclass=abc.ABCMeta):
     @classmethod
     def __subclasshook__(cls, subclass):
         if cls is _Launcher:
-            return (hasattr(subclass, 'train_step') and
-                    callable(subclass.train_step) and
-                    hasattr(subclass, 'infer_step') and
-                    callable(subclass.infer_step))
+            return (hasattr(subclass, 'train_step')
+                    and callable(subclass.train_step)
+                    and hasattr(subclass, 'infer_step')
+                    and callable(subclass.infer_step))
         return NotImplemented
 
 
 class AMPLauncher(_Launcher):
+
     def __init__(self, runner, precision='fp32', amp_level='O1'):
         super().__init__()
         self.runner = runner
@@ -55,8 +57,8 @@ class AMPLauncher(_Launcher):
         self.amp_level = amp_level
         if self.precision == 'fp16' and self.runner.optimizer is not None:
             self.scaler = paddle.amp.GradScaler(init_loss_scaling=1024)
-        if (self.amp_level == 'O2' and self.runner.model is not None and
-                self.runner.optimizer is not None):
+        if (self.amp_level == 'O2' and self.runner.model is not None
+                and self.runner.optimizer is not None):
             self.model, self.optimizer = paddle.amp.decorate(
                 models=self.runner.model,
                 optimizers=self.runner.optimizer,
@@ -94,13 +96,13 @@ class AMPLauncher(_Launcher):
         return loss, loss_list
 
     def train_step_fp16(self, data):
-        with paddle.amp.auto_cast(
-                level=self.amp_level,
-                enable=True,
-                custom_white_list={
-                    'elementwise_add', 'batch_norm', 'sync_batch_norm'
-                },
-                custom_black_list={'bilinear_interp_v2'}):
+        with paddle.amp.auto_cast(level=self.amp_level,
+                                  enable=True,
+                                  custom_white_list={
+                                      'elementwise_add', 'batch_norm',
+                                      'sync_batch_norm'
+                                  },
+                                  custom_black_list={'bilinear_interp_v2'}):
             # Forward
             net_out = self.runner.train_forward(data)
             # Compute loss
@@ -126,12 +128,12 @@ class AMPLauncher(_Launcher):
         return self.runner.infer_forward(data)
 
     def infer_step_fp16(self, data):
-        with paddle.amp.auto_cast(
-                level=self.amp_level,
-                enable=True,
-                custom_white_list={
-                    'elementwise_add', 'batch_norm', 'sync_batch_norm'
-                },
-                custom_black_list={'bilinear_interp_v2'}):
+        with paddle.amp.auto_cast(level=self.amp_level,
+                                  enable=True,
+                                  custom_white_list={
+                                      'elementwise_add', 'batch_norm',
+                                      'sync_batch_norm'
+                                  },
+                                  custom_black_list={'bilinear_interp_v2'}):
             pp_out = self.runner.infer_forward(data)
         return pp_out

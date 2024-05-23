@@ -25,6 +25,7 @@ sys.path.append(osp.join(osp.dirname(osp.realpath(__file__)), ""))
 
 
 class PrepACDC():
+
     def __init__(self,
                  dataset_root=f"data/ACDCDataset",
                  raw_dataset_dir=f"training/",
@@ -47,13 +48,13 @@ class PrepACDC():
 
         with open(txtname[0], "w") as f:
             for filename in self.filenames[:-val_len]:
-                f.write("images/{}.npy labels/{}.npy\n".format(filename,
-                                                               filename))
+                f.write("images/{}.npy labels/{}.npy\n".format(
+                    filename, filename))
         with open(txtname[1], "w") as f:
             for filename in self.filenames[-val_len:]:
 
-                f.write("images/{}.npy labels/{}.npy\n".format(filename,
-                                                               filename))
+                f.write("images/{}.npy labels/{}.npy\n".format(
+                    filename, filename))
 
     def load_save(self, new_spacing):
         self.image_path = join_paths(self.phase_path, "images")
@@ -99,8 +100,7 @@ class PrepACDC():
         for p in patient_dirs_train:
             current_dir = p
             data_files_train = [
-                i for i in subfiles(
-                    current_dir, suffix=".nii.gz")
+                i for i in subfiles(current_dir, suffix=".nii.gz")
                 if i.find("_gt") == -1 and i.find("_4d") == -1
             ]
             corresponding_seg_files = [
@@ -109,12 +109,14 @@ class PrepACDC():
             for d, s in zip(data_files_train, corresponding_seg_files):
                 patient_identifier = os.path.split(d)[1][:-7]
                 all_train_files.append(patient_identifier + "_0000.nii.gz")
-                shutil.copy(d,
-                            join(self.clean_folder, "imagesTr",
-                                 patient_identifier + "_0000.nii.gz"))
-                shutil.copy(s,
-                            join(self.clean_folder, "labelsTr",
-                                 patient_identifier + "_0000.nii.gz"))
+                shutil.copy(
+                    d,
+                    join(self.clean_folder, "imagesTr",
+                         patient_identifier + "_0000.nii.gz"))
+                shutil.copy(
+                    s,
+                    join(self.clean_folder, "labelsTr",
+                         patient_identifier + "_0000.nii.gz"))
 
 
 if __name__ == '__main__':

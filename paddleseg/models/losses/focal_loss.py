@@ -71,12 +71,11 @@ class FocalLoss(nn.Layer):
         label = paddle.cast(label, logit.dtype)
         label.stop_gradient = True
 
-        loss = F.sigmoid_focal_loss(
-            logit=logit,
-            label=label,
-            alpha=self.alpha,
-            gamma=self.gamma,
-            reduction='none')
+        loss = F.sigmoid_focal_loss(logit=logit,
+                                    label=label,
+                                    alpha=self.alpha,
+                                    gamma=self.gamma,
+                                    reduction='none')
         loss = loss * mask
         avg_loss = paddle.sum(loss) / (
             paddle.sum(paddle.cast(mask != 0., 'int32')) * class_num + self.EPS)
@@ -120,8 +119,10 @@ class MultiClassFocalLoss(nn.Layer):
 
         logit = paddle.transpose(logit, [0, 2, 3, 1])
         label = label.astype('int64')
-        ce_loss = F.cross_entropy(
-            logit, label, ignore_index=self.ignore_index, reduction='none')
+        ce_loss = F.cross_entropy(logit,
+                                  label,
+                                  ignore_index=self.ignore_index,
+                                  reduction='none')
 
         pt = paddle.exp(-ce_loss)
         focal_loss = self.alpha * ((1 - pt)**self.gamma) * ce_loss

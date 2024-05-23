@@ -105,14 +105,13 @@ def pad(img, shape=None, padding=None, pad_val=0, padding_mode='constant'):
         'reflect': cv2.BORDER_REFLECT_101,
         'symmetric': cv2.BORDER_REFLECT
     }
-    img = cv2.copyMakeBorder(
-        img,
-        padding[1],
-        padding[3],
-        padding[0],
-        padding[2],
-        border_type[padding_mode],
-        value=pad_val)
+    img = cv2.copyMakeBorder(img,
+                             padding[1],
+                             padding[3],
+                             padding[0],
+                             padding[2],
+                             border_type[padding_mode],
+                             value=pad_val)
 
     return img
 
@@ -208,8 +207,8 @@ def slide_crop_label(src_path, out_dir, mode, patch_H, patch_W, overlap):
             lab_patch = label[y_str:y_end, x_str:x_end]
             lab_patch = Image.fromarray(lab_patch.astype(np.uint8))
 
-            image = osp.basename(src_path).split('.')[0].split('_')[
-                0] + '_' + str(y_str) + '_' + str(y_end) + '_' + str(
+            image = osp.basename(src_path).split('.')[0].split(
+                '_')[0] + '_' + str(y_str) + '_' + str(y_end) + '_' + str(
                     x_str) + '_' + str(x_end) + '_instance_color_RGB' + '.png'
             lab_patch.save(osp.join(out_dir, 'ann_dir', mode, str(image)))
 
@@ -220,18 +219,18 @@ def parse_args():
     parser.add_argument('--tmp_dir', help='Path of the temporary directory.')
     parser.add_argument('-o', '--out_dir', help='Output path.')
 
-    parser.add_argument(
-        '--patch_width',
-        default=896,
-        type=int,
-        help='Width of the cropped image patch.')
-    parser.add_argument(
-        '--patch_height',
-        default=896,
-        type=int,
-        help='Height of the cropped image patch.')
-    parser.add_argument(
-        '--overlap_area', default=384, type=int, help='Overlap area.')
+    parser.add_argument('--patch_width',
+                        default=896,
+                        type=int,
+                        help='Width of the cropped image patch.')
+    parser.add_argument('--patch_height',
+                        default=896,
+                        type=int,
+                        help='Height of the cropped image patch.')
+    parser.add_argument('--overlap_area',
+                        default=384,
+                        type=int,
+                        help='Overlap area.')
     args = parser.parse_args()
     return args
 

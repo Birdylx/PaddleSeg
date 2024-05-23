@@ -24,6 +24,7 @@ from abc import abstractmethod
 
 
 class SlimDataLoaderBase(object):
+
     def __init__(self,
                  data,
                  batch_size,
@@ -48,6 +49,7 @@ class SlimDataLoaderBase(object):
 
 
 class DataLoader3D(SlimDataLoaderBase):
+
     def __init__(self,
                  data,
                  patch_size,
@@ -70,8 +72,8 @@ class DataLoader3D(SlimDataLoaderBase):
         self.patch_size = patch_size
         self.list_of_keys = list(self._data.keys())
 
-        self.need_to_pad = (
-            np.array(patch_size) - np.array(final_patch_size)).astype(int)
+        self.need_to_pad = (np.array(patch_size) -
+                            np.array(final_patch_size)).astype(int)
         if pad_sides is not None:
             if not isinstance(pad_sides, np.ndarray):
                 pad_sides = np.array(pad_sides)
@@ -128,23 +130,24 @@ class DataLoader3D(SlimDataLoaderBase):
                 case_all_data = np.load(self._data[i]['data_file'])['data']
 
             if self.has_prev_stage:
-                if not os.path.isfile(self._data[i][
-                        'seg_from_prev_stage_file']):
+                if not os.path.isfile(
+                        self._data[i]['seg_from_prev_stage_file']):
                     raise UserWarning(
-                        "seg from prev stage missing: {}. please run single_fold_eval.py with --predict_next_stage first.".
-                        format(self._data[i]['seg_from_prev_stage_file']))
-                if os.path.isfile(self._data[i]['seg_from_prev_stage_file'][:-4]
-                                  + ".npy"):
+                        "seg from prev stage missing: {}. please run single_fold_eval.py with --predict_next_stage first."
+                        .format(self._data[i]['seg_from_prev_stage_file']))
+                if os.path.isfile(
+                        self._data[i]['seg_from_prev_stage_file'][:-4] +
+                        ".npy"):
                     segs_from_previous_stage = np.load(
                         self._data[i]['seg_from_prev_stage_file'][:-4] + ".npy",
                         mmap_mode=self.memmap_mode)[None]
                 else:
-                    segs_from_previous_stage = np.load(self._data[i][
-                        'seg_from_prev_stage_file'])['data'][None]
+                    segs_from_previous_stage = np.load(
+                        self._data[i]['seg_from_prev_stage_file'])['data'][None]
 
                 seg_key = np.random.choice(segs_from_previous_stage.shape[0])
-                seg_from_previous_stage = segs_from_previous_stage[seg_key:
-                                                                   seg_key + 1]
+                seg_from_previous_stage = segs_from_previous_stage[
+                    seg_key:seg_key + 1]
                 assert all([i == j for i, j in zip(seg_from_previous_stage.shape[1:], case_all_data.shape[1:])]), \
                     "seg_from_previous_stage does not match the shape of case_all_data: %s vs %s" % \
                     (str(seg_from_previous_stage.shape[1:]), str(case_all_data.shape[1:]))
@@ -221,8 +224,8 @@ class DataLoader3D(SlimDataLoaderBase):
 
             case_all_data = np.copy(
                 case_all_data[:, valid_bbox_x_lb:valid_bbox_x_ub,
-                              valid_bbox_y_lb:valid_bbox_y_ub, valid_bbox_z_lb:
-                              valid_bbox_z_ub])
+                              valid_bbox_y_lb:valid_bbox_y_ub,
+                              valid_bbox_z_lb:valid_bbox_z_ub])
             if seg_from_previous_stage is not None:
                 seg_from_previous_stage = seg_from_previous_stage[:,
                                                                   valid_bbox_x_lb:
@@ -232,23 +235,26 @@ class DataLoader3D(SlimDataLoaderBase):
                                                                   valid_bbox_z_lb:
                                                                   valid_bbox_z_ub]
 
-            data[j] = np.pad(case_all_data[:-1], (
-                (0, 0), (-min(0, bbox_x_lb), max(bbox_x_ub - shape[0], 0)),
-                (-min(0, bbox_y_lb), max(bbox_y_ub - shape[1], 0)),
-                (-min(0, bbox_z_lb), max(bbox_z_ub - shape[2], 0))),
-                             self.pad_mode, **self.pad_kwargs_data)
+            data[j] = np.pad(
+                case_all_data[:-1],
+                ((0, 0), (-min(0, bbox_x_lb), max(bbox_x_ub - shape[0], 0)),
+                 (-min(0, bbox_y_lb), max(bbox_y_ub - shape[1], 0)),
+                 (-min(0, bbox_z_lb), max(bbox_z_ub - shape[2], 0))),
+                self.pad_mode, **self.pad_kwargs_data)
 
-            seg[j, 0] = np.pad(case_all_data[-1:], (
-                (0, 0), (-min(0, bbox_x_lb), max(bbox_x_ub - shape[0], 0)),
-                (-min(0, bbox_y_lb), max(bbox_y_ub - shape[1], 0)),
-                (-min(0, bbox_z_lb), max(bbox_z_ub - shape[2], 0))), 'constant',
-                               **{'constant_values': -1})
+            seg[j, 0] = np.pad(
+                case_all_data[-1:],
+                ((0, 0), (-min(0, bbox_x_lb), max(bbox_x_ub - shape[0], 0)),
+                 (-min(0, bbox_y_lb), max(bbox_y_ub - shape[1], 0)),
+                 (-min(0, bbox_z_lb), max(bbox_z_ub - shape[2], 0))),
+                'constant', **{'constant_values': -1})
             if seg_from_previous_stage is not None:
-                seg[j, 1] = np.pad(seg_from_previous_stage, (
-                    (0, 0), (-min(0, bbox_x_lb), max(bbox_x_ub - shape[0], 0)),
-                    (-min(0, bbox_y_lb), max(bbox_y_ub - shape[1], 0)), (
-                        -min(0, bbox_z_lb), max(bbox_z_ub - shape[2], 0))),
-                                   'constant', **{'constant_values': 0})
+                seg[j, 1] = np.pad(
+                    seg_from_previous_stage,
+                    ((0, 0), (-min(0, bbox_x_lb), max(bbox_x_ub - shape[0], 0)),
+                     (-min(0, bbox_y_lb), max(bbox_y_ub - shape[1], 0)),
+                     (-min(0, bbox_z_lb), max(bbox_z_ub - shape[2], 0))),
+                    'constant', **{'constant_values': 0})
         return {
             'data': data,
             'seg': seg,
@@ -258,6 +264,7 @@ class DataLoader3D(SlimDataLoaderBase):
 
 
 class DataLoader2D(SlimDataLoaderBase):
+
     def __init__(self,
                  data,
                  patch_size,
@@ -433,15 +440,17 @@ class DataLoader2D(SlimDataLoaderBase):
             case_all_data = case_all_data[:, valid_bbox_x_lb:valid_bbox_x_ub,
                                           valid_bbox_y_lb:valid_bbox_y_ub]
 
-            case_all_data_donly = np.pad(case_all_data[:-1], (
-                (0, 0), (-min(0, bbox_x_lb), max(bbox_x_ub - shape[0], 0)),
-                (-min(0, bbox_y_lb), max(bbox_y_ub - shape[1], 0))),
-                                         self.pad_mode, **self.pad_kwargs_data)
+            case_all_data_donly = np.pad(
+                case_all_data[:-1],
+                ((0, 0), (-min(0, bbox_x_lb), max(bbox_x_ub - shape[0], 0)),
+                 (-min(0, bbox_y_lb), max(bbox_y_ub - shape[1], 0))),
+                self.pad_mode, **self.pad_kwargs_data)
 
-            case_all_data_segonly = np.pad(case_all_data[-1:], (
-                (0, 0), (-min(0, bbox_x_lb), max(bbox_x_ub - shape[0], 0)),
-                (-min(0, bbox_y_lb), max(bbox_y_ub - shape[1], 0))), 'constant',
-                                           **{'constant_values': -1})
+            case_all_data_segonly = np.pad(
+                case_all_data[-1:],
+                ((0, 0), (-min(0, bbox_x_lb), max(bbox_x_ub - shape[0], 0)),
+                 (-min(0, bbox_y_lb), max(bbox_y_ub - shape[1], 0))),
+                'constant', **{'constant_values': -1})
 
             data[j] = case_all_data_donly
             seg[j] = case_all_data_segonly

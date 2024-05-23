@@ -246,12 +246,11 @@ def aug_inference(model,
         im = F.interpolate(im, (h, w), mode='bilinear')
         for flip in flip_comb:
             im_flip = tensor_flip(im, flip)
-            logit = inference(
-                model,
-                im_flip,
-                is_slide=is_slide,
-                crop_size=crop_size,
-                stride=stride)
+            logit = inference(model,
+                              im_flip,
+                              is_slide=is_slide,
+                              crop_size=crop_size,
+                              stride=stride)
             logit = tensor_flip(logit, flip)
             logit = F.interpolate(logit, (h_input, w_input), mode='bilinear')
 

@@ -38,20 +38,21 @@ def parse_args():
     parser.add_argument(
         "--input_shape",
         nargs='+',
-        help="Export the model with fixed input shape, e.g., `--input_shape 1 3 1024 1024`.",
+        help=
+        "Export the model with fixed input shape, e.g., `--input_shape 1 3 1024 1024`.",
         type=int,
         default=None)
     parser.add_argument(
         '--output_op',
         choices=['argmax', 'softmax', 'none'],
         default="argmax",
-        help="Select the op to be appended to the last of inference model, default: argmax."
+        help=
+        "Select the op to be appended to the last of inference model, default: argmax."
         "In PaddleSeg, the output of trained model is logit (H*C*H*W). We can apply argmax and"
         "softmax op to the logit according the actual situation.")
-    parser.add_argument(
-        '--for_fd',
-        action='store_true',
-        help="Export the model to FD-compatible format.")
+    parser.add_argument('--for_fd',
+                        action='store_true',
+                        help="Export the model to FD-compatible format.")
 
     return parser.parse_args()
 

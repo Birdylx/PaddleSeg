@@ -18,19 +18,21 @@ from . import GripItem, LineItem, BBoxAnnotation
 
 
 class PolygonAnnotation(QtWidgets.QGraphicsPolygonItem):
+
     def __init__(
-            self,
-            labelIndex,
-            shape,
-            delPolygon,
-            setDirty,
-            insideColor=[255, 0, 0],
-            borderColor=[0, 255, 0],
-            opacity=0.5,
-            cocoIndex=None,
-            parent=None,
-            is_rect=False,
-            hand_rect=False, ):
+        self,
+        labelIndex,
+        shape,
+        delPolygon,
+        setDirty,
+        insideColor=[255, 0, 0],
+        borderColor=[0, 255, 0],
+        opacity=0.5,
+        cocoIndex=None,
+        parent=None,
+        is_rect=False,
+        hand_rect=False,
+    ):
         super(PolygonAnnotation, self).__init__(parent)
         self.points = []
         self.m_items = []
@@ -147,7 +149,8 @@ class PolygonAnnotation(QtWidgets.QGraphicsPolygonItem):
         lineItem = LineItem(self, lineIdx + 1, self.borderColor)
         line = QtCore.QLineF(
             point,
-            self.mapToScene(self.points[(lineIdx + 2) % len(self)]), )
+            self.mapToScene(self.points[(lineIdx + 2) % len(self)]),
+        )
         lineItem.setLine(line)
         self.m_lines.insert(lineIdx + 1, lineItem)
         self.scene().addItem(lineItem)
@@ -155,8 +158,7 @@ class PolygonAnnotation(QtWidgets.QGraphicsPolygonItem):
 
     def addPointLast(self, p, add_point=True):
         if add_point:
-            grip = GripItem(self,
-                            len(self), self.borderColor,
+            grip = GripItem(self, len(self), self.borderColor,
                             (self.height, self.width))
             self.scene().addItem(grip)
             self.m_items.append(grip)
@@ -227,7 +229,8 @@ class PolygonAnnotation(QtWidgets.QGraphicsPolygonItem):
             del self.m_lines[focusIdx]
             line = QtCore.QLineF(
                 self.mapToScene(self.points[(focusIdx - 1) % len(self)]),
-                self.mapToScene(self.points[focusIdx % len(self)]), )
+                self.mapToScene(self.points[focusIdx % len(self)]),
+            )
             # print((focusIdx - 1) % len(self), len(self.m_lines), len(self))
             self.m_lines[(focusIdx - 1) % len(self)].setLine(line)
             for line in self.m_lines[focusIdx:]:
@@ -280,14 +283,12 @@ class PolygonAnnotation(QtWidgets.QGraphicsPolygonItem):
             return
         points = self.points
         # line[i]
-        line = QtCore.QLineF(
-            self.mapToScene(points[i]),
-            self.mapToScene(points[(i + 1) % len(self)]))
+        line = QtCore.QLineF(self.mapToScene(points[i]),
+                             self.mapToScene(points[(i + 1) % len(self)]))
         self.m_lines[i].setLine(line)
         # line[i-1]
-        line = QtCore.QLineF(
-            self.mapToScene(points[(i - 1) % len(self)]),
-            self.mapToScene(points[i]))
+        line = QtCore.QLineF(self.mapToScene(points[(i - 1) % len(self)]),
+                             self.mapToScene(points[i]))
         # print((i - 1) % len(self), len(self.m_lines), len(self))
         self.m_lines[(i - 1) % len(self)].setLine(line)
 
@@ -296,9 +297,8 @@ class PolygonAnnotation(QtWidgets.QGraphicsPolygonItem):
             return
         points = self.points
         for i in range(4):
-            line = QtCore.QLineF(
-                self.mapToScene(points[i]),
-                self.mapToScene(points[(i + 1) % 4]))
+            line = QtCore.QLineF(self.mapToScene(points[i]),
+                                 self.mapToScene(points[(i + 1) % 4]))
             self.m_lines[i].setLine(line)
 
     def move_item(self, i, pos):

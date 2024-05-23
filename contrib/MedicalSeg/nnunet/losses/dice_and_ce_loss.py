@@ -26,6 +26,7 @@ from medicalseg.cvlibs import manager
 
 @manager.LOSSES.add_component
 class DC_and_CE_loss(nn.Layer):
+
     def __init__(self,
                  batch_dice=True,
                  smooth=1e-5,
@@ -49,11 +50,10 @@ class DC_and_CE_loss(nn.Layer):
 
         self.ignore_label = ignore_label
 
-        self.dc = SoftDiceLoss(
-            apply_softmax=True,
-            batch_dice=batch_dice,
-            smooth=smooth,
-            do_bg=do_bg)
+        self.dc = SoftDiceLoss(apply_softmax=True,
+                               batch_dice=batch_dice,
+                               smooth=smooth,
+                               do_bg=do_bg)
 
     def forward(self, net_output, target):
         if self.ignore_label is not None:
@@ -87,16 +87,18 @@ class DC_and_CE_loss(nn.Layer):
 
 
 class RobustCrossEntropyLoss(nn.CrossEntropyLoss):
+
     def forward(self, input: paddle.Tensor,
                 target: paddle.Tensor) -> paddle.Tensor:
         if len(target.shape) == len(input.shape):
             assert target.shape[1] == 1
             target = target[:, 0]
-        input = input.transpose([0, * [i for i in range(2, input.ndim)], 1])
+        input = input.transpose([0, *[i for i in range(2, input.ndim)], 1])
         return super().forward(input, target.astype('int64'))
 
 
 class SoftDiceLoss(nn.Layer):
+
     def __init__(self,
                  apply_softmax=True,
                  batch_dice=False,
@@ -159,8 +161,7 @@ def get_tp_fp_fn_tn(net_output, gt, axes=None, mask=None, square=False):
             y_onehot = paddle.nn.functional.one_hot(
                 gt, num_classes=net_output.shape[1])
             y_onehot = y_onehot.transpose([
-                0, y_onehot.ndim - 1,
-                * [i for i in range(1, y_onehot.ndim - 1)]
+                0, y_onehot.ndim - 1, *[i for i in range(1, y_onehot.ndim - 1)]
             ])
 
     tp = net_output * y_onehot
@@ -169,22 +170,18 @@ def get_tp_fp_fn_tn(net_output, gt, axes=None, mask=None, square=False):
     tn = (1 - net_output) * (1 - y_onehot)
 
     if mask is not None:
-        tp = paddle.stack(
-            tuple(x_i * mask[:, 0] for x_i in paddle.unbind(
-                tp, axis=1)),
-            axis=1)
-        fp = paddle.stack(
-            tuple(x_i * mask[:, 0] for x_i in paddle.unbind(
-                fp, axis=1)),
-            axis=1)
-        fn = paddle.stack(
-            tuple(x_i * mask[:, 0] for x_i in paddle.unbind(
-                fn, axis=1)),
-            axis=1)
-        tn = paddle.stack(
-            tuple(x_i * mask[:, 0] for x_i in paddle.unbind(
-                tn, axis=1)),
-            axis=1)
+        tp = paddle.stack(tuple(x_i * mask[:, 0]
+                                for x_i in paddle.unbind(tp, axis=1)),
+                          axis=1)
+        fp = paddle.stack(tuple(x_i * mask[:, 0]
+                                for x_i in paddle.unbind(fp, axis=1)),
+                          axis=1)
+        fn = paddle.stack(tuple(x_i * mask[:, 0]
+                                for x_i in paddle.unbind(fn, axis=1)),
+                          axis=1)
+        tn = paddle.stack(tuple(x_i * mask[:, 0]
+                                for x_i in paddle.unbind(tn, axis=1)),
+                          axis=1)
     if square:
         tp = tp**2
         fp = fp**2

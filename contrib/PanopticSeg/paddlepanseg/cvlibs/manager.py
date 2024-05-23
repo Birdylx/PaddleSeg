@@ -14,7 +14,7 @@
 
 from paddleseg.cvlibs.manager import ComponentManager, BACKBONES, TRANSFORMS, OPTIMIZERS, LOSSES
 
-# NOTE: Models, datasets, and postprocessors are very different in the 
+# NOTE: Models, datasets, and postprocessors are very different in the
 # panoptic segmentation task, compared with the semantic segmentation task,
 # while most of the backbones and transforms can be reused.
 MODELS = ComponentManager("models")

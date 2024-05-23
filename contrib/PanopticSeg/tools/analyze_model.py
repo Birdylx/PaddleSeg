@@ -38,11 +38,10 @@ def parse_args():
         type=int,
         help="Shape of the input shape, e.g. `--input_shape 1 3 1024 1024`",
         default=[1, 3, 1024, 1024])
-    parser.add_argument(
-        '--num_levels',
-        type=int,
-        help="Maximum levels of layers to show.",
-        default=None)
+    parser.add_argument('--num_levels',
+                        type=int,
+                        help="Maximum levels of layers to show.",
+                        default=None)
     return parser.parse_args()
 
 
@@ -100,8 +99,9 @@ def _stats_to_table(stats, cols):
             if isinstance(ele, float):
                 row[i] = _round(ele)
         rel_level = (level - min_level)
-        row = [''] * rel_level + [row[0]] + [''] * (num_pad_cols - rel_level
-                                                    ) + row[1:]
+        row = [''] * rel_level + [
+            row[0]
+        ] + [''] * (num_pad_cols - rel_level) + row[1:]
         table.add_row(row)
     return table
 
@@ -119,6 +119,7 @@ def _to_giga(x):
 
 
 def dynamic_flops(model, inputs, custom_ops=None, num_levels=None):
+
     def _add_hooks(m):
         if len(list(m.children())) > 0:
             return
@@ -130,8 +131,8 @@ def dynamic_flops(model, inputs, custom_ops=None, num_levels=None):
         if m_type in custom_ops:
             flops_fn = custom_ops[m_type]
             if m_type not in types_collection:
-                print("Customize Function has been applied to {}.".format(
-                    m_type))
+                print(
+                    "Customize Function has been applied to {}.".format(m_type))
         elif m_type in register_hooks:
             flops_fn = register_hooks[m_type]
             if m_type not in types_collection:
@@ -193,11 +194,10 @@ def analyze(args, cfg):
     inputs = paddle.randn(args.input_shape)
 
     builder = make_default_builder(cfg)
-    dynamic_flops(
-        builder.model,
-        inputs,
-        custom_ops=custom_ops,
-        num_levels=args.num_levels)
+    dynamic_flops(builder.model,
+                  inputs,
+                  custom_ops=custom_ops,
+                  num_levels=args.num_levels)
 
 
 if __name__ == '__main__':

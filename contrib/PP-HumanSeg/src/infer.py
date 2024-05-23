@@ -36,17 +36,19 @@ from optic_flow_process import optic_flow_process
 
 
 class DeployConfig:
+
     def __init__(self, path, vertical_screen):
         with codecs.open(path, 'r', 'utf-8') as file:
             self.dic = yaml.load(file, Loader=yaml.FullLoader)
 
             [width, height] = self.dic['Deploy']['transforms'][0]['target_size']
             if vertical_screen and width > height:
-                self.dic['Deploy']['transforms'][0][
-                    'target_size'] = [height, width]
+                self.dic['Deploy']['transforms'][0]['target_size'] = [
+                    height, width
+                ]
 
-        self._transforms = self._load_transforms(self.dic['Deploy'][
-            'transforms'])
+        self._transforms = self._load_transforms(
+            self.dic['Deploy']['transforms'])
         self._dir = os.path.dirname(path)
 
     @property
@@ -76,6 +78,7 @@ class DeployConfig:
 
 
 class Predictor:
+
     def __init__(self, args):
         self.args = args
         self.cfg = DeployConfig(args.config, args.vertical_screen)
@@ -151,8 +154,9 @@ class Predictor:
             score_map = optflow_map / 255.
 
         score_map = score_map[np.newaxis, np.newaxis, ...]
-        score_map = reverse_transform(
-            paddle.to_tensor(score_map), trans_info, mode='bilinear')
+        score_map = reverse_transform(paddle.to_tensor(score_map),
+                                      trans_info,
+                                      mode='bilinear')
         alpha = np.transpose(score_map.numpy().squeeze(1), [1, 2, 0])
 
         h, w, _ = origin_img.shape

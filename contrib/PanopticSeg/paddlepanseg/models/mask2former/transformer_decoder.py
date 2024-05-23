@@ -22,14 +22,16 @@ from .common import Conv2D, PositionEmbeddingSine
 
 
 class SelfAttentionLayer(nn.Layer):
+
     def __init__(self,
                  embed_dim,
                  num_heads,
                  dropout=0.0,
                  normalize_before=False):
         super().__init__()
-        self.self_attn = nn.MultiHeadAttention(
-            embed_dim, num_heads, dropout=dropout)
+        self.self_attn = nn.MultiHeadAttention(embed_dim,
+                                               num_heads,
+                                               dropout=dropout)
 
         self.norm = nn.LayerNorm(embed_dim)
         self.dropout = nn.Dropout(dropout)
@@ -68,14 +70,16 @@ class SelfAttentionLayer(nn.Layer):
 
 
 class CrossAttentionLayer(nn.Layer):
+
     def __init__(self,
                  embed_dim,
                  num_heads,
                  dropout=0.0,
                  normalize_before=False):
         super().__init__()
-        self.multihead_attn = nn.MultiHeadAttention(
-            embed_dim, num_heads, dropout=dropout)
+        self.multihead_attn = nn.MultiHeadAttention(embed_dim,
+                                                    num_heads,
+                                                    dropout=dropout)
 
         self.norm = nn.LayerNorm(embed_dim)
         self.dropout = nn.Dropout(dropout)
@@ -92,11 +96,10 @@ class CrossAttentionLayer(nn.Layer):
         return tensor if pos is None else tensor + pos
 
     def forward_post(self, tgt, memory, memory_mask, pos, query_pos):
-        tgt2 = self.multihead_attn(
-            query=self.with_pos_embed(tgt, query_pos),
-            key=self.with_pos_embed(memory, pos),
-            value=memory,
-            attn_mask=memory_mask)
+        tgt2 = self.multihead_attn(query=self.with_pos_embed(tgt, query_pos),
+                                   key=self.with_pos_embed(memory, pos),
+                                   value=memory,
+                                   attn_mask=memory_mask)
         tgt = tgt + self.dropout(tgt2)
         tgt = self.norm(tgt)
 
@@ -104,11 +107,10 @@ class CrossAttentionLayer(nn.Layer):
 
     def forward_pre(self, tgt, memory, memory_mask, pos, query_pos):
         tgt2 = self.norm(tgt)
-        tgt2 = self.multihead_attn(
-            query=self.with_pos_embed(tgt2, query_pos),
-            key=self.with_pos_embed(memory, pos),
-            value=memory,
-            attn_mask=memory_mask)
+        tgt2 = self.multihead_attn(query=self.with_pos_embed(tgt2, query_pos),
+                                   key=self.with_pos_embed(memory, pos),
+                                   value=memory,
+                                   attn_mask=memory_mask)
         tgt = tgt + self.dropout(tgt2)
 
         return tgt
@@ -120,6 +122,7 @@ class CrossAttentionLayer(nn.Layer):
 
 
 class FFNLayer(nn.Layer, THLinearInitMixin):
+
     def __init__(self,
                  embed_dim,
                  ff_dim=2048,
@@ -166,6 +169,7 @@ class FFNLayer(nn.Layer, THLinearInitMixin):
 
 
 class MLP(nn.Layer, THLinearInitMixin):
+
     def __init__(self, input_dim, hidden_dim, output_dim, num_layers):
         super().__init__()
         self.num_layers = num_layers
@@ -181,18 +185,20 @@ class MLP(nn.Layer, THLinearInitMixin):
 
 
 class MultiScaleMaskedTransformerDecoder(nn.Layer):
+
     def __init__(
-            self,
-            in_channels,
-            num_classes,
-            hidden_dim,
-            num_queries,
-            num_heads,
-            ff_dim,
-            num_dec_layers,
-            pre_norm,
-            mask_dim,
-            enforce_input_proj, ):
+        self,
+        in_channels,
+        num_classes,
+        hidden_dim,
+        num_queries,
+        num_heads,
+        ff_dim,
+        num_dec_layers,
+        pre_norm,
+        mask_dim,
+        enforce_input_proj,
+    ):
         super().__init__()
 
         # Positional encoding
@@ -212,21 +218,24 @@ class MultiScaleMaskedTransformerDecoder(nn.Layer):
                     embed_dim=hidden_dim,
                     num_heads=num_heads,
                     dropout=0.0,
-                    normalize_before=pre_norm, ))
+                    normalize_before=pre_norm,
+                ))
 
             self.transformer_cross_attention_layers.append(
                 CrossAttentionLayer(
                     embed_dim=hidden_dim,
                     num_heads=num_heads,
                     dropout=0.0,
-                    normalize_before=pre_norm, ))
+                    normalize_before=pre_norm,
+                ))
 
             self.transformer_ffn_layers.append(
                 FFNLayer(
                     embed_dim=hidden_dim,
                     ff_dim=ff_dim,
                     dropout=0.0,
-                    normalize_before=pre_norm, ))
+                    normalize_before=pre_norm,
+                ))
 
         self.decoder_norm = nn.LayerNorm(hidden_dim)
 
@@ -243,8 +252,7 @@ class MultiScaleMaskedTransformerDecoder(nn.Layer):
         for _ in range(self.num_feature_levels):
             if in_channels != hidden_dim or enforce_input_proj:
                 self.input_proj.append(
-                    Conv2D(
-                        in_channels, hidden_dim, kernel_size=1))
+                    Conv2D(in_channels, hidden_dim, kernel_size=1))
                 c2_xavier_fill(self.input_proj[-1])
             else:
                 self.input_proj.append(nn.Sequential())
@@ -279,8 +287,8 @@ class MultiScaleMaskedTransformerDecoder(nn.Layer):
         bs = src[0].shape[0]
 
         # QxNxC
-        query_embed = paddle.tile(
-            self.query_embed.weight.unsqueeze(0), (bs, 1, 1))
+        query_embed = paddle.tile(self.query_embed.weight.unsqueeze(0),
+                                  (bs, 1, 1))
         output = paddle.tile(self.query_feat.weight.unsqueeze(0), (bs, 1, 1))
 
         predictions_class = []
@@ -300,8 +308,8 @@ class MultiScaleMaskedTransformerDecoder(nn.Layer):
             all_zero_mask = paddle.tile(all_zero_mask.detach(),
                                         (1, 1, attn_mask.shape[-1]))
             # If a query associates with a all-zero mask, do not use masked attention
-            attn_mask = paddle.where(all_zero_mask,
-                                     paddle.ones_like(attn_mask), attn_mask)
+            attn_mask = paddle.where(all_zero_mask, paddle.ones_like(attn_mask),
+                                     attn_mask)
             attn_mask = attn_mask.astype('bool')
 
             # NOTE: cross-attention first
@@ -344,11 +352,10 @@ class MultiScaleMaskedTransformerDecoder(nn.Layer):
         with paddle.no_grad():
             # NOTE: prediction is of higher-resolution
             # [B, Q, H, W] -> [B, Q, H*W] -> [B, h, Q, H*W] -> [B*h, Q, HW]
-            attn_mask = F.interpolate(
-                outputs_mask,
-                size=attn_mask_target_size,
-                mode='bilinear',
-                align_corners=False)
+            attn_mask = F.interpolate(outputs_mask,
+                                      size=attn_mask_target_size,
+                                      mode='bilinear',
+                                      align_corners=False)
             attn_mask = (paddle.tile(
                 F.sigmoid(attn_mask).flatten(2).unsqueeze(1),
                 (1, self.num_heads, 1, 1)) >= 0.5).astype('bool')

@@ -66,12 +66,11 @@ class DANet(nn.Layer):
             logit_list = [logit_list[0]]
 
         logit_list = [
-            F.interpolate(
-                logit,
-                paddle.shape(x)[2:],
-                mode='bilinear',
-                align_corners=self.align_corners,
-                align_mode=1) for logit in logit_list
+            F.interpolate(logit,
+                          paddle.shape(x)[2:],
+                          mode='bilinear',
+                          align_corners=self.align_corners,
+                          align_mode=1) for logit in logit_list
         ]
         return logit_list
 
@@ -101,8 +100,8 @@ class DAHead(nn.Layer):
         self.conv1 = layers.ConvBNReLU(inter_channels, inter_channels, 3)
         self.conv2 = layers.ConvBNReLU(inter_channels, inter_channels, 3)
 
-        self.aux_head = nn.Sequential(
-            nn.Dropout2D(0.1), nn.Conv2D(in_channels, num_classes, 1))
+        self.aux_head = nn.Sequential(nn.Dropout2D(0.1),
+                                      nn.Conv2D(in_channels, num_classes, 1))
 
         self.aux_head_pam = nn.Sequential(
             nn.Dropout2D(0.1), nn.Conv2D(inter_channels, num_classes, 1))
@@ -110,8 +109,8 @@ class DAHead(nn.Layer):
         self.aux_head_cam = nn.Sequential(
             nn.Dropout2D(0.1), nn.Conv2D(inter_channels, num_classes, 1))
 
-        self.cls_head = nn.Sequential(
-            nn.Dropout2D(0.1), nn.Conv2D(inter_channels, num_classes, 1))
+        self.cls_head = nn.Sequential(nn.Dropout2D(0.1),
+                                      nn.Conv2D(inter_channels, num_classes, 1))
 
     def forward(self, feat_list):
         feats = feat_list[-1]
@@ -205,8 +204,8 @@ class CAM(nn.Layer):
         # sim: n, c, c
         sim = paddle.bmm(query, key)
         # The danet author claims that this can avoid gradient divergence
-        sim = paddle.max(sim, axis=-1, keepdim=True).tile(
-            [1, 1, self.channels]) - sim
+        sim = paddle.max(sim, axis=-1, keepdim=True).tile([1, 1, self.channels
+                                                           ]) - sim
         sim = F.softmax(sim, axis=-1)
 
         # feat: from (n, c, h * w) to (n, c, h, w)

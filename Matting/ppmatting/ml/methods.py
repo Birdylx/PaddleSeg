@@ -17,6 +17,7 @@ from paddleseg.cvlibs import manager
 
 
 class BaseMLMatting(object):
+
     def __init__(self, alpha_estimator, **kargs):
         self.alpha_estimator = alpha_estimator
         self.kargs = kargs
@@ -36,6 +37,7 @@ class BaseMLMatting(object):
 
 @manager.MODELS.add_component
 class CloseFormMatting(BaseMLMatting):
+
     def __init__(self, **kargs):
         cf_alpha_estimator = pymatting.estimate_alpha_cf
         super().__init__(cf_alpha_estimator, **kargs)
@@ -43,6 +45,7 @@ class CloseFormMatting(BaseMLMatting):
 
 @manager.MODELS.add_component
 class KNNMatting(BaseMLMatting):
+
     def __init__(self, **kargs):
         knn_alpha_estimator = pymatting.estimate_alpha_knn
         super().__init__(knn_alpha_estimator, **kargs)
@@ -50,6 +53,7 @@ class KNNMatting(BaseMLMatting):
 
 @manager.MODELS.add_component
 class LearningBasedMatting(BaseMLMatting):
+
     def __init__(self, **kargs):
         lbdm_alpha_estimator = pymatting.estimate_alpha_lbdm
         super().__init__(lbdm_alpha_estimator, **kargs)
@@ -57,6 +61,7 @@ class LearningBasedMatting(BaseMLMatting):
 
 @manager.MODELS.add_component
 class FastMatting(BaseMLMatting):
+
     def __init__(self, **kargs):
         lkm_alpha_estimator = pymatting.estimate_alpha_lkm
         super().__init__(lkm_alpha_estimator, **kargs)
@@ -64,6 +69,7 @@ class FastMatting(BaseMLMatting):
 
 @manager.MODELS.add_component
 class RandomWalksMatting(BaseMLMatting):
+
     def __init__(self, **kargs):
         rw_alpha_estimator = pymatting.estimate_alpha_rw
         super().__init__(rw_alpha_estimator, **kargs)

@@ -21,12 +21,13 @@ from paddleseg.cvlibs import manager
 
 
 class DeployConfig:
+
     def __init__(self, path):
         with codecs.open(path, 'r', 'utf-8') as file:
             self.dic = yaml.load(file, Loader=yaml.FullLoader)
 
-        self._transforms = self.load_transforms(self.dic['Deploy'][
-            'transforms'])
+        self._transforms = self.load_transforms(
+            self.dic['Deploy']['transforms'])
         self._dir = os.path.dirname(path)
 
     @property

@@ -80,9 +80,10 @@ class CityscapesCPS(BaseDataset):
                  img_channels=3,
                  ignore_index=255,
                  separator='\t'):
-        super(CityscapesCPS, self).__init__(
-            mode, dataset_root, transforms, train_path, val_path, file_length,
-            img_channels, ignore_index, separator)
+        super(CityscapesCPS,
+              self).__init__(mode, dataset_root, transforms, train_path,
+                             val_path, file_length, img_channels, ignore_index,
+                             separator)
 
         self.unsupervised = unsupervised
 
@@ -95,8 +96,8 @@ class CityscapesCPS(BaseDataset):
         self._file_names = self._get_file_names(mode)
 
         if not os.path.exists(dataset_root):
-            raise FileNotFoundError('there is not `dataset_root`: {}.'.format(
-                dataset_root))
+            raise FileNotFoundError(
+                'there is not `dataset_root`: {}.'.format(dataset_root))
         if self.transforms is None:
             raise ValueError("`transforms` is necessary, but it is None.")
 

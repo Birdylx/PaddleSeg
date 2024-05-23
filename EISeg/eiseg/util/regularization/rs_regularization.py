@@ -34,7 +34,7 @@ DELTA = math.degrees(math.pi / 12)
 THETA = math.degrees(math.pi / 4)
 
 
-def boundary_regularization(contour, mask_shape, W: int=32) -> np.ndarray:
+def boundary_regularization(contour, mask_shape, W: int = 32) -> np.ndarray:
     new_contour = _coarse(contour, mask_shape)  # coarse
     if new_contour is not None:
         contour = _fine(new_contour, W)  # fine
@@ -42,6 +42,7 @@ def boundary_regularization(contour, mask_shape, W: int=32) -> np.ndarray:
 
 
 def _coarse(contour, img_shape):
+
     def _inline_check(point, shape, eps=5):
         x, y = point[0]
         iH, iW = shape
@@ -75,8 +76,8 @@ def _coarse(contour, img_shape):
         # remove over-sharp angles with threshold α.
         # remove over-smooth angles with threshold β.
         angle = _calc_angle(last_point, current_point, next_point)
-        if (ALPHA > angle or angle > BETA) and _inline_check(current_point,
-                                                             img_shape):
+        if (ALPHA > angle or angle > BETA) and _inline_check(
+                current_point, img_shape):
             contour = np.delete(contour, idx, axis=0)
             p_number -= 1
             continue
@@ -298,8 +299,8 @@ def _calc_distance_between_lines(L1, L2):
     new_A2 = 1
     new_B2 = B2 / (A2 + eps)
     new_C2 = C2 / (A2 + eps)
-    dist = (np.abs(new_C1 - new_C2)) / (
-        np.sqrt(new_A2 * new_A2 + new_B2 * new_B2) + eps)
+    dist = (np.abs(new_C1 -
+                   new_C2)) / (np.sqrt(new_A2 * new_A2 + new_B2 * new_B2) + eps)
     return dist
 
 

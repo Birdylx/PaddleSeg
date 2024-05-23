@@ -24,6 +24,7 @@ OFFSET = 256 * 256 * 256
 
 
 class PQStatCat(object):
+
     def __init__(self):
         self.iou = 0.0
         self.tp = 0
@@ -44,6 +45,7 @@ class PQStatCat(object):
 
 
 class PQStat(object):
+
     def __init__(self, all_ids):
         self.pq_per_cat = defaultdict(PQStatCat)
         self.all_ids = all_ids
@@ -104,6 +106,7 @@ class PQStat(object):
 
 
 class PanSegEvaluator(Evaluator):
+
     def __init__(self,
                  num_classes,
                  thing_ids,
@@ -197,8 +200,9 @@ class PanSegEvaluator(Evaluator):
             intersection = gt_pred_map.get((VOID, pred_label), 0)
 
             if pred_info['category_id'] in crowd_labels_dict:
-                intersection += gt_pred_map.get((
-                    crowd_labels_dict[pred_info['category_id']], pred_label), 0)
+                intersection += gt_pred_map.get(
+                    (crowd_labels_dict[pred_info['category_id']], pred_label),
+                    0)
             if intersection / pred_info['area'] > 0.5:
                 continue
             self.pq_stat[pred_info['category_id']].fp += 1

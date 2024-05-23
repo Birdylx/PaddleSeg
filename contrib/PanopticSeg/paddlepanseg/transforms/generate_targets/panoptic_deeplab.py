@@ -19,6 +19,7 @@ from paddlepanseg.cvlibs import manager
 
 @manager.TRANSFORMS.add_component
 class GeneratePanopticDeepLabTrainTargets(object):
+
     def __init__(self,
                  ignore_index,
                  sigma=8,
@@ -51,12 +52,9 @@ class GeneratePanopticDeepLabTrainTargets(object):
         center = np.zeros((1, height, width), dtype=np.float32)
         center_pts = []
         offset = np.zeros((2, height, width), dtype=np.float32)
-        y_coord, x_coord = np.meshgrid(
-            np.arange(
-                height, dtype=np.float32),
-            np.arange(
-                width, dtype=np.float32),
-            indexing="ij")
+        y_coord, x_coord = np.meshgrid(np.arange(height, dtype=np.float32),
+                                       np.arange(width, dtype=np.float32),
+                                       indexing="ij")
         # Generate pixel-wise loss weights
         semantic_weights = np.ones_like(panoptic, dtype=np.uint8)
         # 0: ignore, 1: has instance
@@ -89,8 +87,8 @@ class GeneratePanopticDeepLabTrainTargets(object):
                     semantic_weights[panoptic ==
                                      seg['id']] = self.small_instance_weight
 
-                center_y, center_x = np.mean(mask_index[0]), np.mean(mask_index[
-                    1])
+                center_y, center_x = np.mean(mask_index[0]), np.mean(
+                    mask_index[1])
                 center_pts.append([center_y, center_x])
 
                 # Generate center heatmap
@@ -112,9 +110,12 @@ class GeneratePanopticDeepLabTrainTargets(object):
                 # Start and end indices in center heatmap image
                 center_x0, center_x1 = max(0, ul[0]), min(br[0], width)
                 center_y0, center_y1 = max(0, ul[1]), min(br[1], height)
-                center[0, center_y0:center_y1, center_x0:center_x1] = np.maximum(
-                    center[0, center_y0:center_y1, center_x0:center_x1],
-                    self.g[gaussian_y0:gaussian_y1, gaussian_x0:gaussian_x1], )
+                center[0, center_y0:center_y1,
+                       center_x0:center_x1] = np.maximum(
+                           center[0, center_y0:center_y1, center_x0:center_x1],
+                           self.g[gaussian_y0:gaussian_y1,
+                                  gaussian_x0:gaussian_x1],
+                       )
                 offset[0][mask_index] = center_y - y_coord[mask_index]
                 offset[1][mask_index] = center_x - x_coord[mask_index]
 

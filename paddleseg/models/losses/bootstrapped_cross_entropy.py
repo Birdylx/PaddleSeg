@@ -56,12 +56,11 @@ class BootstrappedCrossEntropyLoss(nn.Layer):
             y = paddle.transpose(y, (0, 2, 3, 1))
             x = paddle.reshape(x, shape=(-1, c))
             y = paddle.reshape(y, shape=(-1, ))
-            loss = F.cross_entropy(
-                x,
-                y,
-                weight=self.weight,
-                ignore_index=self.ignore_index,
-                reduction="none")
+            loss = F.cross_entropy(x,
+                                   y,
+                                   weight=self.weight,
+                                   ignore_index=self.ignore_index,
+                                   reduction="none")
             sorted_loss = paddle.sort(loss, descending=True)
             if sorted_loss[self.K] > self.threshold:
                 new_indices = paddle.nonzero(sorted_loss > self.threshold)

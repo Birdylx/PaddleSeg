@@ -30,15 +30,15 @@ def predict_preprocessed_data_return_seg_and_softmax(
         predictor,
         dataset,
         data: np.ndarray,
-        do_mirroring: bool=True,
-        mirror_axes: Tuple[int]=None,
-        use_sliding_window: bool=True,
-        step_size: float=0.5,
-        use_gaussian: bool=True,
-        pad_border_mode: str='constant',
-        pad_kwargs: dict=None,
-        verbose: bool=True,
-        mixed_precision: bool=True) -> Tuple[np.ndarray, np.ndarray]:
+        do_mirroring: bool = True,
+        mirror_axes: Tuple[int] = None,
+        use_sliding_window: bool = True,
+        step_size: float = 0.5,
+        use_gaussian: bool = True,
+        pad_border_mode: str = 'constant',
+        pad_kwargs: dict = None,
+        verbose: bool = True,
+        mixed_precision: bool = True) -> Tuple[np.ndarray, np.ndarray]:
     if pad_border_mode == 'constant' and pad_kwargs is None:
         pad_kwargs = {'constant_values': 0}
 
@@ -122,9 +122,10 @@ def predict_next_stage(model,
             predicted_probabilities = output_file[:-4] + ".npy"
 
         results.append(
-            export_pool.starmap_async(resample_and_save, [(
-                predicted_probabilities, target_shp, output_file,
-                force_separate_z, interpolation_order, interpolation_order_z)]))
+            export_pool.starmap_async(resample_and_save, [
+                (predicted_probabilities, target_shp, output_file,
+                 force_separate_z, interpolation_order, interpolation_order_z)
+            ]))
 
     _ = [i.get() for i in results]
     export_pool.close()

@@ -2,6 +2,7 @@ import numpy as np
 
 
 def get_color_map(N=256):
+
     def bitget(byteval, idx):
         return ((byteval & (1 << idx)) != 0)
 

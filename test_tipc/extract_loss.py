@@ -19,36 +19,31 @@ import re
 
 def parameter_parser():
     parser = argparse.ArgumentParser(description="Support Args:")
-    parser.add_argument(
-        "-v",
-        "--valid_expr",
-        type=str,
-        default="*",
-        help="when not match, the line will discard.")
-    parser.add_argument(
-        "-e",
-        "--extract_expr",
-        type=str,
-        default=r"^{%s}$,",
-        help="the extract expr for the loss: loss {%f}")
-    parser.add_argument(
-        "-r",
-        "--reduction_expr",
-        type=str,
-        default="print",
-        help="choices=['print', 'sum', 'mean']")
-    parser.add_argument(
-        "-n",
-        "--discard",
-        type=int,
-        default=0,
-        help="while reduction, discard [0:n] and [-n:]")
-    parser.add_argument(
-        "-d",
-        "--debug",
-        action='store_true',
-        default=False,
-        help="debug options")
+    parser.add_argument("-v",
+                        "--valid_expr",
+                        type=str,
+                        default="*",
+                        help="when not match, the line will discard.")
+    parser.add_argument("-e",
+                        "--extract_expr",
+                        type=str,
+                        default=r"^{%s}$,",
+                        help="the extract expr for the loss: loss {%f}")
+    parser.add_argument("-r",
+                        "--reduction_expr",
+                        type=str,
+                        default="print",
+                        help="choices=['print', 'sum', 'mean']")
+    parser.add_argument("-n",
+                        "--discard",
+                        type=int,
+                        default=0,
+                        help="while reduction, discard [0:n] and [-n:]")
+    parser.add_argument("-d",
+                        "--debug",
+                        action='store_true',
+                        default=False,
+                        help="debug options")
     return parser.parse_args()
 
 

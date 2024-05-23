@@ -63,8 +63,10 @@ class EdgeAttentionLoss(nn.Layer):
 
         seg_logit = paddle.transpose(seg_logit, [0, 2, 3, 1])
         label = paddle.transpose(label, [0, 2, 3, 1])
-        loss = F.softmax_with_cross_entropy(
-            seg_logit, label, ignore_index=self.ignore_index, axis=-1)
+        loss = F.softmax_with_cross_entropy(seg_logit,
+                                            label,
+                                            ignore_index=self.ignore_index,
+                                            axis=-1)
 
         mask = label != self.ignore_index
         mask = paddle.cast(mask, 'float32')

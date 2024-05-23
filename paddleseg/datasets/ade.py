@@ -68,8 +68,8 @@ class ADE20K(Dataset):
                 extraname='ADEChallengeData2016')
         elif not os.path.exists(self.dataset_root):
             self.dataset_root = os.path.normpath(self.dataset_root)
-            savepath, extraname = self.dataset_root.rsplit(
-                sep=os.path.sep, maxsplit=1)
+            savepath, extraname = self.dataset_root.rsplit(sep=os.path.sep,
+                                                           maxsplit=1)
             self.dataset_root = download_file_and_uncompress(
                 url=URL,
                 savepath=savepath,
@@ -113,7 +113,8 @@ class ADE20K(Dataset):
             data['label'] = data['label'] - 1
             data = self.transforms(data)
             if self.edge:
-                edge_mask = F.mask_to_binary_edge(
-                    label, radius=2, num_classes=self.num_classes)
+                edge_mask = F.mask_to_binary_edge(label,
+                                                  radius=2,
+                                                  num_classes=self.num_classes)
                 data['edge'] = edge_mask
             return data

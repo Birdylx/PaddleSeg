@@ -1,15 +1,15 @@
-# Copyright (c) 2023 PaddlePaddle Authors. All Rights Reserved. 
-#   
-# Licensed under the Apache License, Version 2.0 (the "License");   
-# you may not use this file except in compliance with the License.  
-# You may obtain a copy of the License at   
-#   
-#     http://www.apache.org/licenses/LICENSE-2.0    
-#   
-# Unless required by applicable law or agreed to in writing, software   
-# distributed under the License is distributed on an "AS IS" BASIS, 
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  
-# See the License for the specific language governing permissions and   
+# Copyright (c) 2023 PaddlePaddle Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
 # limitations under the License.
 
 from qinspector.cvlib.workspace import create, register
@@ -20,6 +20,7 @@ logger = setup_logger('PostProcess')
 
 @register
 class PostProcess(object):
+
     def __init__(self, model_cfg, env_cfg=None):
         super(PostProcess, self).__init__()
         self.env_cfg = env_cfg
@@ -49,6 +50,7 @@ class PostProcess(object):
 
 @register
 class JudgeDetByScores(object):
+
     def __init__(self, cfg, env_cfg=None):
         super(JudgeDetByScores, self).__init__()
         self.score_threshold = cfg['score_threshold']
@@ -60,8 +62,8 @@ class JudgeDetByScores(object):
                 if pred.get("isNG", 1):
                     if isinstance(self.score_threshold, dict):
                         if pred['category_id'] in self.score_threshold.keys():
-                            threshold = self.score_threshold[pred[
-                                'category_id']]
+                            threshold = self.score_threshold[
+                                pred['category_id']]
                         else:
                             pred['isNG'] = 1
                             continue
@@ -77,6 +79,7 @@ class JudgeDetByScores(object):
 
 @register
 class JudgeByLengthWidth(object):
+
     def __init__(self, cfg, env_cfg=None):
         super(JudgeByLengthWidth, self).__init__()
         self.len_thresh = cfg['len_thresh']
@@ -105,6 +108,7 @@ class JudgeByLengthWidth(object):
 
 @register
 class JudgeByArea(object):
+
     def __init__(self, cfg, env_cfg=None):
         super(JudgeByArea, self).__init__()
         self.area_thresh = cfg['area_thresh']

@@ -54,6 +54,7 @@ class ConfigChecker(object):
 
 
 class Rule(object):
+
     def check_and_correct(self, cfg):
         raise NotImplementedError
 
@@ -64,6 +65,7 @@ class Rule(object):
 
 
 class DefaultPrimaryRule(Rule):
+
     def check_and_correct(self, cfg):
         items = [
             'batch_size', 'iters', 'train_dataset', 'optimizer', 'lr_scheduler',
@@ -75,6 +77,7 @@ class DefaultPrimaryRule(Rule):
 
 
 class DefaultLossRule(Rule):
+
     def __init__(self, loss_name):
         super().__init__()
         self.loss_name = loss_name
@@ -99,6 +102,7 @@ class DefaultLossRule(Rule):
 
 
 class DefaultSyncNumClassesRule(Rule):
+
     def check_and_correct(self, cfg):
         # check the num_classes in model, train_dataset and val_dataset config
         model_cfg = cfg.model_cfg
@@ -140,6 +144,7 @@ class DefaultSyncNumClassesRule(Rule):
 
 
 class DefaultSyncImgChannelsRule(Rule):
+
     def check_and_correct(self, cfg):
         model_cfg = cfg.model_cfg
         train_dataset_cfg = cfg.train_dataset_cfg
@@ -178,11 +183,13 @@ class DefaultSyncImgChannelsRule(Rule):
 
 
 class DefaultSyncIgnoreIndexRule(Rule):
+
     def __init__(self, loss_name):
         super().__init__()
         self.loss_name = loss_name
 
     def check_and_correct(self, cfg):
+
         def _check_helper(loss_cfg, dataset_ignore_index):
             if 'ignore_index' not in loss_cfg:
                 loss_cfg['ignore_index'] = dataset_ignore_index

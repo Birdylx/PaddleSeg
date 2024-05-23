@@ -58,19 +58,17 @@ class EfficientFormerSeg(nn.Layer):
         backbone_channels = [
             backbone.feat_channels[i] for i in backbone_indices
         ]
-        self.neck = EfficientFormerFPNNeck(
-            in_channels=backbone_channels,
-            out_channels=256,
-            num_outs=4,
-            add_extra_convs=add_extra_convs)
-        self.head = EfficientFormerFPN(
-            in_channels=[256, 256, 256, 256],
-            in_index=[0, 1, 2, 3],
-            feature_strides=[4, 8, 16, 32],
-            channels=head_channels,
-            dropout_ratio=0.1,
-            num_classes=num_classes,
-            align_corners=self.align_corners)
+        self.neck = EfficientFormerFPNNeck(in_channels=backbone_channels,
+                                           out_channels=256,
+                                           num_outs=4,
+                                           add_extra_convs=add_extra_convs)
+        self.head = EfficientFormerFPN(in_channels=[256, 256, 256, 256],
+                                       in_index=[0, 1, 2, 3],
+                                       feature_strides=[4, 8, 16, 32],
+                                       channels=head_channels,
+                                       dropout_ratio=0.1,
+                                       num_classes=num_classes,
+                                       align_corners=self.align_corners)
 
         self.init_weight()
 
@@ -80,11 +78,10 @@ class EfficientFormerSeg(nn.Layer):
         x = self.neck(x)
         x = self.head(x)
         x = [
-            F.interpolate(
-                x,
-                size=[H, W],
-                mode='bilinear',
-                align_corners=self.align_corners)
+            F.interpolate(x,
+                          size=[H, W],
+                          mode='bilinear',
+                          align_corners=self.align_corners)
         ]
 
         return x
@@ -95,6 +92,7 @@ class EfficientFormerSeg(nn.Layer):
 
 
 class EfficientFormerFPNNeck(nn.Layer):
+
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -150,8 +148,11 @@ class EfficientFormerFPNNeck(nn.Layer):
                     in_channels = self.in_channels[self.backbone_end_level - 1]
                 else:
                     in_channels = out_channels
-                extra_fpn_conv = nn.Conv2D(
-                    in_channels, out_channels, 3, stride=2, padding=1)
+                extra_fpn_conv = nn.Conv2D(in_channels,
+                                           out_channels,
+                                           3,
+                                           stride=2,
+                                           padding=1)
                 self.fpn_convs.append(extra_fpn_conv)
         self.init_weight()
 
@@ -166,11 +167,10 @@ class EfficientFormerFPNNeck(nn.Layer):
         used_backbone_levels = len(laterals)
         for i in range(used_backbone_levels - 1, 0, -1):
             prev_shape = laterals[i - 1].shape[2:]
-            laterals[i - 1] += F.interpolate(
-                laterals[i],
-                size=prev_shape,
-                mode='nearest',
-                align_corners=False)
+            laterals[i - 1] += F.interpolate(laterals[i],
+                                             size=prev_shape,
+                                             mode='nearest',
+                                             align_corners=False)
 
         outs = [
             self.fpn_convs[i](laterals[i]) for i in range(used_backbone_levels)
@@ -206,6 +206,7 @@ class EfficientFormerFPNNeck(nn.Layer):
 
 
 class EfficientFormerFPN(nn.Layer):
+
     def __init__(self,
                  in_index=[0, 1, 2, 3],
                  in_channels=[256, 256, 256, 256],
@@ -245,16 +246,14 @@ class EfficientFormerFPN(nn.Layer):
                             self.channels,
                             3,
                             padding=1,
-                            bias_attr=False),
-                        nn.BatchNorm2D(self.channels),
+                            bias_attr=False), nn.BatchNorm2D(self.channels),
                         nn.ReLU()))
 
                 if feature_strides[i] != feature_strides[0]:
                     scale_head.append(
-                        nn.Upsample(
-                            scale_factor=2,
-                            mode='bilinear',
-                            align_corners=self.align_corners))
+                        nn.Upsample(scale_factor=2,
+                                    mode='bilinear',
+                                    align_corners=self.align_corners))
 
             self.scale_heads.append(nn.Sequential(*scale_head))
         self.cls_seg = nn.Conv2D(self.channels, self.num_classes, kernel_size=1)
@@ -267,11 +266,10 @@ class EfficientFormerFPN(nn.Layer):
         output = self.scale_heads[0](x[0])
         for i in range(1, len(self.feature_strides)):
             # non inplace
-            output = output + F.interpolate(
-                self.scale_heads[i](x[i]),
-                size=output.shape[2:],
-                mode='bilinear',
-                align_corners=self.align_corners)
+            output = output + F.interpolate(self.scale_heads[i](x[i]),
+                                            size=output.shape[2:],
+                                            mode='bilinear',
+                                            align_corners=self.align_corners)
 
         if self.dropout_ratio > 0:
             output = self.dropout(output)

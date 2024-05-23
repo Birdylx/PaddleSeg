@@ -43,18 +43,20 @@ from PIL import Image
 def parse_args():
     parser = argparse.ArgumentParser(
         description='Generate PASCAL-Context dataset')
-    parser.add_argument(
-        '--voc_path', dest='voc_path', help='pascal voc path', type=str)
-    parser.add_argument(
-        '--annotation_path',
-        dest='annotation_path',
-        help='pascal context annotation path',
-        type=str)
+    parser.add_argument('--voc_path',
+                        dest='voc_path',
+                        help='pascal voc path',
+                        type=str)
+    parser.add_argument('--annotation_path',
+                        dest='annotation_path',
+                        help='pascal context annotation path',
+                        type=str)
 
     return parser.parse_args()
 
 
 class PascalContextGenerator(object):
+
     def __init__(self, voc_path, annotation_path):
         self.voc_path = voc_path
         self.annotation_path = annotation_path
@@ -92,16 +94,14 @@ class PascalContextGenerator(object):
     def save_mask(self, img_id, mode):
         if mode == 'train':
             mask = Image.fromarray(
-                self._class_to_index(
-                    self.train_detail.getMask(img_id),
-                    _mapping=self._mapping,
-                    _key=self._key))
+                self._class_to_index(self.train_detail.getMask(img_id),
+                                     _mapping=self._mapping,
+                                     _key=self._key))
         elif mode == 'val':
             mask = Image.fromarray(
-                self._class_to_index(
-                    self.val_detail.getMask(img_id),
-                    _mapping=self._mapping,
-                    _key=self._key))
+                self._class_to_index(self.val_detail.getMask(img_id),
+                                     _mapping=self._mapping,
+                                     _key=self._key))
         filename = img_id['file_name']
         basename, _ = os.path.splitext(filename)
         if filename.endswith(".jpg"):
@@ -139,8 +139,8 @@ class PascalContextGenerator(object):
 
 def main():
     args = parse_args()
-    generator = PascalContextGenerator(
-        voc_path=args.voc_path, annotation_path=args.annotation_path)
+    generator = PascalContextGenerator(voc_path=args.voc_path,
+                                       annotation_path=args.annotation_path)
     generator.generate_label()
 
 

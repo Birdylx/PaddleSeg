@@ -18,6 +18,7 @@ from eiseg.plugin.remotesensing.raster import Raster
 
 
 class RSGrids:
+
     def __init__(self, raset: Raster) -> None:
         """ 在EISeg中用于处理遥感栅格数据的宫格类.
 

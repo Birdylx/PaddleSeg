@@ -40,73 +40,65 @@ logger = setup_logger('train')
 
 def parse_args():
     parser = ArgsParser()
-    parser.add_argument(
-        "--eval",
-        action='store_true',
-        default=False,
-        help="Whether to perform evaluation in train")
-    parser.add_argument(
-        "-r", "--resume", default=None, help="weights path for resume")
-    parser.add_argument(
-        "--slim_config",
-        default=None,
-        type=str,
-        help="Configuration file of slim method.")
-    parser.add_argument(
-        "--enable_ce",
-        type=bool,
-        default=False,
-        help="If set True, enable continuous evaluation job."
-        "This flag is only used for internal test.")
-    parser.add_argument(
-        "--amp",
-        action='store_true',
-        default=False,
-        help="Enable auto mixed precision training.")
-    parser.add_argument(
-        "--fleet", action='store_true', default=False, help="Use fleet or not")
-    parser.add_argument(
-        "--use_vdl",
-        type=bool,
-        default=False,
-        help="whether to record the data to VisualDL.")
-    parser.add_argument(
-        '--vdl_log_dir',
-        type=str,
-        default="vdl_log_dir/scalar",
-        help='VisualDL logging directory for scalar.')
-    parser.add_argument(
-        "--use_wandb",
-        type=bool,
-        default=False,
-        help="whether to record the data to wandb.")
-    parser.add_argument(
-        '--save_prediction_only',
-        action='store_true',
-        default=False,
-        help='Whether to save the evaluation results only')
-    parser.add_argument(
-        '--profiler_options',
-        type=str,
-        default=None,
-        help="The option of profiler, which should be in "
-        "format \"key1=value1;key2=value2;key3=value3\"."
-        "please see ppdet/utils/profiler.py for detail.")
-    parser.add_argument(
-        '--save_proposals',
-        action='store_true',
-        default=False,
-        help='Whether to save the train proposals')
-    parser.add_argument(
-        '--proposals_path',
-        type=str,
-        default="sniper/proposals.json",
-        help='Train proposals directory')
-    parser.add_argument(
-        "--to_static",
-        action='store_true',
-        default=False,
-        help="Enable dy2st to train.")
+    parser.add_argument("--eval",
+                        action='store_true',
+                        default=False,
+                        help="Whether to perform evaluation in train")
+    parser.add_argument("-r",
+                        "--resume",
+                        default=None,
+                        help="weights path for resume")
+    parser.add_argument("--slim_config",
+                        default=None,
+                        type=str,
+                        help="Configuration file of slim method.")
+    parser.add_argument("--enable_ce",
+                        type=bool,
+                        default=False,
+                        help="If set True, enable continuous evaluation job."
+                        "This flag is only used for internal test.")
+    parser.add_argument("--amp",
+                        action='store_true',
+                        default=False,
+                        help="Enable auto mixed precision training.")
+    parser.add_argument("--fleet",
+                        action='store_true',
+                        default=False,
+                        help="Use fleet or not")
+    parser.add_argument("--use_vdl",
+                        type=bool,
+                        default=False,
+                        help="whether to record the data to VisualDL.")
+    parser.add_argument('--vdl_log_dir',
+                        type=str,
+                        default="vdl_log_dir/scalar",
+                        help='VisualDL logging directory for scalar.')
+    parser.add_argument("--use_wandb",
+                        type=bool,
+                        default=False,
+                        help="whether to record the data to wandb.")
+    parser.add_argument('--save_prediction_only',
+                        action='store_true',
+                        default=False,
+                        help='Whether to save the evaluation results only')
+    parser.add_argument('--profiler_options',
+                        type=str,
+                        default=None,
+                        help="The option of profiler, which should be in "
+                        "format \"key1=value1;key2=value2;key3=value3\"."
+                        "please see ppdet/utils/profiler.py for detail.")
+    parser.add_argument('--save_proposals',
+                        action='store_true',
+                        default=False,
+                        help='Whether to save the train proposals')
+    parser.add_argument('--proposals_path',
+                        type=str,
+                        default="sniper/proposals.json",
+                        help='Train proposals directory')
+    parser.add_argument("--to_static",
+                        action='store_true',
+                        default=False,
+                        help="Enable dy2st to train.")
 
     args = parser.parse_args()
     return args

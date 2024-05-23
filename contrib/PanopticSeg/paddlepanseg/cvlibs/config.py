@@ -42,6 +42,7 @@ class Config(paddleseg.cvlibs.Config):
 
 
 class PanSegBuilder(builder.SegBuilder):
+
     def __init__(self, config, comp_list=None):
         if comp_list is None:
             comp_list = [
@@ -53,6 +54,7 @@ class PanSegBuilder(builder.SegBuilder):
 
     @cached_property
     def postprocessor(self):
+
         def _set_attr_if_not_exists(pp_cfg, attr_name, default=None):
             if attr_name not in pp_cfg:
                 attr_val = getattr(self.val_dataset, attr_name, default)

@@ -33,6 +33,7 @@ paddle.set_printoptions(precision=15)
 
 
 class Trainer():
+
     def __init__(self, model, cfg):
         '''model（nn.Layer): A sementic segmentation model.'''
         self.cfg = cfg
@@ -123,7 +124,8 @@ class Trainer():
             batch_sampler=batch_sampler_src,
             num_workers=num_workers,
             return_list=True,
-            worker_init_fn=worker_init_fn, )
+            worker_init_fn=worker_init_fn,
+        )
         batch_sampler_tgt = paddle.io.DistributedBatchSampler(
             train_dataset_tgt,
             batch_size=batch_size,
@@ -135,7 +137,8 @@ class Trainer():
             batch_sampler=batch_sampler_tgt,
             num_workers=num_workers,
             return_list=True,
-            worker_init_fn=worker_init_fn, )
+            worker_init_fn=worker_init_fn,
+        )
 
         if use_vdl:
             from visualdl import LogWriter
@@ -215,8 +218,8 @@ class Trainer():
                             num_classes=train_dataset_tgt.NUM_CLASSES)
                         edges_tgt = paddle.to_tensor(edges_tgt, dtype='int64')
 
-                        loss_tgt_edge = self.bceloss_tgt(logits_list_tgt[2],
-                                                         edges_tgt)
+                        loss_tgt_edge = self.bceloss_tgt(
+                            logits_list_tgt[2], edges_tgt)
                         loss_edge = loss_tgt_edge + loss_src_edge
                     else:
                         loss_tgt_edge = paddle.zeros([1])
@@ -312,9 +315,9 @@ class Trainer():
                             feat_sel_src = paddle.where(
                                 (pred == i).expand_as(feat_src), feat_src,
                                 paddle.zeros(feat_src.shape))
-                            center_src = paddle.mean(
-                                feat_sel_src,
-                                axis=[2, 3]) / (sel_num / total_pixs)  # 1, C
+                            center_src = paddle.mean(feat_sel_src, axis=[
+                                2, 3
+                            ]) / (sel_num / total_pixs)  # 1, C
 
                             self.src_centers[i] = 0.99 * self.src_centers[i] + (
                                 1 - 0.99) * center_src
@@ -325,9 +328,9 @@ class Trainer():
                             feat_sel_tgt = paddle.where(
                                 (pred == i).expand_as(feat_tgt), feat_tgt,
                                 paddle.zeros(feat_tgt.shape))
-                            center_tgt = paddle.mean(
-                                feat_sel_tgt, axis=[2,
-                                                    3]) / (sel_num / total_pixs)
+                            center_tgt = paddle.mean(feat_sel_tgt, axis=[
+                                2, 3
+                            ]) / (sel_num / total_pixs)
 
                             self.tgt_centers[i] = 0.99 * self.tgt_centers[i] + (
                                 1 - 0.99) * center_tgt
@@ -336,13 +339,15 @@ class Trainer():
 
                     if iter >= 3000:  # average center structure alignment
                         src_centers = paddle.concat(self.src_centers, axis=0)
-                        tgt_centers = paddle.concat(
-                            self.tgt_centers, axis=0)  # 19， 2048
+                        tgt_centers = paddle.concat(self.tgt_centers,
+                                                    axis=0)  # 19， 2048
 
-                        relatmat_src = paddle.matmul(
-                            src_centers, src_centers, transpose_y=True)  # 19，19
-                        relatmat_tgt = paddle.matmul(
-                            tgt_centers, tgt_centers, transpose_y=True)
+                        relatmat_src = paddle.matmul(src_centers,
+                                                     src_centers,
+                                                     transpose_y=True)  # 19，19
+                        relatmat_tgt = paddle.matmul(tgt_centers,
+                                                     tgt_centers,
+                                                     transpose_y=True)
 
                         loss_intra_relate = self.klloss(relatmat_src, (relatmat_tgt+relatmat_src)/2) \
                                             + self.klloss(relatmat_tgt, (relatmat_tgt+relatmat_src)/2)
@@ -401,11 +406,11 @@ class Trainer():
                         tgt_feed_gt = paddle.argmax(
                             tgt_edge_logit.astype('float32'), axis=1)
                         logger.info('src_feed_gt_{}_{}_{}'.format(
-                            src_feed_gt.shape,
-                            src_feed_gt.max(), src_feed_gt.min()))
+                            src_feed_gt.shape, src_feed_gt.max(),
+                            src_feed_gt.min()))
                         logger.info('tgt_feed_gt_{}_{}_{}'.format(
-                            tgt_feed_gt.shape,
-                            max(tgt_feed_gt), min(tgt_feed_gt)))
+                            tgt_feed_gt.shape, max(tgt_feed_gt),
+                            min(tgt_feed_gt)))
                         save_edge(src_feed_gt, 'src_feed_gt_{}'.format(iter))
                         save_edge(tgt_feed_gt, 'tgt_feed_gt_{}'.format(iter))
                         save_edge(tgt_edge, 'tgt_pred_{}'.format(iter))
@@ -416,8 +421,8 @@ class Trainer():
 
                     self.model.clear_gradients()
 
-                    batch_cost_averager.record(
-                        time.time() - batch_start, num_samples=batch_size)
+                    batch_cost_averager.record(time.time() - batch_start,
+                                               num_samples=batch_size)
 
                     iter += 1
                     if (iter) % log_iters == 0 and local_rank == 0:
@@ -441,8 +446,8 @@ class Trainer():
                             # Record all losses if there are more than 2 losses.
                             if len(loss_dict) > 1:
                                 for name, loss in loss_dict.items():
-                                    log_writer.add_scalar('Train/loss_' + name,
-                                                          loss, iter)
+                                    log_writer.add_scalar(
+                                        'Train/loss_' + name, loss, iter)
 
                             log_writer.add_scalar('Train/lr', lr, iter)
                             log_writer.add_scalar('Train/batch_cost',
@@ -455,8 +460,8 @@ class Trainer():
                         reader_cost_averager.reset()
                         batch_cost_averager.reset()
 
-                    if (iter % save_interval == 0 or
-                            iter == iters) and (val_dataset_tgt is not None):
+                    if (iter % save_interval == 0
+                            or iter == iters) and (val_dataset_tgt is not None):
                         num_workers = 4 if num_workers > 0 else 0  # adjust num_worker=4
 
                         if test_config is None:
@@ -484,8 +489,8 @@ class Trainer():
                         self.ema.restore()
                         self.model.train()
 
-                    if (iter % save_interval == 0 or
-                            iter == iters) and local_rank == 0:
+                    if (iter % save_interval == 0
+                            or iter == iters) and local_rank == 0:
                         current_save_dir = os.path.join(save_dir,
                                                         "iter_{}".format(iter))
                         if not os.path.isdir(current_save_dir):
@@ -493,9 +498,10 @@ class Trainer():
                         paddle.save(
                             self.model.state_dict(),
                             os.path.join(current_save_dir, 'model.pdparams'))
-                        paddle.save(self.ema.shadow,
-                                    os.path.join(current_save_dir,
-                                                 'model_ema.pdparams'))
+                        paddle.save(
+                            self.ema.shadow,
+                            os.path.join(current_save_dir,
+                                         'model_ema.pdparams'))
                         paddle.save(
                             optimizer.state_dict(),
                             os.path.join(current_save_dir, 'model.pdopt'))
@@ -508,11 +514,12 @@ class Trainer():
                             if MIoU_tgt > best_mean_iou:
                                 best_mean_iou = MIoU_tgt
                                 best_model_iter = iter
-                                best_model_dir = os.path.join(save_dir,
-                                                              "best_model")
-                                paddle.save(self.model.state_dict(),
-                                            os.path.join(best_model_dir,
-                                                         'model.pdparams'))
+                                best_model_dir = os.path.join(
+                                    save_dir, "best_model")
+                                paddle.save(
+                                    self.model.state_dict(),
+                                    os.path.join(best_model_dir,
+                                                 'model.pdparams'))
 
                             logger.info(
                                 '[EVAL] The model with the best validation mIoU ({:.4f}) was saved at iter {}.'

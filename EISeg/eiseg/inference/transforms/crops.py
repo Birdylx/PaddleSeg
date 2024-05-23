@@ -27,6 +27,7 @@ from .base import BaseTransform
 
 
 class Crops(BaseTransform):
+
     def __init__(self, crop_size=(320, 480), min_overlap=0.2):
         super().__init__()
         self.crop_height, self.crop_width = crop_size
@@ -53,10 +54,10 @@ class Crops(BaseTransform):
         image_crops = []
         for dy in self.y_offsets:
             for dx in self.x_offsets:
-                self._counts[dy:dy + self.crop_height, dx:dx +
-                             self.crop_width] += 1
-                image_crop = image_nd[:, :, dy:dy + self.crop_height, dx:dx +
-                                      self.crop_width]
+                self._counts[dy:dy + self.crop_height,
+                             dx:dx + self.crop_width] += 1
+                image_crop = image_nd[:, :, dy:dy + self.crop_height,
+                                      dx:dx + self.crop_width]
                 image_crops.append(image_crop)
         image_crops = paddle.concat(image_crops, axis=0)
         self._counts = paddle.to_tensor(self._counts, dtype="float32")
@@ -77,14 +78,14 @@ class Crops(BaseTransform):
         if self._counts is None:
             return prob_map
 
-        new_prob_map = paddle.zeros(
-            (1, 1, *self._counts.shape), dtype=prob_map.dtype)
+        new_prob_map = paddle.zeros((1, 1, *self._counts.shape),
+                                    dtype=prob_map.dtype)
 
         crop_indx = 0
         for dy in self.y_offsets:
             for dx in self.x_offsets:
-                new_prob_map[0, 0, dy:dy + self.crop_height, dx:dx +
-                             self.crop_width] += prob_map[crop_indx, 0]
+                new_prob_map[0, 0, dy:dy + self.crop_height,
+                             dx:dx + self.crop_width] += prob_map[crop_indx, 0]
                 crop_indx += 1
         new_prob_map = paddle.divide(new_prob_map, self._counts)
 

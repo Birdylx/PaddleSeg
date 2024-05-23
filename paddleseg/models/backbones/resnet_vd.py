@@ -26,6 +26,7 @@ __all__ = [
 
 
 class ConvBNLayer(nn.Layer):
+
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -42,12 +43,11 @@ class ConvBNLayer(nn.Layer):
                 "the kernel_size should be 3.")
 
         self.is_vd_mode = is_vd_mode
-        self._pool2d_avg = nn.AvgPool2D(
-            kernel_size=2,
-            stride=2,
-            padding=0,
-            ceil_mode=True,
-            data_format=data_format)
+        self._pool2d_avg = nn.AvgPool2D(kernel_size=2,
+                                        stride=2,
+                                        padding=0,
+                                        ceil_mode=True,
+                                        data_format=data_format)
         self._conv = nn.Conv2D(
             in_channels=in_channels,
             out_channels=out_channels,
@@ -60,8 +60,8 @@ class ConvBNLayer(nn.Layer):
             bias_attr=False,
             data_format=data_format)
 
-        self._batch_norm = layers.SyncBatchNorm(
-            out_channels, data_format=data_format)
+        self._batch_norm = layers.SyncBatchNorm(out_channels,
+                                                data_format=data_format)
         self._act_op = layers.Activation(act=act)
 
     def forward(self, inputs):
@@ -75,6 +75,7 @@ class ConvBNLayer(nn.Layer):
 
 
 class BottleneckBlock(nn.Layer):
+
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -86,29 +87,26 @@ class BottleneckBlock(nn.Layer):
         super(BottleneckBlock, self).__init__()
 
         self.data_format = data_format
-        self.conv0 = ConvBNLayer(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=1,
-            act='relu',
-            data_format=data_format)
+        self.conv0 = ConvBNLayer(in_channels=in_channels,
+                                 out_channels=out_channels,
+                                 kernel_size=1,
+                                 act='relu',
+                                 data_format=data_format)
 
         self.dilation = dilation
 
-        self.conv1 = ConvBNLayer(
-            in_channels=out_channels,
-            out_channels=out_channels,
-            kernel_size=3,
-            stride=stride,
-            act='relu',
-            dilation=dilation,
-            data_format=data_format)
-        self.conv2 = ConvBNLayer(
-            in_channels=out_channels,
-            out_channels=out_channels * 4,
-            kernel_size=1,
-            act=None,
-            data_format=data_format)
+        self.conv1 = ConvBNLayer(in_channels=out_channels,
+                                 out_channels=out_channels,
+                                 kernel_size=3,
+                                 stride=stride,
+                                 act='relu',
+                                 dilation=dilation,
+                                 data_format=data_format)
+        self.conv2 = ConvBNLayer(in_channels=out_channels,
+                                 out_channels=out_channels * 4,
+                                 kernel_size=1,
+                                 act=None,
+                                 data_format=data_format)
 
         if not shortcut:
             self.short = ConvBNLayer(
@@ -140,6 +138,7 @@ class BottleneckBlock(nn.Layer):
 
 
 class BasicBlock(nn.Layer):
+
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -149,21 +148,19 @@ class BasicBlock(nn.Layer):
                  if_first=False,
                  data_format='NCHW'):
         super(BasicBlock, self).__init__()
-        self.conv0 = ConvBNLayer(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=3,
-            stride=stride,
-            dilation=dilation,
-            act='relu',
-            data_format=data_format)
-        self.conv1 = ConvBNLayer(
-            in_channels=out_channels,
-            out_channels=out_channels,
-            kernel_size=3,
-            dilation=dilation,
-            act=None,
-            data_format=data_format)
+        self.conv0 = ConvBNLayer(in_channels=in_channels,
+                                 out_channels=out_channels,
+                                 kernel_size=3,
+                                 stride=stride,
+                                 dilation=dilation,
+                                 act='relu',
+                                 data_format=data_format)
+        self.conv1 = ConvBNLayer(in_channels=out_channels,
+                                 out_channels=out_channels,
+                                 kernel_size=3,
+                                 dilation=dilation,
+                                 act=None,
+                                 data_format=data_format)
 
         if not shortcut:
             self.short = ConvBNLayer(
@@ -238,8 +235,8 @@ class ResNet_vd(nn.Layer):
             depth = [3, 8, 36, 3]
         elif layers == 200:
             depth = [3, 12, 48, 3]
-        num_channels = [64, 256, 512,
-                        1024] if layers >= 50 else [64, 64, 128, 256]
+        num_channels = [64, 256, 512, 1024
+                        ] if layers >= 50 else [64, 64, 128, 256]
         num_filters = [64, 128, 256, 512]
 
         # for channels of four returned stages
@@ -252,29 +249,28 @@ class ResNet_vd(nn.Layer):
         elif output_stride == 16:
             dilation_dict = {3: 2}
 
-        self.conv1_1 = ConvBNLayer(
-            in_channels=in_channels,
-            out_channels=32,
-            kernel_size=3,
-            stride=2,
-            act='relu',
-            data_format=data_format)
-        self.conv1_2 = ConvBNLayer(
-            in_channels=32,
-            out_channels=32,
-            kernel_size=3,
-            stride=1,
-            act='relu',
-            data_format=data_format)
-        self.conv1_3 = ConvBNLayer(
-            in_channels=32,
-            out_channels=64,
-            kernel_size=3,
-            stride=1,
-            act='relu',
-            data_format=data_format)
-        self.pool2d_max = nn.MaxPool2D(
-            kernel_size=3, stride=2, padding=1, data_format=data_format)
+        self.conv1_1 = ConvBNLayer(in_channels=in_channels,
+                                   out_channels=32,
+                                   kernel_size=3,
+                                   stride=2,
+                                   act='relu',
+                                   data_format=data_format)
+        self.conv1_2 = ConvBNLayer(in_channels=32,
+                                   out_channels=32,
+                                   kernel_size=3,
+                                   stride=1,
+                                   act='relu',
+                                   data_format=data_format)
+        self.conv1_3 = ConvBNLayer(in_channels=32,
+                                   out_channels=64,
+                                   kernel_size=3,
+                                   stride=1,
+                                   act='relu',
+                                   data_format=data_format)
+        self.pool2d_max = nn.MaxPool2D(kernel_size=3,
+                                       stride=2,
+                                       padding=1,
+                                       data_format=data_format)
 
         # self.block_list = []
         self.stage_list = []
@@ -304,16 +300,15 @@ class ResNet_vd(nn.Layer):
 
                     bottleneck_block = self.add_sublayer(
                         'bb_%d_%d' % (block, i),
-                        BottleneckBlock(
-                            in_channels=num_channels[block]
-                            if i == 0 else num_filters[block] * 4,
-                            out_channels=num_filters[block],
-                            stride=2 if i == 0 and block != 0 and
-                            dilation_rate == 1 else 1,
-                            shortcut=shortcut,
-                            if_first=block == i == 0,
-                            dilation=dilation_rate,
-                            data_format=data_format))
+                        BottleneckBlock(in_channels=num_channels[block]
+                                        if i == 0 else num_filters[block] * 4,
+                                        out_channels=num_filters[block],
+                                        stride=2 if i == 0 and block != 0
+                                        and dilation_rate == 1 else 1,
+                                        shortcut=shortcut,
+                                        if_first=block == i == 0,
+                                        dilation=dilation_rate,
+                                        data_format=data_format))
 
                     block_list.append(bottleneck_block)
                     shortcut = True

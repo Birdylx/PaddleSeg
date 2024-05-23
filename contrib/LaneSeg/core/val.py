@@ -56,18 +56,21 @@ def evaluate(model,
         batch_size=4,
         drop_last=False,
         num_workers=num_workers,
-        return_list=True, )
+        return_list=True,
+    )
 
     postprocessor = tusimple_processor.TusimpleProcessor(
         num_classes=eval_dataset.num_classes,
         cut_height=eval_dataset.cut_height,
         test_gt_json=eval_dataset.test_gt_json,
-        save_dir=save_dir, )
+        save_dir=save_dir,
+    )
     total_iters = len(loader)
 
     if print_detail:
-        logger.info("Start evaluating (total_samples: {}, total_iters: {})...".
-                    format(len(eval_dataset), total_iters))
+        logger.info(
+            "Start evaluating (total_samples: {}, total_iters: {})...".format(
+                len(eval_dataset), total_iters))
     progbar_val = progbar.Progbar(target=total_iters, verbose=1)
     reader_cost_averager = TimeAverager()
     batch_cost_averager = TimeAverager()
@@ -87,14 +90,13 @@ def evaluate(model,
                 transforms=eval_dataset.transforms.transforms)
             time_end = time.time()
 
-            postprocessor.dump_data_to_json(
-                pred[1],
-                im_path,
-                run_time=time_end - time_start,
-                is_dump_json=True,
-                is_view=is_view)
-            batch_cost_averager.record(
-                time.time() - batch_start, num_samples=len(label))
+            postprocessor.dump_data_to_json(pred[1],
+                                            im_path,
+                                            run_time=time_end - time_start,
+                                            is_dump_json=True,
+                                            is_view=is_view)
+            batch_cost_averager.record(time.time() - batch_start,
+                                       num_samples=len(label))
             batch_cost = batch_cost_averager.get_average()
             reader_cost = reader_cost_averager.get_average()
 

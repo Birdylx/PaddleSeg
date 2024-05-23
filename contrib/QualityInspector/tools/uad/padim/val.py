@@ -54,12 +54,11 @@ fins = {"resnet18": 448, "resnet50": 1792, "wide_resnet50_2": 1792}
 
 def argsparser():
     parser = argparse.ArgumentParser('PaDiM')
-    parser.add_argument(
-        "--config",
-        type=str,
-        default=None,
-        help="Path of config",
-        required=True)
+    parser.add_argument("--config",
+                        type=str,
+                        default=None,
+                        help="Path of config",
+                        required=True)
     parser.add_argument("--device", type=str, default=None)
     parser.add_argument("--batch_size", type=int, default=None)
     parser.add_argument('--num_workers', type=int, default=None)
@@ -73,7 +72,8 @@ def argsparser():
         "--backbone",
         type=str,
         default=None,
-        help="backbone model arch, one of [resnet18, resnet50, wide_resnet50_2]")
+        help="backbone model arch, one of [resnet18, resnet50, wide_resnet50_2]"
+    )
     parser.add_argument("--do_val", type=bool, default=None)
     parser.add_argument("--save_pic", type=bool, default=None)
 
@@ -112,14 +112,14 @@ def main():
     print("Eval model for {}".format(class_name))
 
     # build datasets
-    test_dataset = mvtec.MVTecDataset(
-        args.data_path,
-        class_name=class_name,
-        is_train=False,
-        resize=args.resize,
-        cropsize=args.crop_size)
-    test_dataloader = DataLoader(
-        test_dataset, batch_size=args.batch_size, num_workers=args.num_workers)
+    test_dataset = mvtec.MVTecDataset(args.data_path,
+                                      class_name=class_name,
+                                      is_train=False,
+                                      resize=args.resize,
+                                      cropsize=args.crop_size)
+    test_dataloader = DataLoader(test_dataset,
+                                 batch_size=args.batch_size,
+                                 num_workers=args.num_workers)
     result.append(
         [class_name, *val(args, model, test_dataloader, class_name, idx)])
     result = pd.DataFrame(result, columns=csv_columns).set_index('category')
@@ -161,8 +161,9 @@ def val(args, model, test_dataloader, class_name, idx):
     embedding_vectors = test_outputs['layer1']
     for layer_name in ['layer2', 'layer3']:
         layer_embedding = test_outputs[layer_name]
-        layer_embedding = F.interpolate(
-            layer_embedding, size=embedding_vectors.shape[-2:], mode="nearest")
+        layer_embedding = F.interpolate(layer_embedding,
+                                        size=embedding_vectors.shape[-2:],
+                                        mode="nearest")
         embedding_vectors = paddle.concat((embedding_vectors, layer_embedding),
                                           1)
 
@@ -174,9 +175,8 @@ def val(args, model, test_dataloader, class_name, idx):
 
         def mahalanobis_pd(sample, mean, conv_inv):
             return paddle.sqrt(
-                paddle.matmul(
-                    paddle.matmul((sample - mean).t(), conv_inv), (sample - mean
-                                                                   )))[0]
+                paddle.matmul(paddle.matmul((sample - mean).t(), conv_inv),
+                              (sample - mean)))[0]
 
         B, C, H, W = embedding_vectors.shape
         embedding_vectors = embedding_vectors.reshape((B, C, H * W)).cuda()
@@ -209,11 +209,10 @@ def val(args, model, test_dataloader, class_name, idx):
 
     # upsample
     dist_list = paddle.to_tensor(dist_list)
-    score_map = F.interpolate(
-        dist_list.unsqueeze(1),
-        size=x.shape[2:],
-        mode='bilinear',
-        align_corners=False).squeeze().numpy()
+    score_map = F.interpolate(dist_list.unsqueeze(1),
+                              size=x.shape[2:],
+                              mode='bilinear',
+                              align_corners=False).squeeze().numpy()
 
     # apply gaussian smoothing on the score map
     for i in range(score_map.shape[0]):
@@ -233,8 +232,8 @@ def val(args, model, test_dataloader, class_name, idx):
 
     # get optimal threshold
     gt_mask = np.asarray(gt_mask_list, dtype=np.int64)
-    precision, recall, thresholds = precision_recall_curve(gt_mask.flatten(),
-                                                           scores.flatten())
+    precision, recall, thresholds = precision_recall_curve(
+        gt_mask.flatten(), scores.flatten())
     a = 2 * precision * recall
     b = precision + recall
     f1 = np.divide(a, b, out=np.zeros_like(a), where=b != 0)
@@ -305,9 +304,9 @@ def plot_fig(test_img, scores, gts, threshold, save_dir, class_name):
         }
         cb.set_label('Anomaly Score', fontdict=font)
         if i < 1:  # save one result
-            fig_img.savefig(
-                os.path.join(save_dir, class_name + '_val_{}'.format(i)),
-                dpi=100)
+            fig_img.savefig(os.path.join(save_dir,
+                                         class_name + '_val_{}'.format(i)),
+                            dpi=100)
         plt.close()
 
 

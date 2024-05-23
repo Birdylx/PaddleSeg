@@ -1,15 +1,15 @@
-# Copyright (c) 2023 PaddlePaddle Authors. All Rights Reserved. 
-#   
-# Licensed under the Apache License, Version 2.0 (the "License");   
-# you may not use this file except in compliance with the License.  
-# You may obtain a copy of the License at   
-#   
-#     http://www.apache.org/licenses/LICENSE-2.0    
-#   
-# Unless required by applicable law or agreed to in writing, software   
-# distributed under the License is distributed on an "AS IS" BASIS, 
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  
-# See the License for the specific language governing permissions and   
+# Copyright (c) 2023 PaddlePaddle Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
 # limitations under the License.
 
 import argparse
@@ -45,12 +45,17 @@ def get_args():
     parser.add_argument(
         '--pred_path',
         type=str,
-        help='The path of json file saving prediction results obtained by `tools/end2end/predict.py`.',
+        help=
+        'The path of json file saving prediction results obtained by `tools/end2end/predict.py`.',
         required=True)
-    parser.add_argument(
-        '--image_root', type=str, default='', help='The directory of images.')
-    parser.add_argument(
-        '--config', type=str, default=None, help='The path of config file.')
+    parser.add_argument('--image_root',
+                        type=str,
+                        default='',
+                        help='The directory of images.')
+    parser.add_argument('--config',
+                        type=str,
+                        default=None,
+                        help='The path of config file.')
     parser.add_argument(
         '--rules_eval',
         action='store_true',
@@ -64,15 +69,13 @@ def get_args():
         type=float,
         default=0.1,
         help='IoU threshold for instance-wise evalution to judge recall.')
-    parser.add_argument(
-        '--save_badcase',
-        action='store_false',
-        help='Whether or not to save badcase, defalt: True.')
-    parser.add_argument(
-        '--output_dir',
-        type=str,
-        default='./output/badcase/',
-        help='The directory for saving bascases.')
+    parser.add_argument('--save_badcase',
+                        action='store_false',
+                        help='Whether or not to save badcase, defalt: True.')
+    parser.add_argument('--output_dir',
+                        type=str,
+                        default='./output/badcase/',
+                        help='The directory for saving bascases.')
     return parser.parse_args()
 
 
@@ -144,8 +147,8 @@ def eval_ng(gt_data,
         ng_num,
         ng_num - ok_image_in_ng_num,
         ok_image_in_ng_num,
-        "{:.2f}%".format(ok_image_in_ng_num / ng_num * 100)
-        if ng_num > 0 else 0,
+        "{:.2f}%".format(ok_image_in_ng_num / ng_num *
+                         100) if ng_num > 0 else 0,
     ])
     logger.info("Result of Image-Level NG NG Evaluation:\n" + str(table))
 
@@ -154,19 +157,20 @@ def eval_ng(gt_data,
         ok_in_ng_class_num = [ok_in_ng_class_num[cat] for cat in class_list]
         column_names = ["NG", "ALL", *class_name]
         table = pt.PrettyTable(column_names)
-        table.add_row(["Total", ng_instance_num, * [x for x in ng_class_num]])
+        table.add_row(["Total", ng_instance_num, *[x for x in ng_class_num]])
         table.add_row([
-            "NG", ng_instance_num - ok_instance_in_ng_num, * [
+            "NG", ng_instance_num - ok_instance_in_ng_num, *[
                 ng_class_num[i] - ok_in_ng_class_num[i]
                 for i in range(len(ng_class_num))
             ]
         ])
         table.add_row(
-            ["OK", ok_instance_in_ng_num, * [x for x in ok_in_ng_class_num]])
+            ["OK", ok_instance_in_ng_num, *[x for x in ok_in_ng_class_num]])
         table.add_row([
             " Escape ",
-            "{:.2f}%".format(ok_instance_in_ng_num / ng_instance_num * 100)
-            if ng_instance_num > 0 else 0, * [
+            "{:.2f}%".format(ok_instance_in_ng_num / ng_instance_num *
+                             100) if ng_instance_num > 0 else 0,
+            *[
                 "{:.2f}%".format(ok_in_ng_class_num[i] / ng_class_num[i] * 100)
                 for i in range(len(ng_class_num))
             ]
@@ -199,15 +203,17 @@ def eval_ok(gt_data, gt_ok_ids, preds_data, image_root=''):
     column_names = ["OK", "ALL", *class_name]
     table = pt.PrettyTable(column_names)
     table.add_row(
-        ["Total", len(gt_ok_ids), *([len(gt_ok_ids)] * len(class_name))])
+        ["Total",
+         len(gt_ok_ids), *([len(gt_ok_ids)] * len(class_name))])
     table.add_row([
-        "OK", len(gt_ok_ids) - ng_in_ok_num,
-        * [len(gt_ok_ids) - x for x in ng_class_nums]
+        "OK",
+        len(gt_ok_ids) - ng_in_ok_num,
+        *[len(gt_ok_ids) - x for x in ng_class_nums]
     ])
     table.add_row(["NG", ng_in_ok_num, *ng_class_nums])
     table.add_row([
         "Overkill", "{:.2f}%".format((ng_in_ok_num / ok_num) * 100),
-        * ["{:.2f}%".format(x / ok_num * 100) for x in ng_class_nums]
+        *["{:.2f}%".format(x / ok_num * 100) for x in ng_class_nums]
     ])
     logger.info("OK Evaluation Result:\n" + str(table))
 
@@ -282,9 +288,8 @@ def show_badcase(gt_data,
             im_name = gt_data.loadImgs(img_id)[0]['file_name']
             im_path = osp.join(image_root, im_name)
             preds_info = preds_data[im_path]
-            show_result({
-                im_path: preds_info
-            }, osp.join(overkill_path, class_name), class_name)
+            show_result({im_path: preds_info},
+                        osp.join(overkill_path, class_name), class_name)
 
     logger.info("Save escape images in: " + escape_image_path)
     for img_id in escape_info_image:

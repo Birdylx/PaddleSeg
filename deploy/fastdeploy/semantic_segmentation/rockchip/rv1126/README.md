@@ -2,7 +2,7 @@
 
 # PaddleSeg 语义分割模瑞芯微NPU部署方案-FastDeploy
 
-## 1. 说明   
+## 1. 说明  
 本示例基于RV1126来介绍如何使用FastDeploy部署PaddleSeg模型，支持如下芯片的部署：  
 - Rockchip RV1109
 - Rockchip RV1126

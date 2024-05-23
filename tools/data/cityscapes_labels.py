@@ -150,9 +150,10 @@ if __name__ == "__main__":
     # Print all the labels
     print("List of cityscapes labels:")
     print("")
-    print("    {:>21} | {:>3} | {:>7} | {:>14} | {:>10} | {:>12} | {:>12}".
-          format('name', 'id', 'trainId', 'category', 'categoryId',
-                 'hasInstances', 'ignoreInEval'))
+    print(
+        "    {:>21} | {:>3} | {:>7} | {:>14} | {:>10} | {:>12} | {:>12}".format(
+            'name', 'id', 'trainId', 'category', 'categoryId', 'hasInstances',
+            'ignoreInEval'))
     print("    " + ('-' * 98))
     for label in labels:
         print("    {:>21} | {:>3} | {:>7} | {:>14} | {:>10} | {:>12} | {:>12}".
@@ -175,5 +176,5 @@ if __name__ == "__main__":
     # Map from trainID to label
     trainId = 0
     name = trainId2label[trainId].name
-    print("Name of label with trainID '{id}': {name}".format(
-        id=trainId, name=name))
+    print("Name of label with trainID '{id}': {name}".format(id=trainId,
+                                                             name=name))

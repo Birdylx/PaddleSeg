@@ -25,34 +25,33 @@ def parse_val_args(*args, **kwargs):
     parser = argparse.ArgumentParser(description="Model evaluation")
 
     # params of evaluate
-    parser.add_argument(
-        "--config", dest="cfg", help="Config file.", default=None, type=str)
-    parser.add_argument(
-        '--model_path',
-        help="Path of the model to evaluate.",
-        type=str,
-        default=None)
-    parser.add_argument(
-        '--num_workers',
-        help="Number of workers used in data loader.",
-        type=int,
-        default=0)
-    parser.add_argument(
-        '--eval_sem',
-        help="To calculate semantic segmentation metrics.",
-        action='store_true')
-    parser.add_argument(
-        '--eval_ins',
-        help="To calculate instance segmentation metrics.",
-        action='store_true')
-    parser.add_argument(
-        '--debug', help="To enable debug mode.", action='store_true')
-    parser.add_argument(
-        '--device',
-        help="Device for evaluating model.",
-        default='gpu',
-        choices=['cpu', 'gpu', 'xpu', 'npu', 'mlu'],
-        type=str)
+    parser.add_argument("--config",
+                        dest="cfg",
+                        help="Config file.",
+                        default=None,
+                        type=str)
+    parser.add_argument('--model_path',
+                        help="Path of the model to evaluate.",
+                        type=str,
+                        default=None)
+    parser.add_argument('--num_workers',
+                        help="Number of workers used in data loader.",
+                        type=int,
+                        default=0)
+    parser.add_argument('--eval_sem',
+                        help="To calculate semantic segmentation metrics.",
+                        action='store_true')
+    parser.add_argument('--eval_ins',
+                        help="To calculate instance segmentation metrics.",
+                        action='store_true')
+    parser.add_argument('--debug',
+                        help="To enable debug mode.",
+                        action='store_true')
+    parser.add_argument('--device',
+                        help="Device for evaluating model.",
+                        default='gpu',
+                        choices=['cpu', 'gpu', 'xpu', 'npu', 'mlu'],
+                        type=str)
 
     return parser.parse_args(*args, **kwargs)
 
@@ -76,14 +75,13 @@ def val_with_args(args):
     runner = builder.runner
 
     try:
-        evaluate(
-            model,
-            val_dataset,
-            postprocessor=postprocessor,
-            runner=runner,
-            num_workers=args.num_workers,
-            eval_sem=args.eval_sem,
-            eval_ins=args.eval_ins)
+        evaluate(model,
+                 val_dataset,
+                 postprocessor=postprocessor,
+                 runner=runner,
+                 num_workers=args.num_workers,
+                 eval_sem=args.eval_sem,
+                 eval_ins=args.eval_ins)
     except BaseException as e:
         if args.debug:
             import traceback

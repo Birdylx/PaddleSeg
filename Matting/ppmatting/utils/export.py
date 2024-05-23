@@ -28,23 +28,18 @@ def get_input_spec(model_name, shape, trimap):
     input_spec = [{"img": paddle.static.InputSpec(shape=shape, name='img')}]
     if trimap:
         shape[1] = 1
-        input_spec[0]['trimap'] = paddle.static.InputSpec(
-            shape=shape, name='trimap')
+        input_spec[0]['trimap'] = paddle.static.InputSpec(shape=shape,
+                                                          name='trimap')
 
     if model_name == 'RVM':
         input_spec.append(
-            paddle.static.InputSpec(
-                shape=[None, 16, None, None], name='r1'))
+            paddle.static.InputSpec(shape=[None, 16, None, None], name='r1'))
         input_spec.append(
-            paddle.static.InputSpec(
-                shape=[None, 20, None, None], name='r2'))
+            paddle.static.InputSpec(shape=[None, 20, None, None], name='r2'))
         input_spec.append(
-            paddle.static.InputSpec(
-                shape=[None, 40, None, None], name='r3'))
+            paddle.static.InputSpec(shape=[None, 40, None, None], name='r3'))
         input_spec.append(
-            paddle.static.InputSpec(
-                shape=[None, 64, None, None], name='r4'))
+            paddle.static.InputSpec(shape=[None, 64, None, None], name='r4'))
         input_spec.append(
-            paddle.static.InputSpec(
-                shape=[1], name='downsample_ratio'))
+            paddle.static.InputSpec(shape=[1], name='downsample_ratio'))
     return input_spec

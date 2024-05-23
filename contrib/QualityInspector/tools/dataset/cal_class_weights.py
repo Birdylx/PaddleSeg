@@ -34,22 +34,19 @@ logger = setup_logger('CalClassWeights')
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Frequency')
-    parser.add_argument(
-        '--anno_path',
-        help='The path of annotated images',
-        required=True,
-        type=str)
-    parser.add_argument(
-        '--temperature',
-        help='The temperature of weights',
-        default=0.8,
-        type=float)
-    parser.add_argument(
-        '--num_workers',
-        dest='num_workers',
-        help='How many processes are used for data conversion',
-        type=int,
-        default=cpu_count())
+    parser.add_argument('--anno_path',
+                        help='The path of annotated images',
+                        required=True,
+                        type=str)
+    parser.add_argument('--temperature',
+                        help='The temperature of weights',
+                        default=0.8,
+                        type=float)
+    parser.add_argument('--num_workers',
+                        dest='num_workers',
+                        help='How many processes are used for data conversion',
+                        type=int,
+                        default=cpu_count())
     return parser.parse_args()
 
 
@@ -62,8 +59,8 @@ def get_class_loss_weights(overall_sample_class_stats, temperature=0.1):
 
     overall_class_stats = {
         k: v
-        for k, v in sorted(
-            overall_class_stats.items(), key=lambda item: item[1])
+        for k, v in sorted(overall_class_stats.items(),
+                           key=lambda item: item[1])
     }
 
     freq_num = np.asarray(list(overall_class_stats.values()), dtype='float32')
@@ -74,9 +71,8 @@ def get_class_loss_weights(overall_sample_class_stats, temperature=0.1):
     column_names = ["ClassID", *list(overall_class_stats.keys())]
     table = pt.PrettyTable(column_names)
 
-    table.add_row(["Frequency", * [int(num) for num in freq_num.tolist()]])
-    table.add_row(
-        ["Weights", * ["{:.2f}".format(num) for num in freq.tolist()]])
+    table.add_row(["Frequency", *[int(num) for num in freq_num.tolist()]])
+    table.add_row(["Weights", *["{:.2f}".format(num) for num in freq.tolist()]])
     logger.info("Overall Class Frequency Matrix: \n" + str(table))
 
 
@@ -110,8 +106,8 @@ def main():
     p.close()
     p.join()
 
-    get_class_loss_weights(
-        overall_sample_class_stats, temperature=args.temperature)
+    get_class_loss_weights(overall_sample_class_stats,
+                           temperature=args.temperature)
 
 
 if __name__ == '__main__':

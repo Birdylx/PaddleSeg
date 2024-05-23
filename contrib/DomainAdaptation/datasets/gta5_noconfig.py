@@ -22,10 +22,12 @@ from PIL import Image, ImageFile
 from datasets.cityscapes_noconfig import CityDataset, to_tuple
 
 import paddle
+
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
 class GTA5Dataset(CityDataset):
+
     def __init__(self,
                  root='./datasets/GTA5',
                  list_path='./datasets/GTA5/list',
@@ -107,12 +109,12 @@ class GTA5Dataset(CityDataset):
         gt_image = Image.open(gt_image_path)
 
         # Augmentation
-        if (self.split == "train" or self.split == "trainval" or
-                self.split == "all") and self.training:
-            image, gt_image, edge_mask = self._train_sync_transform(image,
-                                                                    gt_image)
+        if (self.split == "train" or self.split == "trainval"
+                or self.split == "all") and self.training:
+            image, gt_image, edge_mask = self._train_sync_transform(
+                image, gt_image)
         else:
-            image, gt_image, edge_mask = self._val_sync_transform(image,
-                                                                  gt_image)
+            image, gt_image, edge_mask = self._val_sync_transform(
+                image, gt_image)
 
         return image, gt_image, edge_mask

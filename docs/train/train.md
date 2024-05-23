@@ -68,7 +68,7 @@ model:
   type: FCN
   backbone:
     type: HRNet_W18
-    pretrained: pretrained_model/hrnet_w18_ssld 
+    pretrained: pretrained_model/hrnet_w18_ssld
   num_classes: 19
   pretrained: FCN_pretrained.pdparams # URL or filepath of the pretrained model weights
 ```

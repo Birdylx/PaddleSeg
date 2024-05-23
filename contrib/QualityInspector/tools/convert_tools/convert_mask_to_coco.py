@@ -26,36 +26,31 @@ def get_args():
     parser = argparse.ArgumentParser(
         description='Mask convert to Json for detection')
     # Parameters
-    parser.add_argument(
-        '--image_path',
-        type=str,
-        required=True,
-        help='The directory of images.')
-    parser.add_argument(
-        '--anno_path',
-        type=str,
-        required=True,
-        help='The directory of ground truth masks.')
-    parser.add_argument(
-        '--class_num',
-        type=int,
-        required=True,
-        help='Number of categories, without background.')
+    parser.add_argument('--image_path',
+                        type=str,
+                        required=True,
+                        help='The directory of images.')
+    parser.add_argument('--anno_path',
+                        type=str,
+                        required=True,
+                        help='The directory of ground truth masks.')
+    parser.add_argument('--class_num',
+                        type=int,
+                        required=True,
+                        help='Number of categories, without background.')
     parser.add_argument(
         '--label_file',
         type=str,
         default=None,
         help='The path of a json file which gives class name and category id.')
-    parser.add_argument(
-        '--suffix',
-        type=str,
-        default='.png',
-        help='The suffix of filename between gt and image.')
-    parser.add_argument(
-        '--output_name',
-        type=str,
-        default='coco.json',
-        help='The file name for saving the output json file.')
+    parser.add_argument('--suffix',
+                        type=str,
+                        default='.png',
+                        help='The suffix of filename between gt and image.')
+    parser.add_argument('--output_name',
+                        type=str,
+                        default='coco.json',
+                        help='The file name for saving the output json file.')
     return parser.parse_args()
 
 

@@ -22,7 +22,7 @@
 ## 3. 自行导出晶晨A311D支持的PaddleSeg模型
 
 ### 3.1 模型版本
-- 支持[PaddleSeg](https://github.com/PaddlePaddle/PaddleSeg)高于2.6版本的Segmentation模型，目前FastDeploy测试过可在晶晨A311D成功部署的模型:   
+- 支持[PaddleSeg](https://github.com/PaddlePaddle/PaddleSeg)高于2.6版本的Segmentation模型，目前FastDeploy测试过可在晶晨A311D成功部署的模型:  
 - [PP-LiteSeg系列模型](https://github.com/PaddlePaddle/PaddleSeg/blob/develop/configs/pp_liteseg/README.md)
 
 ### 3.2 PaddleSeg动态图模型导出为A311D支持的INT8模型

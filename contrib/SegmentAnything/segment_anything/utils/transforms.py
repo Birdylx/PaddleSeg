@@ -157,8 +157,9 @@ class ResizeLongestSide:
         original image size in (H, W) format.
         """
         old_h, old_w = original_size
-        new_h, new_w = self.get_preprocess_shape(
-            original_size[0], original_size[1], self.target_length)
+        new_h, new_w = self.get_preprocess_shape(original_size[0],
+                                                 original_size[1],
+                                                 self.target_length)
         coords = deepcopy(coords).astype(float)
         coords[..., 0] = coords[..., 0] * (new_w / old_w)
         coords[..., 1] = coords[..., 1] * (new_h / old_h)
@@ -190,30 +191,29 @@ class ResizeLongestSide:
             align_corners=False,  # todo: missing this flag antialias=True
         )
 
-    def apply_coords_paddle(self,
-                            coords: paddle.Tensor,
+    def apply_coords_paddle(self, coords: paddle.Tensor,
                             original_size: Tuple[int, ...]) -> paddle.Tensor:
         """
         Expects a paddle tensor with length 2 in the last dimension. Requires the
         original image size in (H, W) format.
         """
         old_h, old_w = original_size
-        new_h, new_w = self.get_preprocess_shape(
-            original_size[0], original_size[1], self.target_length)
+        new_h, new_w = self.get_preprocess_shape(original_size[0],
+                                                 original_size[1],
+                                                 self.target_length)
         coords = deepcopy(coords).to(paddle.float)
         coords[..., 0] = coords[..., 0] * (new_w / old_w)
         coords[..., 1] = coords[..., 1] * (new_h / old_h)
         return coords
 
-    def apply_boxes_paddle(self,
-                           boxes: paddle.Tensor,
+    def apply_boxes_paddle(self, boxes: paddle.Tensor,
                            original_size: Tuple[int, ...]) -> paddle.Tensor:
         """
         Expects a paddle tensor with shape Bx4. Requires the original image
         size in (H, W) format.
         """
-        boxes = self.apply_coords_paddle(
-            boxes.reshape([-1, 2, 2]), original_size)
+        boxes = self.apply_coords_paddle(boxes.reshape([-1, 2, 2]),
+                                         original_size)
         return boxes.reshape([-1, 4])
 
     @staticmethod

@@ -55,27 +55,27 @@ class Config(object):
     """
 
     def __init__(
-            self,
-            path: str,
-            learning_rate: Optional[float]=None,
-            batch_size: Optional[int]=None,
-            nepochs: Optional[int]=None,
-            labeled_ratio: Optional[int]=None,
-            opts: Optional[list]=None,
-            checker: Optional[checker.ConfigChecker]=None, ):
+        self,
+        path: str,
+        learning_rate: Optional[float] = None,
+        batch_size: Optional[int] = None,
+        nepochs: Optional[int] = None,
+        labeled_ratio: Optional[int] = None,
+        opts: Optional[list] = None,
+        checker: Optional[checker.ConfigChecker] = None,
+    ):
         assert os.path.exists(path), \
             'Config path ({}) does not exist'.format(path)
         assert path.endswith('yml') or path.endswith('yaml'), \
             'Config file ({}) should be yaml format'.format(path)
 
         self.dic = self._parse_from_yaml(path)
-        self.dic = self.update_config_dict(
-            self.dic,
-            learning_rate=learning_rate,
-            batch_size=batch_size,
-            nepochs=nepochs,
-            labeled_ratio=labeled_ratio,
-            opts=opts)
+        self.dic = self.update_config_dict(self.dic,
+                                           learning_rate=learning_rate,
+                                           batch_size=batch_size,
+                                           nepochs=nepochs,
+                                           labeled_ratio=labeled_ratio,
+                                           opts=opts)
 
         if checker is None:
             checker = self._build_default_checker()
@@ -133,6 +133,7 @@ class Config(object):
     def batch_transforms_cfg(self) -> Dict:
         return self.dic.get('batch_transforms', {}).copy()
 
+
 # TODO merge test_config into val_dataset
 
     @property
@@ -159,7 +160,7 @@ class Config(object):
         return checker.ConfigChecker(rules, allow_update=True)
 
     def __str__(self) -> str:
-        # Use NoAliasDumper to avoid yml anchor 
+        # Use NoAliasDumper to avoid yml anchor
         return yaml.dump(self.dic, Dumper=utils.NoAliasDumper)
 
 
@@ -199,11 +200,11 @@ def merge_config_dicts(dic, base_dic):
 
 
 def update_config_dict(dic: dict,
-                       learning_rate: Optional[float]=None,
-                       batch_size: Optional[int]=None,
-                       nepochs: Optional[int]=None,
-                       labeled_ratio: Optional[int]=None,
-                       opts: Optional[list]=None):
+                       learning_rate: Optional[float] = None,
+                       batch_size: Optional[int] = None,
+                       nepochs: Optional[int] = None,
+                       labeled_ratio: Optional[int] = None,
+                       opts: Optional[list] = None):
     """Update config"""
     # TODO: If the items to update are marked as anchors in the yaml file,
     # we should synchronize the references.

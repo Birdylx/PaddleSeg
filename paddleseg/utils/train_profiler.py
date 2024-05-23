@@ -23,6 +23,7 @@ _profiler_step_id = 0
 _profiler_options = None
 _prof = None
 
+
 class ProfilerOptions(object):
     '''
     Use a string to initialize a ProfilerOptions.
@@ -95,7 +96,7 @@ def add_profiler_step(options_str=None):
     if options_str is None:
         return
 
-    global _prof 
+    global _prof
     global _profiler_step_id
     global _profiler_options
 
@@ -108,19 +109,17 @@ def add_profiler_step(options_str=None):
     if _prof is None:
         _timer_only = str(_profiler_options['timer_only']) == str(True)
         _prof = profiler.Profiler(
-                   scheduler = (_profiler_options['batch_range'][0], _profiler_options['batch_range'][1]),
-                   on_trace_ready = profiler.export_chrome_tracing('./profiler_log'),
-                   timer_only = _timer_only)
+            scheduler=(_profiler_options['batch_range'][0],
+                       _profiler_options['batch_range'][1]),
+            on_trace_ready=profiler.export_chrome_tracing('./profiler_log'),
+            timer_only=_timer_only)
         _prof.start()
     else:
         _prof.step()
-        
+
     if _profiler_step_id == _profiler_options['batch_range'][1]:
         _prof.stop()
-        _prof.summary(
-             op_detail=True,
-             thread_sep=False,
-             time_unit='ms')
+        _prof.summary(op_detail=True, thread_sep=False, time_unit='ms')
         _prof = None
         if _profiler_options['exit_on_finished']:
             sys.exit(0)

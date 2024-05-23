@@ -23,6 +23,7 @@ from bs4 import BeautifulSoup as bs
 
 
 class BaiduTranslate:
+
     def __init__(self, fromLang, toLang):
         self.url = "/api/trans/vip/translate"
         self.appid = "20200311000396156"

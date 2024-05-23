@@ -40,16 +40,14 @@ logger = setup_logger('train')
 
 def parse_args():
     parser = ArgsParser()
-    parser.add_argument(
-        "--infer_dir",
-        type=str,
-        default=None,
-        help="Directory for images to perform inference on.")
-    parser.add_argument(
-        "--infer_img",
-        type=str,
-        default=None,
-        help="Image path, has higher priority over --infer_dir")
+    parser.add_argument("--infer_dir",
+                        type=str,
+                        default=None,
+                        help="Directory for images to perform inference on.")
+    parser.add_argument("--infer_img",
+                        type=str,
+                        default=None,
+                        help="Image path, has higher priority over --infer_dir")
     parser.add_argument(
         "--output_dir",
         type=str,
@@ -60,64 +58,58 @@ def parse_args():
         type=float,
         default=0.5,
         help="Threshold to reserve the result for visualization.")
-    parser.add_argument(
-        "--slim_config",
-        default=None,
-        type=str,
-        help="Configuration file of slim method.")
-    parser.add_argument(
-        "--use_vdl",
-        type=bool,
-        default=False,
-        help="Whether to record the data to VisualDL.")
-    parser.add_argument(
-        '--vdl_log_dir',
-        type=str,
-        default="vdl_log_dir/image",
-        help='VisualDL logging directory for image.')
-    parser.add_argument(
-        "--save_results",
-        type=bool,
-        default=False,
-        help="Whether to save inference results to output_dir.")
+    parser.add_argument("--slim_config",
+                        default=None,
+                        type=str,
+                        help="Configuration file of slim method.")
+    parser.add_argument("--use_vdl",
+                        type=bool,
+                        default=False,
+                        help="Whether to record the data to VisualDL.")
+    parser.add_argument('--vdl_log_dir',
+                        type=str,
+                        default="vdl_log_dir/image",
+                        help='VisualDL logging directory for image.')
+    parser.add_argument("--save_results",
+                        type=bool,
+                        default=False,
+                        help="Whether to save inference results to output_dir.")
     parser.add_argument(
         "--slice_infer",
         action='store_true',
-        help="Whether to slice the image and merge the inference results for small object detection."
+        help=
+        "Whether to slice the image and merge the inference results for small object detection."
     )
-    parser.add_argument(
-        '--slice_size',
-        nargs='+',
-        type=int,
-        default=[640, 640],
-        help="Height of the sliced image.")
-    parser.add_argument(
-        "--overlap_ratio",
-        nargs='+',
-        type=float,
-        default=[0.25, 0.25],
-        help="Overlap height ratio of the sliced image.")
+    parser.add_argument('--slice_size',
+                        nargs='+',
+                        type=int,
+                        default=[640, 640],
+                        help="Height of the sliced image.")
+    parser.add_argument("--overlap_ratio",
+                        nargs='+',
+                        type=float,
+                        default=[0.25, 0.25],
+                        help="Overlap height ratio of the sliced image.")
     parser.add_argument(
         "--combine_method",
         type=str,
         default='nms',
-        help="Combine method of the sliced images' detection results, choose in ['nms', 'nmm', 'concat']."
+        help=
+        "Combine method of the sliced images' detection results, choose in ['nms', 'nmm', 'concat']."
     )
-    parser.add_argument(
-        "--match_threshold",
-        type=float,
-        default=0.6,
-        help="Combine method matching threshold.")
+    parser.add_argument("--match_threshold",
+                        type=float,
+                        default=0.6,
+                        help="Combine method matching threshold.")
     parser.add_argument(
         "--match_metric",
         type=str,
         default='ios',
         help="Combine method matching metric, choose in ['iou', 'ios'].")
-    parser.add_argument(
-        "--visualize",
-        type=ast.literal_eval,
-        default=True,
-        help="Whether to save visualize results to output_dir.")
+    parser.add_argument("--visualize",
+                        type=ast.literal_eval,
+                        default=True,
+                        help="Whether to save visualize results to output_dir.")
     args = parser.parse_args()
     return args
 
@@ -165,24 +157,22 @@ def run(FLAGS, cfg):
 
     # inference
     if FLAGS.slice_infer:
-        trainer.slice_predict(
-            images,
-            slice_size=FLAGS.slice_size,
-            overlap_ratio=FLAGS.overlap_ratio,
-            combine_method=FLAGS.combine_method,
-            match_threshold=FLAGS.match_threshold,
-            match_metric=FLAGS.match_metric,
-            draw_threshold=FLAGS.draw_threshold,
-            output_dir=FLAGS.output_dir,
-            save_results=FLAGS.save_results,
-            visualize=FLAGS.visualize)
+        trainer.slice_predict(images,
+                              slice_size=FLAGS.slice_size,
+                              overlap_ratio=FLAGS.overlap_ratio,
+                              combine_method=FLAGS.combine_method,
+                              match_threshold=FLAGS.match_threshold,
+                              match_metric=FLAGS.match_metric,
+                              draw_threshold=FLAGS.draw_threshold,
+                              output_dir=FLAGS.output_dir,
+                              save_results=FLAGS.save_results,
+                              visualize=FLAGS.visualize)
     else:
-        trainer.predict(
-            images,
-            draw_threshold=FLAGS.draw_threshold,
-            output_dir=FLAGS.output_dir,
-            save_results=FLAGS.save_results,
-            visualize=FLAGS.visualize)
+        trainer.predict(images,
+                        draw_threshold=FLAGS.draw_threshold,
+                        output_dir=FLAGS.output_dir,
+                        save_results=FLAGS.save_results,
+                        visualize=FLAGS.visualize)
 
 
 def main():

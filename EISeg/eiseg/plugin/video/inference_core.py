@@ -139,8 +139,8 @@ class InferenceCore:
         self.masks = paddle.zeros((t, 1, nh, nw), dtype='int64')
         self.np_masks = np.zeros((t, h, w), dtype=np.int64)
         if self.prob is None:
-            self.prob = paddle.zeros(
-                (self.k + 1, t, 1, nh, nw), dtype='float32')
+            self.prob = paddle.zeros((self.k + 1, t, 1, nh, nw),
+                                     dtype='float32')
             self.prob[0] = 1e-7
         else:
             k, t, c, nh, nw = self.prob.shape
@@ -175,8 +175,8 @@ class InferenceCore:
                 self.query_buf = {}
             result = calculate_segmentation(
                 self.prop_net_segm,
-                self.get_image_buffered(idx).numpy(),
-                this_k.numpy(), this_v.numpy())
+                self.get_image_buffered(idx).numpy(), this_k.numpy(),
+                this_v.numpy())
         mask = result[0]
         quary = result[1]
 
@@ -197,14 +197,14 @@ class InferenceCore:
 
         # Determine the required size of the memory bank
         if forward:
-            closest_ti = min([ti for ti in self.interacted
-                              if ti > idx] + [self.t])
-            total_m = (closest_ti - idx - 1
-                       ) // self.mem_freq + 1 + num_certain_keys
+            closest_ti = min([ti
+                              for ti in self.interacted if ti > idx] + [self.t])
+            total_m = (closest_ti - idx -
+                       1) // self.mem_freq + 1 + num_certain_keys
         else:
             closest_ti = max([ti for ti in self.interacted if ti < idx] + [-1])
-            total_m = (idx - closest_ti - 1
-                       ) // self.mem_freq + 1 + num_certain_keys
+            total_m = (idx - closest_ti -
+                       1) // self.mem_freq + 1 + num_certain_keys
         K, CK, _, H, W = key_k.shape
         _, CV, _, _, _ = key_v.shape
 
@@ -256,9 +256,10 @@ class InferenceCore:
             # In-place fusion, maximizes the use of queried buffer
             # esp. for long sequence where the buffer will be flushed
             if (closest_ti != self.t) and (closest_ti != -1):
-                self.prob[:, ti] = self.fuse_one_frame(
-                    closest_ti, idx, ti, self.prob[:, ti], out_mask, key_k,
-                    quary_key)
+                self.prob[:, ti] = self.fuse_one_frame(closest_ti, idx, ti,
+                                                       self.prob[:,
+                                                                 ti], out_mask,
+                                                       key_k, quary_key)
             else:
                 self.prob[:, ti] = out_mask
 
@@ -284,8 +285,8 @@ class InferenceCore:
             w = calculate_fusion(self.fuse_net,
                                  self.get_image_buffered(ti).numpy(),
                                  prev_mask[k:k + 1].numpy(),
-                                 curr_mask[k:k + 1].numpy(),
-                                 attn_map.numpy(), dist.numpy())
+                                 curr_mask[k:k + 1].numpy(), attn_map.numpy(),
+                                 dist.numpy())
             w = paddle.to_tensor(w)
             w = F.sigmoid(w)
             prob[k - 1:k] = w
@@ -322,11 +323,11 @@ class InferenceCore:
             K, CK, _, H, W = self.certain_mem_k.shape
             CV = self.certain_mem_v.shape[1]
             self.certain_mem_k = paddle.concat(
-                [self.certain_mem_k, paddle.zeros((self.k - K, CK, _, H, W))],
-                0)
+                [self.certain_mem_k,
+                 paddle.zeros((self.k - K, CK, _, H, W))], 0)
             self.certain_mem_v = paddle.concat(
-                [self.certain_mem_v, paddle.zeros((self.k - K, CV, _, H, W))],
-                0)
+                [self.certain_mem_v,
+                 paddle.zeros((self.k - K, CV, _, H, W))], 0)
             self.certain_mem_k = paddle.concat([self.certain_mem_k, key_k], 2)
             self.certain_mem_v = paddle.concat([self.certain_mem_v, key_v], 2)
         # self.certain_mem_k = key_k
@@ -334,8 +335,8 @@ class InferenceCore:
 
         if total_cb is not None:
             # Finds the total num. frames to process
-            front_limit = min([ti for ti in self.interacted
-                               if ti > idx] + [self.t])
+            front_limit = min([ti for ti in self.interacted if ti > idx] +
+                              [self.t])
             back_limit = max([ti for ti in self.interacted if ti < idx] + [-1])
             total_num = front_limit - back_limit - 2  # -1 for shift, -1 for center frame
 

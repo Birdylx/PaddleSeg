@@ -15,6 +15,7 @@ import paddle
 
 
 class WrappedPanSegInferModel(paddle.nn.Layer):
+
     def __init__(self, net, postprocessor):
         super().__init__()
         self.net = net

@@ -34,16 +34,14 @@ VAL_PREFIX = ['exp5', 'exp6']
 def parse_args():
     """Parse arguments"""
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '--dataset_path',
-        type=str,
-        required=True,
-        help="The directory of Magnetic-Tile dataset.")
-    parser.add_argument(
-        '--output_path',
-        type=str,
-        default="dataset/MT_dataset/",
-        help="The directory for saving output dataset.")
+    parser.add_argument('--dataset_path',
+                        type=str,
+                        required=True,
+                        help="The directory of Magnetic-Tile dataset.")
+    parser.add_argument('--output_path',
+                        type=str,
+                        default="dataset/MT_dataset/",
+                        help="The directory for saving output dataset.")
     return parser.parse_args()
 
 
@@ -95,17 +93,15 @@ def convert_MT(args):
             exp_prefix = img_name.split('_')[0]
 
             if exp_prefix in TRAIN_PREFIX:
-                shutil.copyfile(
-                    osp.join(folder_path, img_name),
-                    osp.join(train_img_path, img_name))
+                shutil.copyfile(osp.join(folder_path, img_name),
+                                osp.join(train_img_path, img_name))
                 cv2.imwrite(osp.join(train_anno_path, anno_name), anno_img)
                 line = osp.join(train_img_path, img_name) + " " + osp.join(
                     train_anno_path, anno_name) + "\n"
                 f_train.write(line)
             elif exp_prefix in VAL_PREFIX:
-                shutil.copyfile(
-                    osp.join(folder_path, img_name),
-                    osp.join(val_img_path, img_name))
+                shutil.copyfile(osp.join(folder_path, img_name),
+                                osp.join(val_img_path, img_name))
                 cv2.imwrite(osp.join(val_anno_path, anno_name), anno_img)
                 line = osp.join(val_img_path, img_name) + " " + osp.join(
                     val_anno_path, anno_name) + "\n"

@@ -21,6 +21,7 @@ import paddle.nn.functional as F
 
 from medicalseg.utils import metric, TimeAverager, calculate_eta, logger, progbar, loss_computation, add_image_vdl
 from nnunet.utils import sum_tensor
+
 np.set_printoptions(suppress=True)
 
 
@@ -54,8 +55,9 @@ def evaluate(model,
     total_iters = len(loader)
 
     if print_detail:
-        logger.info("Start evaluating (total_samples: {}, total_iters: {})...".
-                    format(len(eval_dataset), total_iters))
+        logger.info(
+            "Start evaluating (total_samples: {}, total_iters: {})...".format(
+                len(eval_dataset), total_iters))
     progbar_val = progbar.Progbar(target=total_iters, verbose=1)
     reader_cost_averager = TimeAverager()
     batch_cost_averager = TimeAverager()
@@ -109,8 +111,8 @@ def evaluate(model,
             online_eval_fp_list.append(list(fp_hard))
             online_eval_fn_list.append(list(fn_hard))
 
-            batch_cost_averager.record(
-                time.time() - batch_start, num_samples=len(label))
+            batch_cost_averager.record(time.time() - batch_start,
+                                       num_samples=len(label))
             batch_cost = batch_cost_averager.get_average()
             reader_cost = reader_cost_averager.get_average()
 
@@ -126,8 +128,7 @@ def evaluate(model,
     online_eval_fn = np.sum(online_eval_fn_list, 0)
 
     global_dc_per_class = [
-        i
-        for i in [
+        i for i in [
             2 * i / (2 * i + j + k)
             for i, j, k in zip(online_eval_tp, online_eval_fp, online_eval_fn)
         ] if not np.isnan(i)

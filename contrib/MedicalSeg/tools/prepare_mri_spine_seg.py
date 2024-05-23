@@ -54,28 +54,28 @@ urls = {
 
 
 class Prep_mri_spine(Prep):
+
     def __init__(self):
-        super().__init__(
-            dataset_root="data/MRSpineSeg",
-            raw_dataset_dir="MRI_spine_seg_raw/",
-            images_dir="MRI_train/train/MR",
-            labels_dir="MRI_train/train/Mask",
-            phase_dir="MRI_spine_seg_phase0_class20_big_12/",
-            urls=urls,
-            valid_suffix=("nii.gz", "nii.gz"),
-            filter_key=(None, None),
-            uncompress_params={"format": "zip",
-                               "num_files": 1})
+        super().__init__(dataset_root="data/MRSpineSeg",
+                         raw_dataset_dir="MRI_spine_seg_raw/",
+                         images_dir="MRI_train/train/MR",
+                         labels_dir="MRI_train/train/Mask",
+                         phase_dir="MRI_spine_seg_phase0_class20_big_12/",
+                         urls=urls,
+                         valid_suffix=("nii.gz", "nii.gz"),
+                         filter_key=(None, None),
+                         uncompress_params={
+                             "format": "zip",
+                             "num_files": 1
+                         })
 
         self.preprocess = {
             "images": [
-                wrapped_partial(
-                    normalize, min_val=0, max_val=2650), wrapped_partial(
-                        resample, new_shape=[512, 512, 12], order=1)
+                wrapped_partial(normalize, min_val=0, max_val=2650),
+                wrapped_partial(resample, new_shape=[512, 512, 12], order=1)
             ],  # original shape is (1008, 1008, 12)
             "labels":
-            [wrapped_partial(
-                resample, new_shape=[512, 512, 12], order=0)]
+            [wrapped_partial(resample, new_shape=[512, 512, 12], order=0)]
         }
 
     def generate_txt(self, train_split=1.0):
@@ -124,8 +124,11 @@ if __name__ == "__main__":
             19: "T9/T10"
         },
         dataset_name="MRISpine Seg",
-        dataset_description="There are 172 training data in the preliminary competition, including MR images and mask labels, 20 test data in the preliminary competition and 23 test data in the  second round competition. The labels of the preliminary competition testset and the second round competition testset are not published, and the results can be evaluated online on this website.",
-        license_desc="https://www.spinesegmentation-challenge.com/wp-content/uploads/2021/12/Term-of-use.pdf",
-        dataset_reference="https://www.spinesegmentation-challenge.com/", )
+        dataset_description=
+        "There are 172 training data in the preliminary competition, including MR images and mask labels, 20 test data in the preliminary competition and 23 test data in the  second round competition. The labels of the preliminary competition testset and the second round competition testset are not published, and the results can be evaluated online on this website.",
+        license_desc=
+        "https://www.spinesegmentation-challenge.com/wp-content/uploads/2021/12/Term-of-use.pdf",
+        dataset_reference="https://www.spinesegmentation-challenge.com/",
+    )
     prep.load_save()
     prep.generate_txt()

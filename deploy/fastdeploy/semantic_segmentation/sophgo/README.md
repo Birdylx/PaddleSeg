@@ -63,7 +63,7 @@ paddle2onnx --model_dir pp_liteseg_fix \
 - 导出bmodel模型
 
 以转换BM1684x的bmodel模型为例子，我们需要下载[TPU-MLIR](https://github.com/sophgo/tpu-mlir)工程，安装过程具体参见[TPU-MLIR文档](https://github.com/sophgo/tpu-mlir/blob/master/README.md)。
-#### 1.	安装
+#### 1.    安装
 ``` shell
 docker pull sophgo/tpuc_dev:latest
 
@@ -74,7 +74,7 @@ source ./envsetup.sh
 ./build.sh
 ```
 
-#### 2.	ONNX模型转换为bmodel模型
+#### 2.    ONNX模型转换为bmodel模型
 ``` shell
 mkdir pp_liteseg && cd pp_liteseg
 

@@ -73,8 +73,8 @@ class EG1800(Dataset):
                 extrapath=seg_env.DATA_HOME)
         elif not os.path.exists(self.dataset_root):
             self.dataset_root = os.path.normpath(self.dataset_root)
-            savepath, extraname = self.dataset_root.rsplit(
-                sep=os.path.sep, maxsplit=1)
+            savepath, extraname = self.dataset_root.rsplit(sep=os.path.sep,
+                                                           maxsplit=1)
             self.dataset_root = download_file_and_uncompress(
                 url=URL,
                 savepath=savepath,
@@ -94,10 +94,9 @@ class EG1800(Dataset):
             os.path.join(dataset_root, 'Labels', file).strip() for file in files
         ]
 
-        self.file_list = [
-            [img_path, label_path]
-            for img_path, label_path in zip(img_files, label_files)
-        ]
+        self.file_list = [[
+            img_path, label_path
+        ] for img_path, label_path in zip(img_files, label_files)]
         pass
 
     def __getitem__(self, item):
@@ -123,17 +122,18 @@ class EG1800(Dataset):
             im = np.float32(im[::-1, :, :])  # RGB => BGR
             im_aug = np.float32(im_aug[::-1, :, :])  # RGB => BGR
 
-        label = cv2.resize(
-            np.uint8(label), (self.input_width, self.input_height),
-            interpolation=cv2.INTER_NEAREST)
+        label = cv2.resize(np.uint8(label),
+                           (self.input_width, self.input_height),
+                           interpolation=cv2.INTER_NEAREST)
 
         # add mask blur
         label = np.uint8(cv2.blur(label, (5, 5)))
         label[label >= 0.5] = 1
         label[label < 0.5] = 0
 
-        edge_mask = F.mask_to_binary_edge(
-            label, radius=4, num_classes=self.num_classes)
+        edge_mask = F.mask_to_binary_edge(label,
+                                          radius=4,
+                                          num_classes=self.num_classes)
         edge_mask = np.transpose(edge_mask, [1, 2, 0]).squeeze(axis=-1)
         #im = np.concatenate([im_aug, im])
         #im = im_aug

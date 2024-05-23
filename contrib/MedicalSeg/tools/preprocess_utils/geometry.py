@@ -64,8 +64,10 @@ def resample(image,
 
     resize_factor = new_shape / np.array(image.shape)
 
-    image_new = scipy.ndimage.zoom(
-        image, resize_factor, mode='nearest', order=order)
+    image_new = scipy.ndimage.zoom(image,
+                                   resize_factor,
+                                   mode='nearest',
+                                   order=order)
 
     return image_new, new_spacing
 
@@ -85,25 +87,23 @@ def resize_segmentation(segmentation, new_shape, order=3):
     assert len(segmentation.shape) == len(
         new_shape), "new shape must have same dimensionality as segmentation"
     if order == 0:
-        return resize(
-            segmentation.astype(float),
-            new_shape,
-            order,
-            mode="edge",
-            clip=True,
-            anti_aliasing=False).astype(tpe)
+        return resize(segmentation.astype(float),
+                      new_shape,
+                      order,
+                      mode="edge",
+                      clip=True,
+                      anti_aliasing=False).astype(tpe)
     else:
         reshaped = np.zeros(new_shape, dtype=segmentation.dtype)
 
         for i, c in enumerate(unique_labels):
             mask = segmentation == c
-            reshaped_multihot = resize(
-                mask.astype(float),
-                new_shape,
-                order,
-                mode="edge",
-                clip=True,
-                anti_aliasing=False)
+            reshaped_multihot = resize(mask.astype(float),
+                                       new_shape,
+                                       order,
+                                       mode="edge",
+                                       clip=True,
+                                       anti_aliasing=False)
             reshaped[reshaped_multihot >= 0.5] = c
         return reshaped
 

@@ -26,6 +26,7 @@ def checkOpenGrid(img, thumbnail_min):
 
 
 class Grids:
+
     def __init__(self, img, gridSize=(512, 512), overlap=(24, 24)):
         self.clear()
         self.detimg = img
@@ -60,10 +61,9 @@ class Grids:
         #         tmp[:det_tmp.shape[0], :det_tmp.shape[1], :] = det_tmp
         #         self.imagesGrid.append(tmp)
         # self.mask_grids = [[np.zeros(self.gridSize)] * grid_count[1]] * grid_count[0]  # 不能用浅拷贝
-        self.mask_grids = [
-            [np.zeros(self.gridSize) for _ in range(grid_count[1])]
-            for _ in range(grid_count[0])
-        ]
+        self.mask_grids = [[
+            np.zeros(self.gridSize) for _ in range(grid_count[1])
+        ] for _ in range(grid_count[0])]
         # print(len(self.mask_grids), len(self.mask_grids[0]))
         self.grid_init = True
         return list(grid_count)

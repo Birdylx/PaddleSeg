@@ -22,6 +22,7 @@ from paddlepanseg.models.common import *
 
 
 class PositionEmbeddingSine(nn.Layer):
+
     def __init__(self,
                  num_pos_feats=64,
                  temperature=10000,
@@ -39,8 +40,8 @@ class PositionEmbeddingSine(nn.Layer):
 
     def forward(self, x, mask=None):
         if mask is None:
-            mask = paddle.zeros(
-                (x.shape[0], x.shape[2], x.shape[3]), dtype='bool')
+            mask = paddle.zeros((x.shape[0], x.shape[2], x.shape[3]),
+                                dtype='bool')
         not_mask = ~mask
         y_embed = not_mask.astype('float32').cumsum(1)
         x_embed = not_mask.astype('float32').cumsum(2)

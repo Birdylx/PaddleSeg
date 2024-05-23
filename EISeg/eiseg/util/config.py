@@ -31,6 +31,7 @@ def save_configs(path=None, config=None, actions=None):
 
 
 class cfgData(object):
+
     def __init__(self, yaml_file):
         with open(yaml_file, "r", encoding="utf-8") as f:
             fig_data = f.read()

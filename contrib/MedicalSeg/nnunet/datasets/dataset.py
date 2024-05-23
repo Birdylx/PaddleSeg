@@ -38,6 +38,7 @@ from tools.preprocess_utils import verify_dataset_integrity, convert_to_decathlo
 
 @manager.DATASETS.add_component
 class MSDDataset(MedicalDataset):
+
     def __init__(self,
                  plans_name=None,
                  num_batches_per_epoch=250,
@@ -71,8 +72,8 @@ class MSDDataset(MedicalDataset):
         self.cascade = cascade
         self.use_multi_augmenter = use_multi_augmenter
 
-        self.folder_with_segs_from_prev_stage = os.path.join(preprocessed_dir,
-                                                             'pred_next_stage')
+        self.folder_with_segs_from_prev_stage = os.path.join(
+            preprocessed_dir, 'pred_next_stage')
 
         self.dataset_directory = preprocessed_dir
         self.unpack_data = unpack_data
@@ -105,29 +106,27 @@ class MSDDataset(MedicalDataset):
         if not os.path.exists(self.decathlon_dir):
             print("{} not found, convert data to decathlon.".format(
                 self.decathlon_dir))
-            convert_to_decathlon(
-                input_folder=self.raw_data_dir,
-                output_folder=self.decathlon_dir,
-                num_processes=self.num_threads)
-            verify_dataset_integrity(
-                self.decathlon_dir, default_num_threads=self.num_threads)
+            convert_to_decathlon(input_folder=self.raw_data_dir,
+                                 output_folder=self.decathlon_dir,
+                                 num_processes=self.num_threads)
+            verify_dataset_integrity(self.decathlon_dir,
+                                     default_num_threads=self.num_threads)
         else:
             print(
-                "Found existed {}, please ensure your dataset is preprocessed correctly!!!".
-                format(self.decathlon_dir))
+                "Found existed {}, please ensure your dataset is preprocessed correctly!!!"
+                .format(self.decathlon_dir))
 
         if not os.path.exists(self.cropped_data_dir):
             print("{} not found, crop data, it may be time consuming.".format(
                 self.cropped_data_dir))
-            crop(
-                self.decathlon_dir,
-                self.cropped_data_dir,
-                override=False,
-                num_threads=self.num_threads)
+            crop(self.decathlon_dir,
+                 self.cropped_data_dir,
+                 override=False,
+                 num_threads=self.num_threads)
         else:
             print(
-                "Found existed {}, please ensure your dataset is preprocessed correctly!!!".
-                format(self.cropped_data_dir))
+                "Found existed {}, please ensure your dataset is preprocessed correctly!!!"
+                .format(self.cropped_data_dir))
 
         if not os.path.exists(
                 os.path.join(self.cropped_data_dir, 'dataset_properties.pkl')):
@@ -141,10 +140,9 @@ class MSDDataset(MedicalDataset):
             modalities = list(dataset_json["modality"].values())
             collect_intensityproperties = True if (
                 ("CT" in modalities) or ("ct" in modalities)) else False
-            dataset_analyzer = DatasetAnalyzer(
-                self.cropped_data_dir,
-                overwrite=True,
-                num_processes=self.num_threads)
+            dataset_analyzer = DatasetAnalyzer(self.cropped_data_dir,
+                                               overwrite=True,
+                                               num_processes=self.num_threads)
             dataset_analyzer.analyze_dataset(collect_intensityproperties)
         else:
             print(
@@ -169,8 +167,8 @@ class MSDDataset(MedicalDataset):
                                                      self.preprocessed_dir)
             if not os.path.exists(exp_planner_3d.plans_fname):
                 print(
-                    "{} already exists, generating plans, please wait a minute.".
-                    format(exp_planner_3d.plans_fname))
+                    "{} already exists, generating plans, please wait a minute."
+                    .format(exp_planner_3d.plans_fname))
                 exp_planner_3d.plan_experiment()
                 exp_planner_3d.run_preprocessing(self.num_threads)
             else:
@@ -184,70 +182,64 @@ class MSDDataset(MedicalDataset):
 
         if self.threeD:
             if self.stage == 0:
-                dl_tr = DataLoader3D(
-                    self.dataset_tr,
-                    self.basic_generator_patch_size,
-                    self.patch_size,
-                    self.batch_size,
-                    False,
-                    oversample_foreground_percent=self.
-                    oversample_foreground_percent,
-                    pad_mode="constant",
-                    pad_sides=self.pad_all_sides,
-                    memmap_mode='r')
-                dl_val = DataLoader3D(
-                    self.dataset_val,
-                    self.patch_size,
-                    self.patch_size,
-                    self.batch_size,
-                    False,
-                    oversample_foreground_percent=self.
-                    oversample_foreground_percent,
-                    pad_mode="constant",
-                    pad_sides=self.pad_all_sides,
-                    memmap_mode='r')
+                dl_tr = DataLoader3D(self.dataset_tr,
+                                     self.basic_generator_patch_size,
+                                     self.patch_size,
+                                     self.batch_size,
+                                     False,
+                                     oversample_foreground_percent=self.
+                                     oversample_foreground_percent,
+                                     pad_mode="constant",
+                                     pad_sides=self.pad_all_sides,
+                                     memmap_mode='r')
+                dl_val = DataLoader3D(self.dataset_val,
+                                      self.patch_size,
+                                      self.patch_size,
+                                      self.batch_size,
+                                      False,
+                                      oversample_foreground_percent=self.
+                                      oversample_foreground_percent,
+                                      pad_mode="constant",
+                                      pad_sides=self.pad_all_sides,
+                                      memmap_mode='r')
             else:
-                dl_tr = DataLoader3D(
-                    self.dataset_tr,
-                    self.basic_generator_patch_size,
-                    self.patch_size,
-                    self.batch_size,
-                    has_prev_stage=self.cascade,
-                    oversample_foreground_percent=self.
-                    oversample_foreground_percent,
-                    pad_mode="constant",
-                    pad_sides=self.pad_all_sides)
-                dl_val = DataLoader3D(
-                    self.dataset_val,
-                    self.patch_size,
-                    self.patch_size,
-                    self.batch_size,
-                    has_prev_stage=self.cascade,
-                    oversample_foreground_percent=self.
-                    oversample_foreground_percent,
-                    pad_mode="constant",
-                    pad_sides=self.pad_all_sides)
+                dl_tr = DataLoader3D(self.dataset_tr,
+                                     self.basic_generator_patch_size,
+                                     self.patch_size,
+                                     self.batch_size,
+                                     has_prev_stage=self.cascade,
+                                     oversample_foreground_percent=self.
+                                     oversample_foreground_percent,
+                                     pad_mode="constant",
+                                     pad_sides=self.pad_all_sides)
+                dl_val = DataLoader3D(self.dataset_val,
+                                      self.patch_size,
+                                      self.patch_size,
+                                      self.batch_size,
+                                      has_prev_stage=self.cascade,
+                                      oversample_foreground_percent=self.
+                                      oversample_foreground_percent,
+                                      pad_mode="constant",
+                                      pad_sides=self.pad_all_sides)
         else:
-            dl_tr = DataLoader2D(
-                self.dataset_tr,
-                self.basic_generator_patch_size,
-                self.patch_size,
-                self.batch_size,
-                oversample_foreground_percent=self.
-                oversample_foreground_percent,
-                pad_mode="constant",
-                pad_sides=self.pad_all_sides,
-                memmap_mode='r')
-            dl_val = DataLoader2D(
-                self.dataset_val,
-                self.patch_size,
-                self.patch_size,
-                self.batch_size,
-                oversample_foreground_percent=self.
-                oversample_foreground_percent,
-                pad_mode="constant",
-                pad_sides=self.pad_all_sides,
-                memmap_mode='r')
+            dl_tr = DataLoader2D(self.dataset_tr,
+                                 self.basic_generator_patch_size,
+                                 self.patch_size,
+                                 self.batch_size,
+                                 oversample_foreground_percent=self.
+                                 oversample_foreground_percent,
+                                 pad_mode="constant",
+                                 pad_sides=self.pad_all_sides,
+                                 memmap_mode='r')
+            dl_val = DataLoader2D(self.dataset_val,
+                                  self.patch_size,
+                                  self.patch_size,
+                                  self.batch_size,
+                                  oversample_foreground_percent=self.
+                                  oversample_foreground_percent,
+                                  pad_mode="constant",
+                                  pad_sides=self.pad_all_sides,
+                                  memmap_mode='r')
         return dl_tr, dl_val
 
     def initialize(self):
@@ -263,8 +255,8 @@ class MSDDataset(MedicalDataset):
                                  '*.npy'))) <= 0:
             self.unpack_data = False
             print("unpacking dataset")
-            unpack_dataset(
-                self.folder_with_preprocessed_data, threads=self.num_threads)
+            unpack_dataset(self.folder_with_preprocessed_data,
+                           threads=self.num_threads)
             print("done")
         else:
             print("found unpacked dataset.")
@@ -285,8 +277,7 @@ class MSDDataset(MedicalDataset):
 
     def setup_DA_params(self):
         self.deep_supervision_scales = [[1, 1, 1]] + list(
-            list(i)
-            for i in 1 / np.cumprod(
+            list(i) for i in 1 / np.cumprod(
                 np.vstack(self.net_num_pool_op_kernel_sizes), axis=0))[:-1]
 
         if self.threeD:
@@ -311,8 +302,10 @@ class MSDDataset(MedicalDataset):
         else:
             self.do_dummy_2D_aug = False
             if max(self.patch_size) / min(self.patch_size) > 1.5:
-                default_2D_augmentation_params['rotation_x'] = (
-                    -15. / 360 * 2. * np.pi, 15. / 360 * 2. * np.pi)
+                default_2D_augmentation_params['rotation_x'] = (-15. / 360 *
+                                                                2. * np.pi,
+                                                                15. / 360 * 2. *
+                                                                np.pi)
             self.data_aug_params = default_2D_augmentation_params
         self.data_aug_params[
             "mask_was_used_for_normalization"] = self.use_mask_for_norm
@@ -323,8 +316,8 @@ class MSDDataset(MedicalDataset):
                 self.data_aug_params['rotation_y'],
                 self.data_aug_params['rotation_z'],
                 self.data_aug_params['scale_range'])
-            self.basic_generator_patch_size = np.array([self.patch_size[
-                0]] + list(self.basic_generator_patch_size))
+            self.basic_generator_patch_size = np.array(
+                [self.patch_size[0]] + list(self.basic_generator_patch_size))
         else:
             self.basic_generator_patch_size = get_patch_size(
                 self.patch_size, self.data_aug_params['rotation_x'],
@@ -511,19 +504,19 @@ def unpack_dataset(folder, threads=8, key="data"):
 
 
 def subfiles(folder: str,
-             join: bool=True,
-             prefix: str=None,
-             suffix: str=None,
-             sort: bool=True) -> List[str]:
+             join: bool = True,
+             prefix: str = None,
+             suffix: str = None,
+             sort: bool = True) -> List[str]:
     if join:
         l = os.path.join
     else:
         l = lambda x, y: y
     res = [
         l(folder, i) for i in os.listdir(folder)
-        if os.path.isfile(os.path.join(folder, i)) and
-        (prefix is None or
-         i.startswith(prefix)) and (suffix is None or i.endswith(suffix))
+        if os.path.isfile(os.path.join(folder, i)) and (
+            prefix is None or i.startswith(prefix)) and (
+                suffix is None or i.endswith(suffix))
     ]
     if sort:
         res.sort()
@@ -545,14 +538,14 @@ def get_patch_size(final_patch_size, rot_x, rot_y, rot_z, scale_range):
     final_shape = np.copy(coords)
     if len(coords) == 3:
         final_shape = np.max(
-            np.vstack((np.abs(rotate_coords_3d(coords, rot_x, 0, 0)),
-                       final_shape)), 0)
+            np.vstack((np.abs(rotate_coords_3d(coords, rot_x, 0,
+                                               0)), final_shape)), 0)
         final_shape = np.max(
-            np.vstack((np.abs(rotate_coords_3d(coords, 0, rot_y, 0)),
-                       final_shape)), 0)
+            np.vstack((np.abs(rotate_coords_3d(coords, 0, rot_y,
+                                               0)), final_shape)), 0)
         final_shape = np.max(
-            np.vstack((np.abs(rotate_coords_3d(coords, 0, 0, rot_z)),
-                       final_shape)), 0)
+            np.vstack((np.abs(rotate_coords_3d(coords, 0, 0,
+                                               rot_z)), final_shape)), 0)
     elif len(coords) == 2:
         final_shape = np.max(
             np.vstack((np.abs(rotate_coords_2d(coords, rot_x)), final_shape)),

@@ -23,6 +23,7 @@ from paddleseg.cvlibs import param_init
 
 
 class GuidedCxtAtten(nn.Layer):
+
     def __init__(self,
                  out_channels,
                  guidance_channels,
@@ -34,18 +35,15 @@ class GuidedCxtAtten(nn.Layer):
         self.kernel_size = kernel_size
         self.rate = rate
         self.stride = stride
-        self.guidance_conv = nn.Conv2D(
-            in_channels=guidance_channels,
-            out_channels=guidance_channels // 2,
-            kernel_size=1)
+        self.guidance_conv = nn.Conv2D(in_channels=guidance_channels,
+                                       out_channels=guidance_channels // 2,
+                                       kernel_size=1)
 
         self.out_conv = nn.Sequential(
-            nn.Conv2D(
-                in_channels=out_channels,
-                out_channels=out_channels,
-                kernel_size=1,
-                bias_attr=False),
-            nn.BatchNorm(out_channels))
+            nn.Conv2D(in_channels=out_channels,
+                      out_channels=out_channels,
+                      kernel_size=1,
+                      bias_attr=False), nn.BatchNorm(out_channels))
 
         self.init_weight()
 
@@ -59,12 +57,13 @@ class GuidedCxtAtten(nn.Layer):
     def forward(self, img_feat, alpha_feat, unknown=None, softmax_scale=1.):
 
         img_feat = self.guidance_conv(img_feat)
-        img_feat = F.interpolate(
-            img_feat, scale_factor=1 / self.rate, mode='nearest')
+        img_feat = F.interpolate(img_feat,
+                                 scale_factor=1 / self.rate,
+                                 mode='nearest')
 
         # process unknown mask
-        unknown, softmax_scale = self.process_unknown_mask(unknown, img_feat,
-                                                           softmax_scale)
+        unknown, softmax_scale = self.process_unknown_mask(
+            unknown, img_feat, softmax_scale)
 
         img_ps, alpha_ps, unknown_ps = self.extract_feature_maps_patches(
             img_feat, alpha_feat, unknown)
@@ -139,8 +138,8 @@ class GuidedCxtAtten(nn.Layer):
         # unknown area
         unknown_scale, known_scale = scale[0]
         out = similarity_map * (
-            unknown_scale * paddle.greater_than(unknown_ps,
-                                                paddle.to_tensor([0.])) +
+            unknown_scale *
+            paddle.greater_than(unknown_ps, paddle.to_tensor([0.])) +
             known_scale * paddle.less_equal(unknown_ps, paddle.to_tensor([0.])))
         # mask itself, self-mask only applied to unknown area
         out = out + self_mask * unknown_ps
@@ -172,9 +171,8 @@ class GuidedCxtAtten(nn.Layer):
 
     def get_self_correlation_mask(self, img_feat):
         _, _, h, w = img_feat.shape
-        self_mask = F.one_hot(
-            paddle.reshape(paddle.arange(h * w), (h, w)),
-            num_classes=int(h * w))
+        self_mask = F.one_hot(paddle.reshape(paddle.arange(h * w), (h, w)),
+                              num_classes=int(h * w))
 
         self_mask = paddle.transpose(self_mask, (2, 0, 1))
         self_mask = paddle.reshape(self_mask, (1, h * w, h, w))
@@ -187,14 +185,15 @@ class GuidedCxtAtten(nn.Layer):
 
         if unknown is not None:
             unknown = unknown.clone()
-            unknown = F.interpolate(
-                unknown, scale_factor=1 / self.rate, mode='nearest')
+            unknown = F.interpolate(unknown,
+                                    scale_factor=1 / self.rate,
+                                    mode='nearest')
             unknown_mean = unknown.mean(axis=[2, 3])
             known_mean = 1 - unknown_mean
-            unknown_scale = paddle.clip(
-                paddle.sqrt(unknown_mean / known_mean), 0.1, 10)
-            known_scale = paddle.clip(
-                paddle.sqrt(known_mean / unknown_mean), 0.1, 10)
+            unknown_scale = paddle.clip(paddle.sqrt(unknown_mean / known_mean),
+                                        0.1, 10)
+            known_scale = paddle.clip(paddle.sqrt(known_mean / unknown_mean),
+                                      0.1, 10)
             softmax_scale = paddle.concat([unknown_scale, known_scale], axis=1)
         else:
             unknown = paddle.ones([n, 1, h, w])

@@ -68,20 +68,26 @@ class FastFCN(nn.Layer):
                 mid_channels,
                 1,
                 padding=0,
-                bias_attr=False, )
+                bias_attr=False,
+            )
         else:
             self.bottleneck = layers.ConvBNReLU(
                 in_channels[-1],
                 mid_channels,
                 3,
                 padding=1,
-                bias_attr=False, )
+                bias_attr=False,
+            )
         if self.add_lateral:
             self.lateral_convs = nn.LayerList([
-                layers.ConvBNReLU(
-                    in_channels[0], mid_channels, 1, bias_attr=False),
-                layers.ConvBNReLU(
-                    in_channels[1], mid_channels, 1, bias_attr=False),
+                layers.ConvBNReLU(in_channels[0],
+                                  mid_channels,
+                                  1,
+                                  bias_attr=False),
+                layers.ConvBNReLU(in_channels[1],
+                                  mid_channels,
+                                  1,
+                                  bias_attr=False),
             ])
 
             self.fusion = layers.ConvBNReLU(
@@ -89,7 +95,8 @@ class FastFCN(nn.Layer):
                 mid_channels,
                 3,
                 padding=1,
-                bias_attr=False, )
+                bias_attr=False,
+            )
 
         self.enc_module = EncModule(mid_channels, num_codes)
         self.cls_seg = nn.Conv2D(mid_channels, num_classes, 1)
@@ -123,22 +130,25 @@ class FastFCN(nn.Layer):
             laterals = []
             for i, lateral_conv in enumerate(self.lateral_convs):
                 laterals.append(
-                    F.interpolate(
-                        lateral_conv(feats[i]),
-                        size=paddle.shape(feat)[2:],
-                        mode='bilinear',
-                        align_corners=False))
+                    F.interpolate(lateral_conv(feats[i]),
+                                  size=paddle.shape(feat)[2:],
+                                  mode='bilinear',
+                                  align_corners=False))
             feat = self.fusion(paddle.concat([feat, *laterals], 1))
         encode_feat, feat = self.enc_module(feat)
         out = self.cls_seg(feat)
-        out = F.interpolate(
-            out, size=imsize, mode='bilinear', align_corners=False)
+        out = F.interpolate(out,
+                            size=imsize,
+                            mode='bilinear',
+                            align_corners=False)
         output = [out]
 
         if self.training:
             fcn_out = self.fcn_head(fcn_feat)
-            fcn_out = F.interpolate(
-                fcn_out, size=imsize, mode='bilinear', align_corners=False)
+            fcn_out = F.interpolate(fcn_out,
+                                    size=imsize,
+                                    mode='bilinear',
+                                    align_corners=False)
             output.append(fcn_out)
             if self.use_se_loss:
                 se_out = self.se_layer(encode_feat)
@@ -148,6 +158,7 @@ class FastFCN(nn.Layer):
 
 
 class Encoding(nn.Layer):
+
     def __init__(self, channels, num_codes):
         super().__init__()
         self.channels, self.num_codes = channels, num_codes
@@ -155,10 +166,12 @@ class Encoding(nn.Layer):
         std = 1 / ((channels * num_codes)**0.5)
         self.codewords = self.create_parameter(
             shape=(num_codes, channels),
-            default_initializer=nn.initializer.Uniform(-std, std), )
+            default_initializer=nn.initializer.Uniform(-std, std),
+        )
         self.scale = self.create_parameter(
             shape=(num_codes, ),
-            default_initializer=nn.initializer.Uniform(-1, 0), )
+            default_initializer=nn.initializer.Uniform(-1, 0),
+        )
 
     def scaled_l2(self, x, codewords, scale):
         num_codes, channels = paddle.shape(codewords)
@@ -175,7 +188,8 @@ class Encoding(nn.Layer):
         reshaped_codewords = codewords.reshape([1, 1, num_codes, channels])
         expanded_x = paddle.tile(
             x.unsqueeze(2),
-            [1, 1, num_codes, 1], )
+            [1, 1, num_codes, 1],
+        )
         encoded_feat = (assignment_weights.unsqueeze(3) *
                         (expanded_x - reshaped_codewords)).sum(axis=1)
         return encoded_feat
@@ -187,11 +201,13 @@ class Encoding(nn.Layer):
         assert paddle.shape(
             x
         )[1] == self.channels, "Encoding channels error, excepted {} but got {}.".format(
-            self.channels, paddle.shape(x)[1])
+            self.channels,
+            paddle.shape(x)[1])
         batch_size = paddle.shape(x)[0]
         x = x.reshape([batch_size, self.channels, -1]).transpose([0, 2, 1])
-        assignment_weights = F.softmax(
-            self.scaled_l2(x, self.codewords, self.scale), axis=2)
+        assignment_weights = F.softmax(self.scaled_l2(x, self.codewords,
+                                                      self.scale),
+                                       axis=2)
 
         encoded_feat = self.aggregate(assignment_weights, x, self.codewords)
         encoded_feat = encoded_feat.reshape([batch_size, self.num_codes, -1])
@@ -199,20 +215,23 @@ class Encoding(nn.Layer):
 
 
 class EncModule(nn.Layer):
+
     def __init__(self, in_channels, num_codes):
         super().__init__()
         self.encoding_project = layers.ConvBNReLU(
             in_channels,
             in_channels,
-            1, )
+            1,
+        )
         self.encoding = nn.Sequential(
-            Encoding(
-                channels=in_channels, num_codes=num_codes),
+            Encoding(channels=in_channels, num_codes=num_codes),
             nn.BatchNorm1D(num_codes),
-            nn.ReLU(), )
+            nn.ReLU(),
+        )
         self.fc = nn.Sequential(
             nn.Linear(in_channels, in_channels),
-            nn.Sigmoid(), )
+            nn.Sigmoid(),
+        )
 
     def forward(self, x):
         encoding_projection = self.encoding_project(x)

@@ -79,27 +79,30 @@ label_map = {
 
 
 class Prep_abdomen(Prep):
+
     def __init__(self):
-        super().__init__(
-            dataset_root="data/abdomen",
-            raw_dataset_dir="abdomen_raw/",
-            images_dir="RawData/RawData/Training/img",
-            labels_dir="RawData/RawData/Training/label",
-            phase_dir="abdomen_phase0/",
-            urls=urls,
-            valid_suffix=("nii.gz", "nii.gz"),
-            filter_key=(None, None),
-            uncompress_params={"format": "zip",
-                               "num_files": 1})
+        super().__init__(dataset_root="data/abdomen",
+                         raw_dataset_dir="abdomen_raw/",
+                         images_dir="RawData/RawData/Training/img",
+                         labels_dir="RawData/RawData/Training/label",
+                         phase_dir="abdomen_phase0/",
+                         urls=urls,
+                         valid_suffix=("nii.gz", "nii.gz"),
+                         filter_key=(None, None),
+                         uncompress_params={
+                             "format": "zip",
+                             "num_files": 1
+                         })
 
         self.preprocess = {
             "images": [
-                wrapped_partial(
-                    np.clip, a_min=-125, a_max=275), wrapped_partial(
-                        HUnorm, HU_min=-125, HU_max=275, multiply_255=False)
+                wrapped_partial(np.clip, a_min=-125, a_max=275),
+                wrapped_partial(HUnorm,
+                                HU_min=-125,
+                                HU_max=275,
+                                multiply_255=False)
             ],
-            "labels": [wrapped_partial(
-                ignore_label, label_map=label_map)]
+            "labels": [wrapped_partial(ignore_label, label_map=label_map)]
         }
         self.train_image_files = []
         self.val_image_files = []
@@ -136,11 +139,10 @@ class Prep_abdomen(Prep):
             pre = self.preprocess[process_tuple[i]]
             savepath = save_tuple[i]
 
-            for f in tqdm(
-                    files,
-                    total=len(files),
-                    desc="preprocessing the {}".format(["images", "labels"][
-                        i])):
+            for f in tqdm(files,
+                          total=len(files),
+                          desc="preprocessing the {}".format(
+                              ["images", "labels"][i])):
 
                 f_nps = Prep.load_medical_data(f)[0]
                 # xyz to zxy
@@ -149,8 +151,8 @@ class Prep_abdomen(Prep):
                     for volume_idx, f_np in enumerate(f_nps):
                         for op in pre:
                             f_np = op(f_np)
-                        filename = osp.basename(f).split(".")[
-                            0] + f"-{volume_idx:>04d}.npy"
+                        filename = osp.basename(f).split(
+                            ".")[0] + f"-{volume_idx:>04d}.npy"
                         f_np_name = join_paths(savepath, filename)
                         np.save(f_np_name, f_np)
                         target_files[i].append(filename)
@@ -208,9 +210,11 @@ if __name__ == "__main__":
             8: 'pancreas'
         },
         dataset_name="Abdomen CT scans",
-        dataset_description="Under Institutional Review Board (IRB) supervision, 50 abdomen CT scans of were randomly selected from a combination of an ongoing colorectal cancer chemotherapy trial, and a retrospective ventral hernia study.",
+        dataset_description=
+        "Under Institutional Review Board (IRB) supervision, 50 abdomen CT scans of were randomly selected from a combination of an ongoing colorectal cancer chemotherapy trial, and a retrospective ventral hernia study.",
         license_desc="https://creativecommons.org/licenses/by/4.0/legalcode",
-        dataset_reference="https://www.synapse.org/#!Synapse:syn3193805/wiki/89480",
+        dataset_reference=
+        "https://www.synapse.org/#!Synapse:syn3193805/wiki/89480",
     )
     prep.load_save(mode='train')
     prep.load_save(mode='val')

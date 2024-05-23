@@ -80,8 +80,9 @@ def preprocess_save_to_queue(preprocess_fn, q, list_of_lists, output_files,
                                                                                  "shape! image: %s, seg_prev: %s" % \
                                                                                  (l[0], segs_from_prev_stage[i])
                 seg_prev = seg_prev.transpose(transpose_forward)
-                seg_reshaped = resize_segmentation(
-                    seg_prev, d.shape[1:], order=1)
+                seg_reshaped = resize_segmentation(seg_prev,
+                                                   d.shape[1:],
+                                                   order=1)
                 seg_reshaped = to_one_hot(seg_reshaped, classes)
                 d = np.vstack((d, seg_reshaped)).astype(np.float32)
             """There is a problem with python process communication that prevents us from communicating objects 
@@ -127,13 +128,12 @@ def preprocess_multithreaded(predictor,
     q = Queue(1)
     processes = []
     for i in range(num_processes):
-        pr = Process(
-            target=preprocess_save_to_queue,
-            args=(predictor.preprocess_patient, q,
-                  list_of_lists[i::num_processes],
-                  output_files[i::num_processes],
-                  segs_from_prev_stage[i::num_processes], classes,
-                  predictor.plans['transpose_forward']))
+        pr = Process(target=preprocess_save_to_queue,
+                     args=(predictor.preprocess_patient, q,
+                           list_of_lists[i::num_processes],
+                           output_files[i::num_processes],
+                           segs_from_prev_stage[i::num_processes], classes,
+                           predictor.plans['transpose_forward']))
         pr.start()
         processes.append(pr)
 
@@ -168,7 +168,7 @@ def predict_cases(predictor,
                   all_in_gpu=False,
                   step_size=0.5,
                   disable_postprocessing=False,
-                  segmentation_export_kwargs: dict=None,
+                  segmentation_export_kwargs: dict = None,
                   postprocessing_json_path=None):
     assert len(list_of_lists) == len(
         output_filenames
@@ -195,8 +195,8 @@ def predict_cases(predictor,
         print("number of cases:", len(list_of_lists))
         not_done_idx = [
             i for i, j in enumerate(cleaned_output_files)
-            if (not os.path.isfile(j)
-                ) or (save_npz and not os.path.isfile(j[:-7] + '.npz'))
+            if (not os.path.isfile(j)) or (
+                save_npz and not os.path.isfile(j[:-7] + '.npz'))
         ]
 
         cleaned_output_files = [cleaned_output_files[i] for i in not_done_idx]
@@ -230,9 +230,10 @@ def predict_cases(predictor,
     print("starting preprocessing generator")
     print("file list: ", list_of_lists)
     print("preprocess output files: ", cleaned_output_files)
-    preprocessing = preprocess_multithreaded(
-        predictor, list_of_lists, cleaned_output_files,
-        num_threads_preprocessing, segs_from_prev_stage)
+    preprocessing = preprocess_multithreaded(predictor, list_of_lists,
+                                             cleaned_output_files,
+                                             num_threads_preprocessing,
+                                             segs_from_prev_stage)
     print("starting prediction...")
     all_output_files = []
     for preprocessed in preprocessing:
@@ -251,7 +252,8 @@ def predict_cases(predictor,
             use_sliding_window=True,
             step_size=step_size,
             use_gaussian=True,
-            mixed_precision=mixed_precision, )
+            mixed_precision=mixed_precision,
+        )
 
         transpose_forward = predictor.plans.get('transpose_forward')
         if transpose_forward is not None:
@@ -280,10 +282,11 @@ def predict_cases(predictor,
             softmax = output_filename[:-7] + ".npy"
 
         results.append(
-            pool.starmap_async(save_segmentation_nifti_from_softmax, (
-                (softmax, output_filename, dct, interpolation_order,
-                 region_class_order, None, None, npz_file, None,
-                 force_separate_z, interpolation_order_z), )))
+            pool.starmap_async(
+                save_segmentation_nifti_from_softmax,
+                ((softmax, output_filename, dct, interpolation_order,
+                  region_class_order, None, None, npz_file, None,
+                  force_separate_z, interpolation_order_z), )))
 
     print(
         "inference done. Now waiting for the segmentation export to finish...")

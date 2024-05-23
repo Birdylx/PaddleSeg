@@ -42,7 +42,10 @@ class DiceLoss(nn.Layer):
         else:
             self.norm = nn.Softmax(axis=1)
 
-    def compute_per_channel_dice(self, input, target, epsilon=1e-6,
+    def compute_per_channel_dice(self,
+                                 input,
+                                 target,
+                                 epsilon=1e-6,
                                  weight=None):
         """
         Computes DiceCoefficient as defined in https://arxiv.org/abs/1606.04797 given  a multi channel input and target.
@@ -92,11 +95,12 @@ class DiceLoss(nn.Layer):
 
         logits = self.norm(logits)  # softmax to sigmoid
 
-        per_channel_dice = self.compute_per_channel_dice(
-            logits, labels_one_hot, weight=self.weight)
+        per_channel_dice = self.compute_per_channel_dice(logits,
+                                                         labels_one_hot,
+                                                         weight=self.weight)
 
         dice_loss = (1. - paddle.mean(per_channel_dice))
-        per_channel_dice = per_channel_dice.detach().cpu(
-        ).numpy()  # vnet variant dice
+        per_channel_dice = per_channel_dice.detach().cpu().numpy(
+        )  # vnet variant dice
 
         return dice_loss, per_channel_dice

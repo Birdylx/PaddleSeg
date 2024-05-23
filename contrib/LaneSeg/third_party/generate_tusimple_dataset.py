@@ -119,11 +119,10 @@ def process_tusimple_dataset(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '--root',
-        type=str,
-        default=None,
-        help='The origin path of unzipped tusimple dataset')
+    parser.add_argument('--root',
+                        type=str,
+                        default=None,
+                        help='The origin path of unzipped tusimple dataset')
     args = parser.parse_args()
 
     process_tusimple_dataset(args)

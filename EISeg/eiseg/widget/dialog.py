@@ -1,9 +1,9 @@
-from qtpy.QtWidgets import (
-    QDialog, QLabel, QRadioButton, QButtonGroup, QDialogButtonBox, QVBoxLayout
-)
+from qtpy.QtWidgets import (QDialog, QLabel, QRadioButton, QButtonGroup,
+                            QDialogButtonBox, QVBoxLayout)
 
 
 class CustomDialog(QDialog):
+
     def __init__(self, parent, title, message, btn1_text, btn2_text):
         super().__init__(parent)
         self.setWindowTitle(title)
@@ -14,8 +14,8 @@ class CustomDialog(QDialog):
         self.btngroup = QButtonGroup()
         self.btngroup.addButton(self.btn1)
         self.btngroup.addButton(self.btn2)
-        button_box = QDialogButtonBox(
-            QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        button_box = QDialogButtonBox(QDialogButtonBox.Ok
+                                      | QDialogButtonBox.Cancel)
         # 绑定按钮事件
         self.btngroup.buttonClicked.connect(self._check)
         button_box.accepted.connect(self.accept)
@@ -30,7 +30,7 @@ class CustomDialog(QDialog):
 
     def _check(self):
         self.res = self.btngroup.checkedButton().text()
-        
+
     @property
     def rs_support(self):
         return (self.res == self.btn1.text())

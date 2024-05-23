@@ -34,40 +34,42 @@ from ppmatting.utils import get_image_list, Config, MatBuilder
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Model training')
-    parser.add_argument(
-        "--config", dest="cfg", help="The config file.", default=None, type=str)
+    parser.add_argument("--config",
+                        dest="cfg",
+                        help="The config file.",
+                        default=None,
+                        type=str)
 
-    parser.add_argument(
-        '--model_path',
-        dest='model_path',
-        help='The path of model for prediction',
-        type=str,
-        default=None)
+    parser.add_argument('--model_path',
+                        dest='model_path',
+                        help='The path of model for prediction',
+                        type=str,
+                        default=None)
     parser.add_argument(
         '--image_path',
         dest='image_path',
-        help='The path of image, it can be a file or a directory including images',
+        help=
+        'The path of image, it can be a file or a directory including images',
         type=str,
         default=None)
     parser.add_argument(
         '--trimap_path',
         dest='trimap_path',
-        help='The path of trimap, it can be a file or a directory including images. '
+        help=
+        'The path of trimap, it can be a file or a directory including images. '
         'The image should be the same as image when it is a directory.',
         type=str,
         default=None)
-    parser.add_argument(
-        '--save_dir',
-        dest='save_dir',
-        help='The directory for saving the model snapshot',
-        type=str,
-        default='./output/results')
-    parser.add_argument(
-        '--fg_estimate',
-        default=True,
-        type=eval,
-        choices=[True, False],
-        help='Whether to estimate foreground when predicting.')
+    parser.add_argument('--save_dir',
+                        dest='save_dir',
+                        help='The directory for saving the model snapshot',
+                        type=str,
+                        default='./output/results')
+    parser.add_argument('--fg_estimate',
+                        default=True,
+                        type=eval,
+                        choices=[True, False],
+                        help='Whether to estimate foreground when predicting.')
     parser.add_argument(
         '--device',
         dest='device',
@@ -98,15 +100,14 @@ def main(args):
         trimap_list, _ = get_image_list(args.trimap_path)
     logger.info('Number of predict images = {}'.format(len(image_list)))
 
-    predict(
-        model,
-        model_path=args.model_path,
-        transforms=transforms,
-        image_list=image_list,
-        image_dir=image_dir,
-        trimap_list=trimap_list,
-        save_dir=args.save_dir,
-        fg_estimate=args.fg_estimate)
+    predict(model,
+            model_path=args.model_path,
+            transforms=transforms,
+            image_list=image_list,
+            image_dir=image_dir,
+            trimap_list=trimap_list,
+            save_dir=args.save_dir,
+            fg_estimate=args.fg_estimate)
 
 
 if __name__ == '__main__':

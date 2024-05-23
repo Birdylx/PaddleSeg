@@ -20,12 +20,16 @@ def parse_arguments():
     import argparse
     import ast
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--model_file", required=True, help="Path of PaddleSeg model.")
-    parser.add_argument(
-        "--config_file", required=True, help="Path of PaddleSeg config.")
-    parser.add_argument(
-        "--image", type=str, required=True, help="Path of test image file.")
+    parser.add_argument("--model_file",
+                        required=True,
+                        help="Path of PaddleSeg model.")
+    parser.add_argument("--config_file",
+                        required=True,
+                        help="Path of PaddleSeg config.")
+    parser.add_argument("--image",
+                        type=str,
+                        required=True,
+                        help="Path of test image file.")
     return parser.parse_args()
 
 
@@ -37,17 +41,16 @@ def build_option(args):
 
 args = parse_arguments()
 
-# setup runtime 
+# setup runtime
 runtime_option = build_option(args)
 model_file = args.model_file
 params_file = ""
 config_file = args.config_file
-model = fd.vision.segmentation.PaddleSegModel(
-    model_file,
-    params_file,
-    config_file,
-    runtime_option=runtime_option,
-    model_format=fd.ModelFormat.RKNN)
+model = fd.vision.segmentation.PaddleSegModel(model_file,
+                                              params_file,
+                                              config_file,
+                                              runtime_option=runtime_option,
+                                              model_format=fd.ModelFormat.RKNN)
 
 model.preprocessor.disable_normalize()
 model.preprocessor.disable_permute()

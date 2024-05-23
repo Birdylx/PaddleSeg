@@ -86,8 +86,10 @@ class ProbOhemCrossEntropy2D(nn.Layer):
 
         label = label.reshape((n, 1, h, w))
         valid_mask = valid_mask.reshape((n, 1, h, w)).astype('float32')
-        loss = F.softmax_with_cross_entropy(
-            logit, label, ignore_index=self.ignore_index, axis=1)
+        loss = F.softmax_with_cross_entropy(logit,
+                                            label,
+                                            ignore_index=self.ignore_index,
+                                            axis=1)
         loss = loss * valid_mask
         avg_loss = paddle.mean(loss) / paddle.mean(valid_mask)
 

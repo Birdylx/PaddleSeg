@@ -197,8 +197,8 @@ class MattingDataset(paddle.io.Dataset):
         if self.if_rssn:
             if np.random.rand() < 0.5:
                 fg = cv2.fastNlMeansDenoisingColored(fg, None, 3, 3, 7, 21)
-                ori_bg = cv2.fastNlMeansDenoisingColored(ori_bg, None, 3, 3, 7,
-                                                         21)
+                ori_bg = cv2.fastNlMeansDenoisingColored(
+                    ori_bg, None, 3, 3, 7, 21)
             if np.random.rand() < 0.5:
                 radius = np.random.choice([19, 29, 39, 49, 59])
                 ori_bg = cv2.GaussianBlur(ori_bg, (radius, radius), 0, 0)
@@ -213,8 +213,8 @@ class MattingDataset(paddle.io.Dataset):
         if ratio > 1:
             resize_h = math.ceil(ori_bg_h * ratio)
             resize_w = math.ceil(ori_bg_w * ratio)
-            bg = cv2.resize(
-                ori_bg, (resize_w, resize_h), interpolation=cv2.INTER_LINEAR)
+            bg = cv2.resize(ori_bg, (resize_w, resize_h),
+                            interpolation=cv2.INTER_LINEAR)
         else:
             bg = ori_bg
 

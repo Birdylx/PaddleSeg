@@ -3,6 +3,7 @@ from util.coco.detlabel import COCO_CLASS_DICT
 
 
 class DetInfer:
+
     def __init__(self, model_path=None):
         self.model = None if model_path is None else Detector(model_path)
 

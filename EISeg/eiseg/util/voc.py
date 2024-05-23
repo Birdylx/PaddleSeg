@@ -2,6 +2,7 @@ import xml.etree.ElementTree as ET
 
 
 class VocAnnotations:
+
     def __init__(self,
                  filename,
                  witdh,

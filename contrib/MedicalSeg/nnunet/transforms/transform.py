@@ -40,6 +40,7 @@ class AbstractTransform(object):
 
 
 class Compose(AbstractTransform):
+
     def __init__(self, transforms):
         self.transforms = transforms
 
@@ -53,6 +54,7 @@ class Compose(AbstractTransform):
 
 
 class DataChannelSelectionTransform(AbstractTransform):
+
     def __init__(self, channels, data_key="data"):
         self.data_key = data_key
         self.channels = channels
@@ -63,6 +65,7 @@ class DataChannelSelectionTransform(AbstractTransform):
 
 
 class SegChannelSelectionTransform(AbstractTransform):
+
     def __init__(self, channels, keep_discarded_seg=False, label_key="seg"):
         self.label_key = label_key
         self.channels = channels
@@ -86,6 +89,7 @@ class SegChannelSelectionTransform(AbstractTransform):
 
 
 class Convert3DTo2DTransform(AbstractTransform):
+
     def __init__(self):
         pass
 
@@ -94,6 +98,7 @@ class Convert3DTo2DTransform(AbstractTransform):
 
 
 class SpatialTransform(AbstractTransform):
+
     def __init__(self,
                  patch_size,
                  patch_center_dist_from_border=30,
@@ -119,8 +124,8 @@ class SpatialTransform(AbstractTransform):
                  p_scale_per_sample=1,
                  p_rot_per_sample=1,
                  independent_scale_for_each_axis=False,
-                 p_rot_per_axis: float=1,
-                 p_independent_scale_per_axis: int=1):
+                 p_rot_per_axis: float = 1,
+                 p_independent_scale_per_axis: int = 1):
         self.independent_scale_for_each_axis = independent_scale_for_each_axis
         self.p_rot_per_sample = p_rot_per_sample
         self.p_scale_per_sample = p_scale_per_sample
@@ -196,6 +201,7 @@ class SpatialTransform(AbstractTransform):
 
 
 class Convert2DTo3DTransform(AbstractTransform):
+
     def __init__(self):
         pass
 
@@ -204,11 +210,12 @@ class Convert2DTo3DTransform(AbstractTransform):
 
 
 class GaussianNoiseTransform(AbstractTransform):
+
     def __init__(self,
                  noise_variance=(0, 0.1),
                  p_per_sample=1,
-                 p_per_channel: float=1,
-                 per_channel: bool=False,
+                 p_per_channel: float = 1,
+                 per_channel: bool = False,
                  data_key="data"):
         self.p_per_sample = p_per_sample
         self.data_key = data_key
@@ -226,14 +233,15 @@ class GaussianNoiseTransform(AbstractTransform):
 
 
 class GaussianBlurTransform(AbstractTransform):
+
     def __init__(self,
-                 blur_sigma: Tuple[float, float]=(1, 5),
-                 different_sigma_per_channel: bool=True,
-                 different_sigma_per_axis: bool=False,
-                 p_isotropic: float=0,
-                 p_per_channel: float=1,
-                 p_per_sample: float=1,
-                 data_key: str="data"):
+                 blur_sigma: Tuple[float, float] = (1, 5),
+                 different_sigma_per_channel: bool = True,
+                 different_sigma_per_axis: bool = False,
+                 p_isotropic: float = 0,
+                 p_per_channel: float = 1,
+                 p_per_sample: float = 1,
+                 data_key: str = "data"):
         self.p_per_sample = p_per_sample
         self.different_sigma_per_channel = different_sigma_per_channel
         self.p_per_channel = p_per_channel
@@ -256,6 +264,7 @@ class GaussianBlurTransform(AbstractTransform):
 
 
 class BrightnessMultiplicativeTransform(AbstractTransform):
+
     def __init__(self,
                  multiplier_range=(0.5, 2),
                  per_channel=True,
@@ -276,6 +285,7 @@ class BrightnessMultiplicativeTransform(AbstractTransform):
 
 
 class BrightnessTransform(AbstractTransform):
+
     def __init__(self,
                  mu,
                  sigma,
@@ -307,15 +317,15 @@ class BrightnessTransform(AbstractTransform):
 
 
 class ContrastAugmentationTransform(AbstractTransform):
-    def __init__(
-            self,
-            contrast_range: Union[Tuple[float, float], Callable[[], float]]=(
-                0.75, 1.25),
-            preserve_range: bool=True,
-            per_channel: bool=True,
-            data_key: str="data",
-            p_per_sample: float=1,
-            p_per_channel: float=1):
+
+    def __init__(self,
+                 contrast_range: Union[Tuple[float, float],
+                                       Callable[[], float]] = (0.75, 1.25),
+                 preserve_range: bool = True,
+                 per_channel: bool = True,
+                 data_key: str = "data",
+                 p_per_sample: float = 1,
+                 p_per_channel: float = 1):
         self.p_per_sample = p_per_sample
         self.data_key = data_key
         self.contrast_range = contrast_range
@@ -336,6 +346,7 @@ class ContrastAugmentationTransform(AbstractTransform):
 
 
 class SimulateLowResolutionTransform(AbstractTransform):
+
     def __init__(self,
                  zoom_range=(0.5, 1),
                  per_channel=False,
@@ -372,12 +383,13 @@ class SimulateLowResolutionTransform(AbstractTransform):
 
 
 class GammaTransform(AbstractTransform):
+
     def __init__(self,
                  gamma_range=(0.5, 2),
                  invert_image=False,
                  per_channel=False,
                  data_key="data",
-                 retain_stats: Union[bool, Callable[[], bool]]=False,
+                 retain_stats: Union[bool, Callable[[], bool]] = False,
                  p_per_sample=1):
         self.p_per_sample = p_per_sample
         self.retain_stats = retain_stats
@@ -399,6 +411,7 @@ class GammaTransform(AbstractTransform):
 
 
 class MirrorTransform(AbstractTransform):
+
     def __init__(self,
                  axes=(0, 1, 2),
                  data_key="data",
@@ -436,6 +449,7 @@ class MirrorTransform(AbstractTransform):
 
 
 class MaskTransform(AbstractTransform):
+
     def __init__(self,
                  dct_for_where_it_was_used,
                  mask_idx_in_seg=1,
@@ -465,6 +479,7 @@ class MaskTransform(AbstractTransform):
 
 
 class RemoveLabelTransform(AbstractTransform):
+
     def __init__(self,
                  remove_label,
                  replace_with=0,
@@ -483,6 +498,7 @@ class RemoveLabelTransform(AbstractTransform):
 
 
 class MoveSegAsOneHotToData(AbstractTransform):
+
     def __init__(self,
                  channel_id,
                  all_seg_labels,
@@ -517,6 +533,7 @@ class MoveSegAsOneHotToData(AbstractTransform):
 
 
 class ApplyRandomBinaryOperatorTransform(AbstractTransform):
+
     def __init__(self,
                  channel_idx,
                  p_per_sample=0.3,
@@ -564,6 +581,7 @@ class ApplyRandomBinaryOperatorTransform(AbstractTransform):
 
 class RemoveRandomConnectedComponentFromOneHotEncodingTransform(
         AbstractTransform):
+
     def __init__(self,
                  channel_idx,
                  key="data",
@@ -619,6 +637,7 @@ class RemoveRandomConnectedComponentFromOneHotEncodingTransform(
 
 
 class RenameTransform(AbstractTransform):
+
     def __init__(self, in_key, out_key, delete_old=False):
         self.delete_old = delete_old
         self.out_key = out_key
@@ -632,11 +651,12 @@ class RenameTransform(AbstractTransform):
 
 
 class ConvertSegmentationToRegionsTransform(AbstractTransform):
+
     def __init__(self,
                  regions: dict,
-                 seg_key: str="seg",
-                 output_key: str="seg",
-                 seg_channel: int=0):
+                 seg_key: str = "seg",
+                 output_key: str = "seg",
+                 seg_channel: int = 0):
         self.seg_channel = seg_channel
         self.output_key = output_key
         self.seg_key = seg_key
@@ -659,6 +679,7 @@ class ConvertSegmentationToRegionsTransform(AbstractTransform):
 
 
 class DownsampleSegForDSTransform3(AbstractTransform):
+
     def __init__(self,
                  ds_scales=(1, 0.5, 0.25),
                  input_key="seg",
@@ -676,6 +697,7 @@ class DownsampleSegForDSTransform3(AbstractTransform):
 
 
 class DownsampleSegForDSTransform2(AbstractTransform):
+
     def __init__(self,
                  ds_scales=(1, 0.5, 0.25),
                  order=0,
@@ -695,6 +717,7 @@ class DownsampleSegForDSTransform2(AbstractTransform):
 
 
 class NumpyToTensor(AbstractTransform):
+
     def __init__(self, keys=None, cast_to=None):
         if keys is not None and not isinstance(keys, (list, tuple)):
             keys = [keys]
@@ -723,8 +746,9 @@ class NumpyToTensor(AbstractTransform):
                     data_dict[key] = self.cast(paddle.to_tensor(val))
                 elif isinstance(val, (list, tuple)) and all(
                     [isinstance(i, np.ndarray) for i in val]):
-                    data_dict[
-                        key] = [self.cast(paddle.to_tensor(i)) for i in val]
+                    data_dict[key] = [
+                        self.cast(paddle.to_tensor(i)) for i in val
+                    ]
         else:
             for key in self.keys:
                 if isinstance(data_dict[key], np.ndarray):

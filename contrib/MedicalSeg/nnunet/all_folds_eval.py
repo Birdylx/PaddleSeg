@@ -31,8 +31,8 @@ from nnunet.utils import aggregate_scores, determine_postprocessing
 
 def collect_cv_niftis(cv_folder: str,
                       output_folder: str,
-                      validation_folder_name: str='validation_raw',
-                      folds: tuple=(0, 1, 2, 3, 4)):
+                      validation_folder_name: str = 'validation_raw',
+                      folds: tuple = (0, 1, 2, 3, 4)):
     validation_raw_folders = [
         os.path.join(cv_folder, "fold_%d" % i, validation_folder_name)
         for i in folds
@@ -58,9 +58,9 @@ def collect_cv_niftis(cv_folder: str,
 
 
 def consolidate_folds(output_folder_base,
-                      validation_folder_name: str='validation_raw',
-                      advanced_postprocessing: bool=False,
-                      folds: Tuple[int]=(0, 1, 2, 3, 4),
+                      validation_folder_name: str = 'validation_raw',
+                      advanced_postprocessing: bool = False,
+                      folds: Tuple[int] = (0, 1, 2, 3, 4),
                       num_threads=4):
     output_folder_raw = os.path.join(output_folder_base, "cv_niftis_raw")
     if os.path.isdir(output_folder_raw):
@@ -71,8 +71,8 @@ def consolidate_folds(output_folder_base,
                       validation_folder_name, folds)
 
     num_niftis_gt = len(
-        subfiles(
-            os.path.join(output_folder_base, "gt_niftis"), suffix='.nii.gz'))
+        subfiles(os.path.join(output_folder_base, "gt_niftis"),
+                 suffix='.nii.gz'))
     num_niftis = len(subfiles(output_folder_raw, suffix='.nii.gz'))
     if num_niftis != num_niftis_gt:
         raise AssertionError(
@@ -88,34 +88,32 @@ def consolidate_folds(output_folder_base,
     classes = [int(i) for i in summary_info.keys()]
     niftis = [
         file for file in os.listdir(output_folder_raw)
-        if os.path.isfile(os.path.join(output_folder_raw, file)) and
-        file.endswith('.nii.gz')
+        if os.path.isfile(os.path.join(output_folder_raw, file))
+        and file.endswith('.nii.gz')
     ]
-    test_pred_pairs = [
-        (os.path.join(output_folder_raw, i), os.path.join(output_folder_gt, i))
-        for i in niftis
-    ]
+    test_pred_pairs = [(os.path.join(output_folder_raw,
+                                     i), os.path.join(output_folder_gt, i))
+                       for i in niftis]
 
-    _ = aggregate_scores(
-        test_pred_pairs,
-        labels=classes,
-        json_output_file=os.path.join(output_folder_raw, "summary.json"),
-        num_threads=num_threads)
+    _ = aggregate_scores(test_pred_pairs,
+                         labels=classes,
+                         json_output_file=os.path.join(output_folder_raw,
+                                                       "summary.json"),
+                         num_threads=num_threads)
 
-    determine_postprocessing(
-        output_folder_base,
-        output_folder_gt,
-        'cv_niftis_raw',
-        final_subf_name="cv_niftis_postprocessed",
-        processes=num_threads,
-        advanced_postprocessing=advanced_postprocessing)
+    determine_postprocessing(output_folder_base,
+                             output_folder_gt,
+                             'cv_niftis_raw',
+                             final_subf_name="cv_niftis_postprocessed",
+                             processes=num_threads,
+                             advanced_postprocessing=advanced_postprocessing)
 
 
-def subfiles(folder: str, suffix: str=None):
+def subfiles(folder: str, suffix: str = None):
     res = [
         os.path.join(folder, i) for i in os.listdir(folder)
-        if os.path.isfile(os.path.join(folder, i)) and (suffix is None or
-                                                        i.endswith(suffix))
+        if os.path.isfile(os.path.join(folder, i)) and (
+            suffix is None or i.endswith(suffix))
     ]
     return res
 
@@ -123,24 +121,21 @@ def subfiles(folder: str, suffix: str=None):
 def parse_args():
     parser = argparse.ArgumentParser(description='NNUnet model evaluation')
 
-    parser.add_argument(
-        '--gt_dir',
-        dest='gt_dir',
-        help='The path to gt result',
-        type=str,
-        default=None)
-    parser.add_argument(
-        '--val_pred_dir',
-        dest='val_pred_dir',
-        help='The path to val data result',
-        type=str,
-        default=None)
-    parser.add_argument(
-        '--folds',
-        dest='folds',
-        help='The number of cross validation folds.',
-        type=int,
-        default=5)
+    parser.add_argument('--gt_dir',
+                        dest='gt_dir',
+                        help='The path to gt result',
+                        type=str,
+                        default=None)
+    parser.add_argument('--val_pred_dir',
+                        dest='val_pred_dir',
+                        help='The path to val data result',
+                        type=str,
+                        default=None)
+    parser.add_argument('--folds',
+                        dest='folds',
+                        help='The number of cross validation folds.',
+                        type=int,
+                        default=5)
     return parser.parse_args()
 
 

@@ -16,6 +16,7 @@ import argparse
 import os
 import os.path as osp
 import sys
+
 parent_path = os.path.abspath(os.path.join(__file__, *(['..'] * 3)))
 sys.path.insert(0, parent_path)
 
@@ -30,34 +31,33 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description='CoCo format Json convert to RoI binary Mask.')
     # Parameters
-    parser.add_argument(
-        '--json_path',
-        type=str,
-        required=True,
-        help='The path of coco format json file.')
+    parser.add_argument('--json_path',
+                        type=str,
+                        required=True,
+                        help='The path of coco format json file.')
     parser.add_argument(
         '--image_path',
         type=str,
         default='',
-        help='The directory of images, default None if the path of images is absolute path in json file.'
+        help=
+        'The directory of images, default None if the path of images is absolute path in json file.'
     )
     parser.add_argument(
         '--seg_classid',
         type=int,
         nargs='+',
         default=None,
-        help='Classid for converting to RoI, default None if all classes need to be converted.'
+        help=
+        'Classid for converting to RoI, default None if all classes need to be converted.'
     )
-    parser.add_argument(
-        '--pad_scale',
-        type=float,
-        default=0.5,
-        help='The padding scale of box to crop image.')
-    parser.add_argument(
-        '--suffix',
-        type=str,
-        default='.png',
-        help='The suffix of filename between gt and image.')
+    parser.add_argument('--pad_scale',
+                        type=float,
+                        default=0.5,
+                        help='The padding scale of box to crop image.')
+    parser.add_argument('--suffix',
+                        type=str,
+                        default='.png',
+                        help='The suffix of filename between gt and image.')
     parser.add_argument(
         '--output_path',
         type=str,

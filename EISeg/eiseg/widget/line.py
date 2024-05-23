@@ -114,7 +114,8 @@ class LineItem(QtWidgets.QGraphicsLineItem):
                 dir.y(),
                 dx,
                 dy,
-                norm, )
+                norm,
+            )
         dx /= (norm + 1e-16)
         dy /= (norm + 1e-16)
         if debug:

@@ -40,18 +40,16 @@ from cityscapesscripts.preparation.json2labelImg import json2labelImg
 def parse_args():
     parser = argparse.ArgumentParser(
         description='Generate **labelTrainIds.png for training')
-    parser.add_argument(
-        '--cityscapes_path',
-        dest='cityscapes_path',
-        help='cityscapes path',
-        type=str)
+    parser.add_argument('--cityscapes_path',
+                        dest='cityscapes_path',
+                        help='cityscapes path',
+                        type=str)
 
-    parser.add_argument(
-        '--num_workers',
-        dest='num_workers',
-        help='How many processes are used for data conversion',
-        type=int,
-        default=cpu_count())
+    parser.add_argument('--num_workers',
+                        dest='num_workers',
+                        help='How many processes are used for data conversion',
+                        type=int,
+                        default=cpu_count())
     return parser.parse_args()
 
 

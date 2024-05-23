@@ -19,6 +19,7 @@ from paddlepanseg.cvlibs import manager
 
 @manager.LOSSES.add_component
 class NoncustomizableLoss(paddle.nn.Layer):
+
     def __init__(self, ignore_index=255):
         super().__init__()
         # `ignore_index` unused

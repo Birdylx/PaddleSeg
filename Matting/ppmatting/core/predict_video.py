@@ -35,16 +35,14 @@ def build_loader_writter(video_path, transforms, save_dir):
     alpha_save_path = os.path.join(save_dir, name + '_alpha.avi')
     fg_save_path = os.path.join(save_dir, name + '_fg.avi')
 
-    writer_alpha = VideoWriter(
-        alpha_save_path,
-        reader.fps,
-        frame_size=(reader.width, reader.height),
-        is_color=False)
-    writer_fg = VideoWriter(
-        fg_save_path,
-        reader.fps,
-        frame_size=(reader.width, reader.height),
-        is_color=True)
+    writer_alpha = VideoWriter(alpha_save_path,
+                               reader.fps,
+                               frame_size=(reader.width, reader.height),
+                               is_color=False)
+    writer_fg = VideoWriter(fg_save_path,
+                            reader.fps,
+                            frame_size=(reader.width, reader.height),
+                            is_color=True)
     writers = {'alpha': writer_alpha, 'fg': writer_fg}
 
     return loader, writers
@@ -117,8 +115,9 @@ def predict_video(model,
     model.eval()
 
     # Build loader and writer for video
-    loader, writers = build_loader_writter(
-        video_path, transforms, save_dir=save_dir)
+    loader, writers = build_loader_writter(video_path,
+                                           transforms,
+                                           save_dir=save_dir)
 
     logger.info("Start to predict...")
     progbar_pred = progbar.Progbar(target=len(loader), verbose=1)
@@ -141,13 +140,12 @@ def predict_video(model,
             infer_cost_averager.record(time.time() - infer_start)
 
             postprocess_start = time.time()
-            postprocess(
-                fg,
-                alpha,
-                data['ori_img'],
-                trans_info=data['trans_info'],
-                writers=writers,
-                fg_estimate=fg_estimate)
+            postprocess(fg,
+                        alpha,
+                        data['ori_img'],
+                        trans_info=data['trans_info'],
+                        writers=writers,
+                        fg_estimate=fg_estimate)
             postprocess_cost_averager.record(time.time() - postprocess_start)
 
             preprocess_cost = preprocess_cost_averager.get_average()

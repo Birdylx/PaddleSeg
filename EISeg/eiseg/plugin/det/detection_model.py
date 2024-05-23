@@ -8,6 +8,7 @@ import cv2
 from PIL import Image, ImageDraw
 from paddle.inference import Config
 from paddle.inference import create_predictor
+
 curr_path = os.path.abspath(os.path.dirname(__file__))
 """------------------------------------------utils.py--start----------------------------------------"""
 SUPPORT_MODELS = {
@@ -100,6 +101,7 @@ coco_clsid2catid = {
 
 
 class Times(object):
+
     def __init__(self):
         self.time = 0.
         # start time
@@ -127,6 +129,7 @@ class Times(object):
 
 
 class Timer(Times):
+
     def __init__(self, with_tracker=False):
         super(Timer, self).__init__()
         self.with_tracker = with_tracker
@@ -166,14 +169,14 @@ class Timer(Times):
             average_latency * 1000, qps))
         if self.with_tracker:
             print(
-                "preprocess_time(ms): {:.2f}, inference_time(ms): {:.2f}, postprocess_time(ms): {:.2f}, tracking_time(ms): {:.2f}".
-                format(preprocess_time * 1000, inference_time * 1000,
-                       postprocess_time * 1000, tracking_time * 1000))
+                "preprocess_time(ms): {:.2f}, inference_time(ms): {:.2f}, postprocess_time(ms): {:.2f}, tracking_time(ms): {:.2f}"
+                .format(preprocess_time * 1000, inference_time * 1000,
+                        postprocess_time * 1000, tracking_time * 1000))
         else:
             print(
-                "preprocess_time(ms): {:.2f}, inference_time(ms): {:.2f}, postprocess_time(ms): {:.2f}".
-                format(preprocess_time * 1000, inference_time * 1000,
-                       postprocess_time * 1000))
+                "preprocess_time(ms): {:.2f}, inference_time(ms): {:.2f}, postprocess_time(ms): {:.2f}"
+                .format(preprocess_time * 1000, inference_time * 1000,
+                        postprocess_time * 1000))
 
     def report(self, average=False):
         dic = {}
@@ -239,8 +242,8 @@ class PredictConfig():
         for support_model in SUPPORT_MODELS:
             if support_model in yml_conf['arch']:
                 return True
-        raise ValueError("Unsupported arch: {}, expect {}".format(yml_conf[
-            'arch'], SUPPORT_MODELS))
+        raise ValueError("Unsupported arch: {}, expect {}".format(
+            yml_conf['arch'], SUPPORT_MODELS))
 
     def print_config(self):
         print('-----------  Model Configuration -----------')
@@ -284,8 +287,8 @@ def create_inputs(imgs, im_info):
     padding_imgs = []
     for img in imgs:
         im_c, im_h, im_w = img.shape[:]
-        padding_im = np.zeros(
-            (im_c, max_shape_h, max_shape_w), dtype=np.float32)
+        padding_im = np.zeros((im_c, max_shape_h, max_shape_w),
+                              dtype=np.float32)
         padding_im[:, :im_h, :im_w] = img
         padding_imgs.append(padding_im)
     inputs['image'] = np.stack(padding_imgs, axis=0)
@@ -325,8 +328,7 @@ def decode_image(im_file, im_info, to_rgb=True):
 def preprocess(im, preprocess_ops):
     # process image by preprocess_ops
     im_info = {
-        'scale_factor': np.array(
-            [1., 1.], dtype=np.float32),
+        'scale_factor': np.array([1., 1.], dtype=np.float32),
         'im_shape': None,
     }
     im, im_info = decode_image(im, im_info)
@@ -363,16 +365,15 @@ class Resize(object):
         assert self.target_size[0] > 0 and self.target_size[1] > 0
         im_channel = im.shape[2]
         im_scale_y, im_scale_x = self.generate_scale(im)
-        im = cv2.resize(
-            im,
-            None,
-            None,
-            fx=im_scale_x,
-            fy=im_scale_y,
-            interpolation=self.interp)
+        im = cv2.resize(im,
+                        None,
+                        None,
+                        fx=im_scale_x,
+                        fy=im_scale_y,
+                        interpolation=self.interp)
         im_info['im_shape'] = np.array(im.shape[:2]).astype('float32')
-        im_info['scale_factor'] = np.array(
-            [im_scale_y, im_scale_x]).astype('float32')
+        im_info['scale_factor'] = np.array([im_scale_y,
+                                            im_scale_x]).astype('float32')
         return im, im_info
 
     def generate_scale(self, im):
@@ -492,6 +493,7 @@ class PadStride(object):
 
 
 class LetterBoxResize(object):
+
     def __init__(self, target_size):
         """
         Resize image to target size, convert normalized xywh to pixel xyxy
@@ -510,18 +512,22 @@ class LetterBoxResize(object):
         ratio_h = float(height) / shape[0]
         ratio_w = float(width) / shape[1]
         ratio = min(ratio_h, ratio_w)
-        new_shape = (round(shape[1] * ratio),
-                     round(shape[0] * ratio))  # [width, height]
+        new_shape = (round(shape[1] * ratio), round(shape[0] * ratio)
+                     )  # [width, height]
         padw = (width - new_shape[0]) / 2
         padh = (height - new_shape[1]) / 2
         top, bottom = round(padh - 0.1), round(padh + 0.1)
         left, right = round(padw - 0.1), round(padw + 0.1)
 
-        img = cv2.resize(
-            img, new_shape, interpolation=cv2.INTER_AREA)  # resized, no border
-        img = cv2.copyMakeBorder(
-            img, top, bottom, left, right, cv2.BORDER_CONSTANT,
-            value=color)  # padded rectangular
+        img = cv2.resize(img, new_shape,
+                         interpolation=cv2.INTER_AREA)  # resized, no border
+        img = cv2.copyMakeBorder(img,
+                                 top,
+                                 bottom,
+                                 left,
+                                 right,
+                                 cv2.BORDER_CONSTANT,
+                                 value=color)  # padded rectangular
         return img, ratio, padw, padh
 
     def __call__(self, im, im_info):
@@ -546,6 +552,7 @@ class LetterBoxResize(object):
 
 
 class Pad(object):
+
     def __init__(self, size, fill_value=[114.0, 114.0, 114.0]):
         """
         Pad image to a specified size.
@@ -683,28 +690,26 @@ def draw_box(im, np_boxes, labels, threshold=0.5, image_path=None):
         if len(bbox) == 4:
             xmin, ymin, xmax, ymax = bbox
             print('class_id:{:d}, confidence:{:.4f}, left_top:[{:.2f},{:.2f}],'
-                  'right_bottom:[{:.2f},{:.2f}]'.format(
-                      int(clsid), score, xmin, ymin, xmax, ymax))
+                  'right_bottom:[{:.2f},{:.2f}]'.format(int(clsid), score, xmin,
+                                                        ymin, xmax, ymax))
             # draw bbox
-            draw.line(
-                [(xmin, ymin), (xmin, ymax), (xmax, ymax), (xmax, ymin),
-                 (xmin, ymin)],
-                width=draw_thickness,
-                fill=color)
+            draw.line([(xmin, ymin), (xmin, ymax), (xmax, ymax), (xmax, ymin),
+                       (xmin, ymin)],
+                      width=draw_thickness,
+                      fill=color)
         elif len(bbox) == 8:
             x1, y1, x2, y2, x3, y3, x4, y4 = bbox
-            draw.line(
-                [(x1, y1), (x2, y2), (x3, y3), (x4, y4), (x1, y1)],
-                width=2,
-                fill=color)
+            draw.line([(x1, y1), (x2, y2), (x3, y3), (x4, y4), (x1, y1)],
+                      width=2,
+                      fill=color)
             xmin = min(x1, x2, x3, x4)
             ymin = min(y1, y2, y3, y4)
 
         # draw label
         text = "{} {:.4f}".format(labels[clsid], score)
         tw, th = draw.textsize(text)
-        draw.rectangle(
-            [(xmin + 1, ymin - th), (xmin + tw + 1, ymin)], fill=color)
+        draw.rectangle([(xmin + 1, ymin - th), (xmin + tw + 1, ymin)],
+                       fill=color)
         draw.text((xmin + 1, ymin - th), text, fill=(255, 255, 255))
     return im
 
@@ -752,13 +757,12 @@ def draw_segm(im,
         t_size = cv2.getTextSize(bbox_text, 0, 0.3, thickness=1)[0]
         cv2.rectangle(im, (x0, y0), (x0 + t_size[0], y0 - t_size[1] - 3),
                       tuple(color_mask.astype('int32').tolist()), -1)
-        cv2.putText(
-            im,
-            bbox_text, (x0, y0 - 2),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.3, (0, 0, 0),
-            1,
-            lineType=cv2.LINE_AA)
+        cv2.putText(im,
+                    bbox_text, (x0, y0 - 2),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.3, (0, 0, 0),
+                    1,
+                    lineType=cv2.LINE_AA)
     return Image.fromarray(im.astype('uint8'))
 
 
@@ -780,23 +784,24 @@ def visualize_box_mask(im, results, labels, threshold=0.5, image_path=None):
     elif isinstance(im, np.ndarray):
         im = Image.fromarray(im)
     if 'masks' in results and 'boxes' in results and len(results['boxes']) > 0:
-        im = draw_mask(
-            im, results['boxes'], results['masks'], labels, threshold=threshold)
+        im = draw_mask(im,
+                       results['boxes'],
+                       results['masks'],
+                       labels,
+                       threshold=threshold)
     if 'boxes' in results and len(results['boxes']) > 0:
-        im = draw_box(
-            im,
-            results['boxes'],
-            labels,
-            threshold=threshold,
-            image_path=image_path)
+        im = draw_box(im,
+                      results['boxes'],
+                      labels,
+                      threshold=threshold,
+                      image_path=image_path)
     if 'segm' in results:
-        im = draw_segm(
-            im,
-            results['segm'],
-            results['label'],
-            results['score'],
-            labels,
-            threshold=threshold)
+        im = draw_segm(im,
+                       results['segm'],
+                       results['label'],
+                       results['score'],
+                       labels,
+                       threshold=threshold)
     return im
 
 
@@ -829,12 +834,11 @@ def visualize(image_list,
                                                   im_bboxes_num]
 
         start_idx += im_bboxes_num
-        im = visualize_box_mask(
-            image_file,
-            im_results,
-            labels,
-            threshold=threshold,
-            image_path=image_path)
+        im = visualize_box_mask(image_file,
+                                im_results,
+                                labels,
+                                threshold=threshold,
+                                image_path=image_path)
         # img_name = os.path.split(image_file)[-1]
         img_name = os.path.split(image_path)[-1]
         print("img_name: ", img_name)
@@ -920,13 +924,12 @@ def load_predictor(model_dir,
         'trt_fp16': Config.Precision.Half
     }
     if run_mode in precision_map.keys():
-        config.enable_tensorrt_engine(
-            workspace_size=(1 << 25) * batch_size,
-            max_batch_size=batch_size,
-            min_subgraph_size=min_subgraph_size,
-            precision_mode=precision_map[run_mode],
-            use_static=False,
-            use_calib_mode=trt_calib_mode)
+        config.enable_tensorrt_engine(workspace_size=(1 << 25) * batch_size,
+                                      max_batch_size=batch_size,
+                                      min_subgraph_size=min_subgraph_size,
+                                      precision_mode=precision_map[run_mode],
+                                      use_static=False,
+                                      use_calib_mode=trt_calib_mode)
 
         if use_dynamic_shape:
             min_input_shape = {
@@ -1169,15 +1172,14 @@ class Detector(object):
 
                 # print("result: ", result)
                 if visual:
-                    self.output_dir = '/'.join(image_path.split("/")
-                                               [:-1]) + "/output/"
-                    visualize(
-                        batch_image_list,
-                        result,
-                        self.pred_config.labels,
-                        output_dir=self.output_dir,
-                        threshold=self.threshold,
-                        image_path=image_path)
+                    self.output_dir = '/'.join(
+                        image_path.split("/")[:-1]) + "/output/"
+                    visualize(batch_image_list,
+                              result,
+                              self.pred_config.labels,
+                              output_dir=self.output_dir,
+                              threshold=self.threshold,
+                              image_path=image_path)
             results.append(result)
             # print('Test iter {}'.format(i))
 
@@ -1234,8 +1236,8 @@ class Detector(object):
                 seg_res = []
                 for box, mask in zip(boxes, masks):
                     rle = mask_util.encode(
-                        np.array(
-                            mask[:, :, None], dtype=np.uint8, order="F"))[0]
+                        np.array(mask[:, :, None], dtype=np.uint8,
+                                 order="F"))[0]
                     if 'counts' in rle:
                         rle['counts'] = rle['counts'].decode("utf8")
                     seg_res.append({

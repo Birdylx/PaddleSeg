@@ -28,21 +28,24 @@ from qat_train import skip_quant
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Model export.')
-    parser.add_argument(
-        "--config", help="The config file.", type=str, required=True)
-    parser.add_argument(
-        '--model_path', help='The path of model for export', type=str)
+    parser.add_argument("--config",
+                        help="The config file.",
+                        type=str,
+                        required=True)
+    parser.add_argument('--model_path',
+                        help='The path of model for export',
+                        type=str)
     parser.add_argument(
         "--input_shape",
         nargs='+',
-        help="Export the model with fixed input shape, e.g., `--input_shape 1 3 1024 1024`.",
+        help=
+        "Export the model with fixed input shape, e.g., `--input_shape 1 3 1024 1024`.",
         type=int,
         default=None)
-    parser.add_argument(
-        '--save_dir',
-        help='The directory for saving the exported model',
-        type=str,
-        default='./output/inference_model')
+    parser.add_argument('--save_dir',
+                        help='The directory for saving the exported model',
+                        type=str,
+                        default='./output/inference_model')
     parser.add_argument(
         '--output_op',
         choices=['argmax', 'softmax', 'none'],
@@ -58,10 +61,9 @@ def parse_args():
         dest='with_softmax',
         help='Add the softmax operation at the end of the network',
         action='store_true')
-    parser.add_argument(
-        '--for_fd',
-        action='store_true',
-        help="Export the model to FD-compatible format.")
+    parser.add_argument('--for_fd',
+                        action='store_true',
+                        help="Export the model to FD-compatible format.")
 
     return parser.parse_args()
 

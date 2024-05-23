@@ -51,17 +51,17 @@ def cholesky_inverse(input, upper=False, out=None, inplace=True):
     elif len(u.shape) == 4:
         uit = paddle.transpose(u, perm=(0, 1, 3, 2))
     if inplace:
-        input = u @uit if upper else uit @u
+        input = u @ uit if upper else uit @ u
         return input
     else:
-        out = u @uit if upper else uit @u
+        out = u @ uit if upper else uit @ u
         return out
 
 
 def mahalanobis(embedding, mean, inv_covariance):
     B, C, H, W = embedding.shape
     delta = (embedding - mean).reshape((B, C, H * W)).transpose((2, 0, 1))
-    distances = ((delta @inv_covariance) @delta).sum(2).transpose((1, 0))
+    distances = ((delta @ inv_covariance) @ delta).sum(2).transpose((1, 0))
     distances = distances.reshape((B, H, W))
     distances = distances.sqrt_()
     return distances
@@ -133,7 +133,8 @@ def cdist(X, Y, p=2.0):
     return D
 
 
-def compute_pro_(y_true: np.ndarray, binary_amaps: np.ndarray,
+def compute_pro_(y_true: np.ndarray,
+                 binary_amaps: np.ndarray,
                  method='mean') -> float:
     pros = []
     for binary_amap, mask in zip(binary_amaps, y_true):
@@ -277,8 +278,8 @@ def compute_roc_score(y_true: np.ndarray,
                       non_partial_AUC=False) -> float:
     # fprs, tprs = compute_roc(masks, amaps, steps)
     fprs, tprs, thresholds = roc_curve(y_true, amaps)
-    return compute_non_partial_auc(fprs, tprs) if non_partial_AUC else auc(fprs,
-                                                                           tprs)
+    return compute_non_partial_auc(fprs, tprs) if non_partial_AUC else auc(
+        fprs, tprs)
 
 
 def denormalization(x):
@@ -325,8 +326,10 @@ def plot_fig(test_img,
             ax_img[1].title.set_text('GroundTruth')
         ax = ax_img[with_gt + 1].imshow(heat_map, cmap='jet', norm=norm)
         ax_img[with_gt + 1].imshow(img, cmap='gray', interpolation='none')
-        ax_img[with_gt + 1].imshow(
-            heat_map, cmap='jet', alpha=0.5, interpolation='none')
+        ax_img[with_gt + 1].imshow(heat_map,
+                                   cmap='jet',
+                                   alpha=0.5,
+                                   interpolation='none')
         ax_img[with_gt + 1].title.set_text('Predicted heat map')
         ax_img[with_gt + 2].imshow(mask, cmap='gray')
         ax_img[with_gt + 2].title.set_text('Predicted mask')
@@ -349,9 +352,8 @@ def plot_fig(test_img,
         cb.set_label('Anomaly Score', fontdict=font)
         if i < 1:  # save one result
             if save_pic:
-                save_name = os.path.join(save_dir,
-                                         '{}_{}'.format(class_name, tag
-                                                        if tag else i))
+                save_name = os.path.join(
+                    save_dir, '{}_{}'.format(class_name, tag if tag else i))
                 fig_img.savefig(save_name, dpi=100)
             else:
                 plt.show()

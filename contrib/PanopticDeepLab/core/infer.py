@@ -109,8 +109,10 @@ def find_instance_center(ctr_hmp, threshold=0.1, nms_kernel=3, top_k=None):
     #NMS
     nms_padding = (nms_kernel - 1) // 2
     ctr_hmp = ctr_hmp.unsqueeze(0)
-    ctr_hmp_max_pooled = F.max_pool2d(
-        ctr_hmp, kernel_size=nms_kernel, stride=1, padding=nms_padding)
+    ctr_hmp_max_pooled = F.max_pool2d(ctr_hmp,
+                                      kernel_size=nms_kernel,
+                                      stride=1,
+                                      padding=nms_padding)
     ctr_hmp = ctr_hmp * (ctr_hmp_max_pooled == ctr_hmp)
 
     ctr_hmp = ctr_hmp.squeeze((0, 1))
@@ -162,8 +164,8 @@ def group_pixels(ctr, offsets):
     distance = paddle.norm((ctr - ctr_loc).astype('float32'), axis=-1)
 
     # finds center with minimum distance at each location, offset by 1, to reserve id=0 for stuff
-    instance_id = paddle.argmin(
-        distance, axis=0).reshape((1, height, width)) + 1
+    instance_id = paddle.argmin(distance, axis=0).reshape(
+        (1, height, width)) + 1
 
     return instance_id
 
@@ -197,8 +199,10 @@ def get_instance_segmentation(semantic,
     for thing_class in thing_list:
         thing_seg = thing_seg + (semantic == thing_class).astype('int64')
     thing_seg = (thing_seg > 0).astype('int64')
-    center = find_instance_center(
-        ctr_hmp, threshold=threshold, nms_kernel=nms_kernel, top_k=top_k)
+    center = find_instance_center(ctr_hmp,
+                                  threshold=threshold,
+                                  nms_kernel=nms_kernel,
+                                  top_k=top_k)
     if center is None:
         return paddle.zeros_like(semantic), center
     ins_seg = group_pixels(center, offset)
@@ -245,10 +249,9 @@ def merge_semantic_and_instance(semantic, instance, label_divisor, thing_list,
         if paddle.all(paddle.logical_not(thing_mask)):
             continue
         # get class id for instance of ins_id
-        sem_ins_id = paddle.gather(
-            semantic.reshape((-1, )),
-            paddle.nonzero(thing_mask.reshape((
-                -1, ))))  # equal to semantic[thing_mask]
+        sem_ins_id = paddle.gather(semantic.reshape(
+            (-1, )), paddle.nonzero(thing_mask.reshape(
+                (-1, ))))  # equal to semantic[thing_mask]
         v, c = paddle.unique(sem_ins_id, return_counts=True)
         class_id = paddle.gather(v, c.argmax())
         class_id = int(class_id)
@@ -282,17 +285,18 @@ def merge_semantic_and_instance(semantic, instance, label_divisor, thing_list,
 
 
 def inference(
-        model,
-        im,
-        transforms,
-        thing_list,
-        label_divisor,
-        stuff_area,
-        ignore_index,
-        threshold=0.1,
-        nms_kernel=3,
-        top_k=None,
-        ori_shape=None, ):
+    model,
+    im,
+    transforms,
+    thing_list,
+    label_divisor,
+    stuff_area,
+    ignore_index,
+    threshold=0.1,
+    nms_kernel=3,
+    top_k=None,
+    ori_shape=None,
+):
     """
     Inference for image.
 
@@ -325,14 +329,13 @@ def inference(
     ctr_hmp = ctr_hmp.squeeze(0)  # shape: [1, h, w]
     offset = offset.squeeze(0)  # shape: [2, h, w]
 
-    instance, center = get_instance_segmentation(
-        semantic=semantic,
-        ctr_hmp=ctr_hmp,
-        offset=offset,
-        thing_list=thing_list,
-        threshold=threshold,
-        nms_kernel=nms_kernel,
-        top_k=top_k)
+    instance, center = get_instance_segmentation(semantic=semantic,
+                                                 ctr_hmp=ctr_hmp,
+                                                 offset=offset,
+                                                 thing_list=thing_list,
+                                                 threshold=threshold,
+                                                 nms_kernel=nms_kernel,
+                                                 top_k=top_k)
     panoptic = merge_semantic_and_instance(semantic, instance, label_divisor,
                                            thing_list, stuff_area, ignore_index)
 
@@ -344,8 +347,8 @@ def inference(
     if ori_shape is not None:
         results = [i.unsqueeze(0) for i in results]
         results = [
-            reverse_transform(
-                i, ori_shape=ori_shape, transforms=transforms) for i in results
+            reverse_transform(i, ori_shape=ori_shape, transforms=transforms)
+            for i in results
         ]
 
     return results

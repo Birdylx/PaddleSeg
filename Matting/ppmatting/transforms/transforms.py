@@ -63,6 +63,7 @@ class Compose:
 
 @manager.TRANSFORMS.add_component
 class LoadImages:
+
     def __init__(self, to_rgb=True):
         self.to_rgb = to_rgb
 
@@ -89,6 +90,7 @@ class LoadImages:
 
 @manager.TRANSFORMS.add_component
 class Resize:
+
     def __init__(self, target_size=(512, 512), random_interp=False):
         if isinstance(target_size, list) or isinstance(target_size, tuple):
             if len(target_size) != 2:
@@ -269,9 +271,8 @@ class Normalize:
     def __init__(self, mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)):
         self.mean = mean
         self.std = std
-        if not (isinstance(self.mean,
-                           (list, tuple)) and isinstance(self.std,
-                                                         (list, tuple))):
+        if not (isinstance(self.mean, (list, tuple))
+                and isinstance(self.std, (list, tuple))):
             raise ValueError(
                 "{}: input type is invalid. It should be list or tuple".format(
                     self))
@@ -302,7 +303,8 @@ class RandomCropByAlpha:
 
     """
 
-    def __init__(self, crop_size=((320, 320), (480, 480), (640, 640)),
+    def __init__(self,
+                 crop_size=((320, 320), (480, 480), (640, 640)),
                  prob=0.5):
         self.crop_size = crop_size
         self.prob = prob
@@ -693,32 +695,31 @@ class Padding:
         if (pad_height == 0) and (pad_width == 0):
             return data
         else:
-            data['img'] = cv2.copyMakeBorder(
-                data['img'],
-                0,
-                pad_height,
-                0,
-                pad_width,
-                cv2.BORDER_CONSTANT,
-                value=self.im_padding_value)
+            data['img'] = cv2.copyMakeBorder(data['img'],
+                                             0,
+                                             pad_height,
+                                             0,
+                                             pad_width,
+                                             cv2.BORDER_CONSTANT,
+                                             value=self.im_padding_value)
             for key in data.get('gt_fields', []):
                 if key in ['trimap', 'alpha']:
                     value = 0
                 else:
                     value = self.im_padding_value
-                data[key] = cv2.copyMakeBorder(
-                    data[key],
-                    0,
-                    pad_height,
-                    0,
-                    pad_width,
-                    cv2.BORDER_CONSTANT,
-                    value=value)
+                data[key] = cv2.copyMakeBorder(data[key],
+                                               0,
+                                               pad_height,
+                                               0,
+                                               pad_width,
+                                               cv2.BORDER_CONSTANT,
+                                               value=value)
         return data
 
 
 @manager.TRANSFORMS.add_component
 class RandomSharpen:
+
     def __init__(self, prob=0.1):
         if prob < 0:
             self.prob = 0
@@ -746,6 +747,7 @@ class RandomSharpen:
 
 @manager.TRANSFORMS.add_component
 class RandomNoise:
+
     def __init__(self, prob=0.1):
         if prob < 0:
             self.prob = 0
@@ -768,6 +770,7 @@ class RandomNoise:
 
 @manager.TRANSFORMS.add_component
 class RandomReJpeg:
+
     def __init__(self, prob=0.1):
         if prob < 0:
             self.prob = 0

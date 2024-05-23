@@ -125,8 +125,8 @@ def lovasz_hinge_flat(logits, labels):
     signs.stop_gradient = True
     errors = 1. - logits * signs
     if hasattr(paddle, "_legacy_C_ops"):
-        errors_sorted, perm = paddle._legacy_C_ops.argsort(errors, 'axis', 0,
-                                                           'descending', True)
+        errors_sorted, perm = paddle._legacy_C_ops.argsort(
+            errors, 'axis', 0, 'descending', True)
     else:
         errors_sorted, perm = paddle._C_ops.argsort(errors, 'axis', 0,
                                                     'descending', True)

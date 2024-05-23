@@ -155,8 +155,9 @@ class RandomRotation3D:
             sequence: params to be passed to ``rotate`` for random rotation.
         """
         angle = random.uniform(degrees[0], degrees[1])
-        r_plane = self.rotate_planes[random.randint(
-            0, len(self.rotate_planes) - 1)]
+        r_plane = self.rotate_planes[random.randint(0,
+                                                    len(self.rotate_planes) -
+                                                    1)]
 
         return angle, r_plane
 
@@ -196,8 +197,9 @@ class RandomQuarterTurn3D:
         Returns:
             sequence: params to be passed to ``rotate`` for random rotation.
         """
-        r_plane = self.rotate_planes[random.randint(
-            0, len(self.rotate_planes) - 1)]
+        r_plane = self.rotate_planes[random.randint(0,
+                                                    len(self.rotate_planes) -
+                                                    1)]
         return r_plane
 
     def __call__(self, img, label=None):
@@ -483,8 +485,9 @@ class RandomRotation4D:
             sequence: params to be passed to ``rotate`` for random rotation.
         """
         angle = random.uniform(degrees[0], degrees[1])
-        r_plane = self.rotate_planes[random.randint(
-            0, len(self.rotate_planes) - 1)]
+        r_plane = self.rotate_planes[random.randint(0,
+                                                    len(self.rotate_planes) -
+                                                    1)]
 
         return angle, r_plane
 
@@ -635,8 +638,8 @@ class GaussianNoiseTransform:
     def __init__(self,
                  noise_variance=(0, 0.1),
                  p_per_sample=1,
-                 p_per_channel: float=1,
-                 per_channel: bool=False):
+                 p_per_channel: float = 1,
+                 per_channel: bool = False):
         self.p_per_sample = p_per_sample
         self.noise_variance = noise_variance
         self.p_per_channel = p_per_channel
@@ -662,12 +665,12 @@ class GaussianBlurTransform:
     """
 
     def __init__(self,
-                 blur_sigma: Tuple[float, float]=(1, 5),
-                 different_sigma_per_channel: bool=True,
-                 different_sigma_per_axis: bool=False,
-                 p_isotropic: float=0,
-                 p_per_channel: float=1,
-                 p_per_sample: float=1):
+                 blur_sigma: Tuple[float, float] = (1, 5),
+                 different_sigma_per_channel: bool = True,
+                 different_sigma_per_axis: bool = False,
+                 p_isotropic: float = 0,
+                 p_per_channel: float = 1,
+                 p_per_sample: float = 1):
         self.p_per_sample = p_per_sample
         self.different_sigma_per_channel = different_sigma_per_channel
         self.p_per_channel = p_per_channel
@@ -708,8 +711,9 @@ class BrightnessMultiplicativeTransform:
     def __call__(self, img, label=None):
 
         if np.random.uniform() < self.p_per_sample:
-            img = F.augment_brightness_multiplicative(
-                img, self.multiplier_range, self.per_channel)
+            img = F.augment_brightness_multiplicative(img,
+                                                      self.multiplier_range,
+                                                      self.per_channel)
         return img, label
 
 
@@ -724,14 +728,13 @@ class ContrastAugmentationTransform:
     p_per_channel: 对原image每个channel上进行该项数据增强的概率
     """
 
-    def __init__(
-            self,
-            contrast_range: Union[Tuple[float, float], Callable[[], float]]=(
-                0.75, 1.25),
-            preserve_range: bool=True,
-            per_channel: bool=True,
-            p_per_sample: float=1,
-            p_per_channel: float=1):
+    def __init__(self,
+                 contrast_range: Union[Tuple[float, float],
+                                       Callable[[], float]] = (0.75, 1.25),
+                 preserve_range: bool = True,
+                 per_channel: bool = True,
+                 p_per_sample: float = 1,
+                 p_per_channel: float = 1):
         self.p_per_sample = p_per_sample
         self.contrast_range = contrast_range
         self.preserve_range = preserve_range
@@ -741,12 +744,11 @@ class ContrastAugmentationTransform:
     def __call__(self, img, label=None):
 
         if np.random.uniform() < self.p_per_sample:
-            img = F.augment_contrast(
-                img,
-                contrast_range=self.contrast_range,
-                preserve_range=self.preserve_range,
-                per_channel=self.per_channel,
-                p_per_channel=self.p_per_channel)
+            img = F.augment_contrast(img,
+                                     contrast_range=self.contrast_range,
+                                     preserve_range=self.preserve_range,
+                                     per_channel=self.per_channel,
+                                     p_per_channel=self.p_per_channel)
         return img, label
 
 
@@ -811,7 +813,7 @@ class GammaTransform:
                  gamma_range=(0.5, 2),
                  invert_image=False,
                  per_channel=False,
-                 retain_stats: Union[bool, Callable[[], bool]]=False,
+                 retain_stats: Union[bool, Callable[[], bool]] = False,
                  p_per_sample=1):
         self.p_per_sample = p_per_sample
         self.retain_stats = retain_stats
@@ -822,12 +824,11 @@ class GammaTransform:
     def __call__(self, img, label=None):
 
         if np.random.uniform() < self.p_per_sample:
-            img = F.augment_gamma(
-                img,
-                self.gamma_range,
-                self.invert_image,
-                per_channel=self.per_channel,
-                retain_stats=self.retain_stats)
+            img = F.augment_gamma(img,
+                                  self.gamma_range,
+                                  self.invert_image,
+                                  per_channel=self.per_channel,
+                                  retain_stats=self.retain_stats)
         return img, label
 
 
@@ -953,8 +954,8 @@ class RandomPaddingCrop:
             pad_height = max(crop_height - img_height, 0)
             pad_width = max(crop_width - img_width, 0)
             if (pad_height > 0 or pad_width > 0 or pad_depth > 0):
-                img = np.pad(img, ((0, pad_depth), (0, pad_height),
-                                   (0, pad_width)))
+                img = np.pad(img,
+                             ((0, pad_depth), (0, pad_height), (0, pad_width)))
                 if label is not None:
                     label = np.pad(label, ((0, pad_depth), (0, pad_height),
                                            (0, pad_width)))
@@ -967,9 +968,11 @@ class RandomPaddingCrop:
                 d_off = np.random.randint(img_depth - crop_depth + 1)
                 h_off = np.random.randint(img_height - crop_height + 1)
                 w_off = np.random.randint(img_width - crop_width + 1)
-                img = img[d_off:(d_off + crop_depth), h_off:(
-                    crop_height + h_off), w_off:(w_off + crop_width)]
+                img = img[d_off:(d_off + crop_depth),
+                          h_off:(crop_height + h_off),
+                          w_off:(w_off + crop_width)]
                 if label is not None:
-                    label = label[d_off:(d_off + crop_depth), h_off:(
-                        crop_height + h_off), w_off:(w_off + crop_width)]
+                    label = label[d_off:(d_off + crop_depth),
+                                  h_off:(crop_height + h_off),
+                                  w_off:(w_off + crop_width)]
         return img, label

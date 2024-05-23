@@ -18,6 +18,7 @@ def _isArrayLike(obj):
 
 
 class COCO:
+
     def __init__(self, annotation_file=None):
         """
         Constructor of Microsoft COCO helper class for reading and visualizing annotations.
@@ -45,9 +46,9 @@ class COCO:
             print("loading annotations into memory...")
             tic = time.time()
             dataset = json.load(open(annotation_file, "r"))
-            assert (
-                type(dataset) == dict
-            ), "annotation file format {} not supported".format(type(dataset))
+            assert (type(dataset) == dict
+                    ), "annotation file format {} not supported".format(
+                        type(dataset))
             print("Done (t={:0.2f}s)".format(time.time() - tic))
             self.dataset = dataset
             self.createIndex()
@@ -104,13 +105,14 @@ class COCO:
         self.cats = cats
 
     def setInfo(
-            self,
-            year: int="",
-            version: str="",
-            description: str="",
-            contributor: str="",
-            url: str="",
-            date_created: datetime="", ):
+        self,
+        year: int = "",
+        version: str = "",
+        description: str = "",
+        contributor: str = "",
+        url: str = "",
+        date_created: datetime = "",
+    ):
         self.dataset["info"] = {
             "year": year,
             "version": version,
@@ -121,11 +123,12 @@ class COCO:
         }
 
     def addCategory(
-            self,
-            id: int,
-            name: str,
-            color: list,
-            supercategory: str="", ):
+        self,
+        id: int,
+        name: str,
+        color: list,
+        supercategory: str = "",
+    ):
         cat = {
             "id": id,
             "name": name,
@@ -136,11 +139,12 @@ class COCO:
         self.dataset["categories"].append(cat)
 
     def updateCategory(
-            self,
-            id: int,
-            name: str,
-            color: list,
-            supercategory: str="", ):
+        self,
+        id: int,
+        name: str,
+        color: list,
+        supercategory: str = "",
+    ):
         cat = {
             "id": id,
             "name": name,
@@ -153,15 +157,16 @@ class COCO:
                 self.dataset["categories"][idx] = cat
 
     def addImage(
-            self,
-            file_name: str,
-            width: int,
-            height: int,
-            id: int=None,
-            license: int="",
-            flickr_url: str="",
-            coco_url: str="",
-            date_captured: datetime="", ):
+        self,
+        file_name: str,
+        width: int,
+        height: int,
+        id: int = None,
+        license: int = "",
+        flickr_url: str = "",
+        coco_url: str = "",
+        date_captured: datetime = "",
+    ):
         if self.hasImage(file_name):
             print(f"{file_name}图片已存在")
             return
@@ -196,12 +201,13 @@ class COCO:
         return 0.5 * np.abs(np.dot(x, np.roll(y, 1)) - np.dot(y, np.roll(x, 1)))
 
     def addAnnotation(
-            self,
-            image_id: int,
-            category_id: int,
-            segmentation: list,
-            area: float=None,
-            id: int=None, ):
+        self,
+        image_id: int,
+        category_id: int,
+        segmentation: list,
+        area: float = None,
+        id: int = None,
+    ):
         if id is not None and self.anns.get(id, None) is not None:
             print("标签已经存在")
             return
@@ -252,7 +258,8 @@ class COCO:
                 print(
                     "record point : ",
                     rec["segmentation"][0][0],
-                    rec["segmentation"][0][1], )
+                    rec["segmentation"][0][1],
+                )
                 break
 
         for rec in self.imgToAnns[imgId]:
@@ -568,7 +575,8 @@ class COCO:
             if not os.path.exists(fname):
                 urlretrieve(img["coco_url"], fname)
             print("downloaded {}/{} images (t={:0.1f}s)".format(
-                i, N, time.time() - tic))
+                i, N,
+                time.time() - tic))
 
     def loadNumpyAnnotations(self, data):
         """

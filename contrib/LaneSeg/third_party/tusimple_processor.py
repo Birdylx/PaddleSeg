@@ -29,6 +29,7 @@ def mkdir(path):
 
 
 class TusimpleProcessor:
+
     def __init__(self,
                  num_classes=2,
                  ori_shape=(720, 1280),
@@ -44,14 +45,13 @@ class TusimpleProcessor:
         self.color_map = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0),
                           (255, 0, 255), (0, 255, 125), (50, 100, 50),
                           (100, 50, 100)]
-        self.laneProcessor = LaneProcessor(
-            num_classes=self.num_classes,
-            ori_shape=ori_shape,
-            cut_height=cut_height,
-            y_pixel_gap=10,
-            points_nums=56,
-            thresh=thresh,
-            smooth=True)
+        self.laneProcessor = LaneProcessor(num_classes=self.num_classes,
+                                           ori_shape=ori_shape,
+                                           cut_height=cut_height,
+                                           y_pixel_gap=10,
+                                           points_nums=56,
+                                           thresh=thresh,
+                                           smooth=True)
 
     def dump_data_to_json(self,
                           output,
@@ -96,8 +96,9 @@ class TusimpleProcessor:
                 self.draw(img, lane_coords, saved_path)
 
     def predict(self, output, im_path):
-        self.dump_data_to_json(
-            output, [im_path], is_dump_json=False, is_view=True)
+        self.dump_data_to_json(output, [im_path],
+                               is_dump_json=False,
+                               is_view=True)
 
     def bench_one_submit(self, local_rank):
         output_file = os.path.join(self.save_dir, str(local_rank), 'pred.json')
@@ -107,8 +108,8 @@ class TusimpleProcessor:
             for line in self.dump_to_json:
                 print(line, end="\n", file=f)
 
-        eval_rst, acc, fp, fn = LaneEval.bench_one_submit(output_file,
-                                                          self.test_gt_json)
+        eval_rst, acc, fp, fn = LaneEval.bench_one_submit(
+            output_file, self.test_gt_json)
         self.dump_to_json = []
         return acc, fp, fn, eval_rst
 

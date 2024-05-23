@@ -28,44 +28,43 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Model prediction')
 
     # params of prediction
-    parser.add_argument(
-        "--config", dest="cfg", help="The config file.", default=None, type=str)
-    parser.add_argument(
-        '--model_path',
-        dest='model_path',
-        help='The path of model for prediction',
-        type=str,
-        default=None)
+    parser.add_argument("--config",
+                        dest="cfg",
+                        help="The config file.",
+                        default=None,
+                        type=str)
+    parser.add_argument('--model_path',
+                        dest='model_path',
+                        help='The path of model for prediction',
+                        type=str,
+                        default=None)
     parser.add_argument(
         '--image_path',
         dest='image_path',
-        help='The path of image, it can be a file or a directory including images',
+        help=
+        'The path of image, it can be a file or a directory including images',
         type=str,
         default=None)
-    parser.add_argument(
-        '--save_dir',
-        dest='save_dir',
-        help='The directory for saving the predicted results',
-        type=str,
-        default='./output/result')
-    parser.add_argument(
-        '--threshold',
-        dest='threshold',
-        help='Threshold applied to center heatmap score',
-        type=float,
-        default=0.1)
-    parser.add_argument(
-        '--nms_kernel',
-        dest='nms_kernel',
-        help='NMS max pooling kernel size',
-        type=int,
-        default=7)
-    parser.add_argument(
-        '--top_k',
-        dest='top_k',
-        help='Top k centers to keep',
-        type=int,
-        default=200)
+    parser.add_argument('--save_dir',
+                        dest='save_dir',
+                        help='The directory for saving the predicted results',
+                        type=str,
+                        default='./output/result')
+    parser.add_argument('--threshold',
+                        dest='threshold',
+                        help='Threshold applied to center heatmap score',
+                        type=float,
+                        default=0.1)
+    parser.add_argument('--nms_kernel',
+                        dest='nms_kernel',
+                        help='NMS max pooling kernel size',
+                        type=int,
+                        default=7)
+    parser.add_argument('--top_k',
+                        dest='top_k',
+                        help='Top k centers to keep',
+                        type=int,
+                        default=200)
 
     return parser.parse_args()
 
@@ -125,20 +124,19 @@ def main(args):
     image_list, image_dir = get_image_list(args.image_path)
     logger.info('Number of predict images = {}'.format(len(image_list)))
 
-    predict(
-        model,
-        model_path=args.model_path,
-        transforms=transforms,
-        thing_list=val_dataset.thing_list,
-        label_divisor=val_dataset.label_divisor,
-        stuff_area=val_dataset.stuff_area,
-        ignore_index=val_dataset.ignore_index,
-        image_list=image_list,
-        image_dir=image_dir,
-        save_dir=args.save_dir,
-        threshold=args.threshold,
-        nms_kernel=args.nms_kernel,
-        top_k=args.top_k)
+    predict(model,
+            model_path=args.model_path,
+            transforms=transforms,
+            thing_list=val_dataset.thing_list,
+            label_divisor=val_dataset.label_divisor,
+            stuff_area=val_dataset.stuff_area,
+            ignore_index=val_dataset.ignore_index,
+            image_list=image_list,
+            image_dir=image_dir,
+            save_dir=args.save_dir,
+            threshold=args.threshold,
+            nms_kernel=args.nms_kernel,
+            top_k=args.top_k)
 
 
 if __name__ == '__main__':

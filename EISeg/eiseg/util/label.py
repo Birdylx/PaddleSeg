@@ -18,6 +18,7 @@ from . import colorMap
 
 
 class Label:
+
     def __init__(self, idx=None, name=None, color=None):
         self.idx = idx
         self.name = name
@@ -28,7 +29,8 @@ class Label:
 
 
 class LabelList(object):
-    def __init__(self, labels: dict=None):
+
+    def __init__(self, labels: dict = None):
         self.labelList = []
         if labels is not None:
             for lab in labels:

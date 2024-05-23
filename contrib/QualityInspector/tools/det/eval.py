@@ -52,64 +52,59 @@ def parse_args():
         default=False,
         help='Whether to re eval with already exists bbox.json or mask.json')
 
-    parser.add_argument(
-        "--slim_config",
-        default=None,
-        type=str,
-        help="Configuration file of slim method.")
+    parser.add_argument("--slim_config",
+                        default=None,
+                        type=str,
+                        help="Configuration file of slim method.")
 
     # TODO: bias should be unified
-    parser.add_argument(
-        "--bias",
-        action="store_true",
-        help="whether add bias or not while getting w and h")
+    parser.add_argument("--bias",
+                        action="store_true",
+                        help="whether add bias or not while getting w and h")
 
     parser.add_argument(
         "--classwise",
         action="store_true",
         help="whether per-category AP and draw P-R Curve or not.")
 
-    parser.add_argument(
-        '--save_prediction_only',
-        action='store_true',
-        default=False,
-        help='Whether to save the evaluation results only')
+    parser.add_argument('--save_prediction_only',
+                        action='store_true',
+                        default=False,
+                        help='Whether to save the evaluation results only')
 
-    parser.add_argument(
-        "--amp",
-        action='store_true',
-        default=False,
-        help="Enable auto mixed precision eval.")
+    parser.add_argument("--amp",
+                        action='store_true',
+                        default=False,
+                        help="Enable auto mixed precision eval.")
 
     # for smalldet slice_infer
     parser.add_argument(
         "--slice_infer",
         action='store_true',
-        help="Whether to slice the image and merge the inference results for small object detection."
+        help=
+        "Whether to slice the image and merge the inference results for small object detection."
     )
-    parser.add_argument(
-        '--slice_size',
-        nargs='+',
-        type=int,
-        default=[640, 640],
-        help="Height of the sliced image.")
-    parser.add_argument(
-        "--overlap_ratio",
-        nargs='+',
-        type=float,
-        default=[0.25, 0.25],
-        help="Overlap height ratio of the sliced image.")
+    parser.add_argument('--slice_size',
+                        nargs='+',
+                        type=int,
+                        default=[640, 640],
+                        help="Height of the sliced image.")
+    parser.add_argument("--overlap_ratio",
+                        nargs='+',
+                        type=float,
+                        default=[0.25, 0.25],
+                        help="Overlap height ratio of the sliced image.")
     parser.add_argument(
         "--combine_method",
         type=str,
         default='nms',
-        help="Combine method of the sliced images' detection results, choose in ['nms', 'nmm', 'concat']."
+        help=
+        "Combine method of the sliced images' detection results, choose in ['nms', 'nmm', 'concat']."
     )
-    parser.add_argument(
-        "--match_threshold",
-        type=float,
-        default=0.6,
-        help="Combine method matching threshold.")
+    parser.add_argument("--match_threshold",
+                        type=float,
+                        default=0.6,
+                        help="Combine method matching threshold.")
     parser.add_argument(
         "--match_metric",
         type=str,
@@ -125,10 +120,9 @@ def run(FLAGS, cfg):
             "In json_eval mode, PaddleDetection will evaluate json files in "
             "output_eval directly. And proposal.json, bbox.json and mask.json "
             "will be detected by default.")
-        json_eval_results(
-            cfg.metric,
-            json_directory=FLAGS.output_eval,
-            dataset=cfg['EvalDataset'])
+        json_eval_results(cfg.metric,
+                          json_directory=FLAGS.output_eval,
+                          dataset=cfg['EvalDataset'])
         return
 
     # init parallel environment if nranks > 1
@@ -142,12 +136,11 @@ def run(FLAGS, cfg):
 
     # training
     if FLAGS.slice_infer:
-        trainer.evaluate_slice(
-            slice_size=FLAGS.slice_size,
-            overlap_ratio=FLAGS.overlap_ratio,
-            combine_method=FLAGS.combine_method,
-            match_threshold=FLAGS.match_threshold,
-            match_metric=FLAGS.match_metric)
+        trainer.evaluate_slice(slice_size=FLAGS.slice_size,
+                               overlap_ratio=FLAGS.overlap_ratio,
+                               combine_method=FLAGS.combine_method,
+                               match_threshold=FLAGS.match_threshold,
+                               match_metric=FLAGS.match_metric)
     else:
         trainer.evaluate()
 

@@ -34,41 +34,40 @@ from ppmatting.utils import Config, MatBuilder
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Model training')
-    parser.add_argument(
-        "--config", dest="cfg", help="The config file.", default=None, type=str)
-    parser.add_argument(
-        '--opts',
-        help='Update the key-value pairs of all options.',
-        default=None,
-        nargs='+')
-    parser.add_argument(
-        '--model_path',
-        dest='model_path',
-        help='The path of model for evaluation',
-        type=str,
-        default=None)
-    parser.add_argument(
-        '--save_dir',
-        dest='save_dir',
-        help='The directory for saving the model snapshot',
-        type=str,
-        default='./output/results')
-    parser.add_argument(
-        '--num_workers',
-        dest='num_workers',
-        help='Num workers for data loader',
-        type=int,
-        default=0)
-    parser.add_argument(
-        '--save_results',
-        dest='save_results',
-        help='save prediction alpha while evaluating',
-        action='store_true')
+    parser.add_argument("--config",
+                        dest="cfg",
+                        help="The config file.",
+                        default=None,
+                        type=str)
+    parser.add_argument('--opts',
+                        help='Update the key-value pairs of all options.',
+                        default=None,
+                        nargs='+')
+    parser.add_argument('--model_path',
+                        dest='model_path',
+                        help='The path of model for evaluation',
+                        type=str,
+                        default=None)
+    parser.add_argument('--save_dir',
+                        dest='save_dir',
+                        help='The directory for saving the model snapshot',
+                        type=str,
+                        default='./output/results')
+    parser.add_argument('--num_workers',
+                        dest='num_workers',
+                        help='Num workers for data loader',
+                        type=int,
+                        default=0)
+    parser.add_argument('--save_results',
+                        dest='save_results',
+                        help='save prediction alpha while evaluating',
+                        action='store_true')
     parser.add_argument(
         '--metrics',
         dest='metrics',
         nargs='+',
-        help='The metrics to evaluate, it may be the combination of ("sad", "mse", "grad", "conn")',
+        help=
+        'The metrics to evaluate, it may be the combination of ("sad", "mse", "grad", "conn")',
         type=str,
         default='sad')
     parser.add_argument(
@@ -98,19 +97,17 @@ def main(args):
         if args.model_path:
             utils.load_entire_model(model, args.model_path)
             logger.info('Loaded trained params of model successfully')
-        evaluate(
-            model,
-            val_dataset,
-            num_workers=args.num_workers,
-            save_dir=args.save_dir,
-            save_results=args.save_results,
-            metrics=args.metrics)
+        evaluate(model,
+                 val_dataset,
+                 num_workers=args.num_workers,
+                 save_dir=args.save_dir,
+                 save_results=args.save_results,
+                 metrics=args.metrics)
     else:
-        evaluate_ml(
-            model,
-            val_dataset,
-            save_dir=args.save_dir,
-            save_results=args.save_results)
+        evaluate_ml(model,
+                    val_dataset,
+                    save_dir=args.save_dir,
+                    save_results=args.save_results)
 
 
 if __name__ == '__main__':

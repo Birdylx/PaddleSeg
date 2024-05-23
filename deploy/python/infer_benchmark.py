@@ -28,19 +28,17 @@ from infer import auto_tune, use_auto_tune, Predictor
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Test')
-    parser.add_argument(
-        "--config",
-        dest="cfg",
-        help="The config file.",
-        default=None,
-        type=str,
-        required=True)
-    parser.add_argument(
-        '--save_dir',
-        dest='save_dir',
-        help='The directory for saving the predict result.',
-        type=str,
-        default='./output')
+    parser.add_argument("--config",
+                        dest="cfg",
+                        help="The config file.",
+                        default=None,
+                        type=str,
+                        required=True)
+    parser.add_argument('--save_dir',
+                        dest='save_dir',
+                        help='The directory for saving the predict result.',
+                        type=str,
+                        default='./output')
 
     parser.add_argument(
         '--image_path',
@@ -74,61 +72,56 @@ def parse_args():
         type=eval,
         choices=[True, False],
         help='Whether to use Nvidia TensorRT to accelerate prediction.')
-    parser.add_argument(
-        "--precision",
-        default="fp32",
-        type=str,
-        choices=["fp32", "fp16", "int8"],
-        help='The tensorrt precision.')
-    parser.add_argument(
-        '--min_subgraph_size',
-        default=3,
-        type=int,
-        help='The min subgraph size in tensorrt prediction.')
+    parser.add_argument("--precision",
+                        default="fp32",
+                        type=str,
+                        choices=["fp32", "fp16", "int8"],
+                        help='The tensorrt precision.')
+    parser.add_argument('--min_subgraph_size',
+                        default=3,
+                        type=int,
+                        help='The min subgraph size in tensorrt prediction.')
     parser.add_argument(
         '--enable_auto_tune',
         default=False,
         type=eval,
         choices=[True, False],
-        help='Whether to enable tuned dynamic shape. We uses some images to collect '
+        help=
+        'Whether to enable tuned dynamic shape. We uses some images to collect '
         'the dynamic shape for trt sub graph, which avoids setting dynamic shape manually.'
     )
-    parser.add_argument(
-        '--auto_tuned_shape_file',
-        type=str,
-        default="auto_tune_tmp.pbtxt",
-        help='The temp file to save tuned dynamic shape.')
+    parser.add_argument('--auto_tuned_shape_file',
+                        type=str,
+                        default="auto_tune_tmp.pbtxt",
+                        help='The temp file to save tuned dynamic shape.')
 
-    parser.add_argument(
-        '--cpu_threads',
-        default=10,
-        type=int,
-        help='Number of threads to predict when using cpu.')
-    parser.add_argument(
-        '--enable_mkldnn',
-        default=False,
-        type=eval,
-        choices=[True, False],
-        help='Enable to use mkldnn to speed up when using cpu.')
+    parser.add_argument('--cpu_threads',
+                        default=10,
+                        type=int,
+                        help='Number of threads to predict when using cpu.')
+    parser.add_argument('--enable_mkldnn',
+                        default=False,
+                        type=eval,
+                        choices=[True, False],
+                        help='Enable to use mkldnn to speed up when using cpu.')
 
     parser.add_argument('--warmup', default=50, type=int, help='')
     parser.add_argument('--repeats', default=100, type=int, help='')
 
-    parser.add_argument(
-        '--with_argmax',
-        dest='with_argmax',
-        help='Perform argmax operation on the predict result.',
-        action='store_true')
-    parser.add_argument(
-        '--print_detail',
-        dest='print_detail',
-        help='Print GLOG information of Paddle Inference.',
-        action='store_true')
+    parser.add_argument('--with_argmax',
+                        dest='with_argmax',
+                        help='Perform argmax operation on the predict result.',
+                        action='store_true')
+    parser.add_argument('--print_detail',
+                        dest='print_detail',
+                        help='Print GLOG information of Paddle Inference.',
+                        action='store_true')
 
     return parser.parse_args()
 
 
 class PredictorBenchmark(Predictor):
+
     def run(self, img_path):
         args = self.args
         input_names = self.predictor.get_input_names()
@@ -168,10 +161,11 @@ class PredictorBenchmark(Predictor):
             with codecs.open(args.cfg, 'r', 'utf-8') as file:
                 dic = yaml.load(file, Loader=yaml.FullLoader)
             transforms_dic = dic['Deploy']['transforms']
-            transforms_dic.insert(0, {
-                "type": "Resize",
-                'target_size': [args.resize_width, args.resize_height]
-            })
+            transforms_dic.insert(
+                0, {
+                    "type": "Resize",
+                    'target_size': [args.resize_width, args.resize_height]
+                })
             transforms = DeployConfig.load_transforms(transforms_dic)
             return transforms(data)['img']
 

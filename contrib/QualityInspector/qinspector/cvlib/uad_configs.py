@@ -44,8 +44,8 @@ class ConfigParser(object):
 
     def check_cfg(self):
         device = self.cfg.get("device", "GPU")
-        assert device.upper() in ['CPU', 'GPU', 'XPU'
-                                  ], "device should be CPU, GPU or XPU"
+        assert device.upper() in ['CPU', 'GPU',
+                                  'XPU'], "device should be CPU, GPU or XPU"
 
     def parser(self):
         return Dic2Obj(self.cfg)
@@ -58,6 +58,7 @@ class ConfigParser(object):
 
 
 class Dic2Obj(object):
+
     def __new__(cls, data):
         if isinstance(data, dict):
             return namedtuple('Dic2Obj',

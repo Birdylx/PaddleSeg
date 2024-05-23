@@ -39,6 +39,7 @@ from tools.preprocess_utils import uncompressor, global_var, add_qform_sform, jo
 
 
 class Prep:
+
     def __init__(self,
                  dataset_root="data/TemDataSet",
                  raw_dataset_dir="TemDataSet_seg_raw/",
@@ -48,8 +49,10 @@ class Prep:
                  urls=None,
                  valid_suffix=("nii.gz", "nii.gz"),
                  filter_key=(None, None),
-                 uncompress_params={"format": "zip",
-                                    "num_files": 1},
+                 uncompress_params={
+                     "format": "zip",
+                     "num_files": 1
+                 },
                  images_dir_test=""):
         """
         Create proprosessor for medical dataset.
@@ -93,9 +96,8 @@ class Prep:
                 f"raw_dataset_dir {self.raw_data_path} exists, skipping uncompress. To uncompress again, remove this directory"
             )
         else:
-            self.uncompress_file(
-                num_files=uncompress_params["num_files"],
-                form=uncompress_params["format"])
+            self.uncompress_file(num_files=uncompress_params["num_files"],
+                                 form=uncompress_params["format"])
 
         self.image_files_test = None
         if len(images_dir_test
@@ -130,8 +132,9 @@ class Prep:
         self.label_files.sort()
 
     def uncompress_file(self, num_files, form):
-        uncompress_tool = uncompressor(
-            download_params=(self.urls, self.dataset_root, True))
+        uncompress_tool = uncompressor(download_params=(self.urls,
+                                                        self.dataset_root,
+                                                        True))
         """unzip all the file in the root directory"""
         files = glob.glob(join_paths(self.dataset_root, "*.{}".format(form)))
 
@@ -143,8 +146,10 @@ class Prep:
         for f in files:
             extract_path = join_paths(self.raw_data_path,
                                       os.path.split(f)[1].split('.')[0])
-            uncompress_tool._uncompress_file(
-                f, extract_path, delete_file=False, print_progress=True)
+            uncompress_tool._uncompress_file(f,
+                                             extract_path,
+                                             delete_file=False,
+                                             print_progress=True)
 
     @staticmethod
     def load_medical_data(f):
@@ -221,11 +226,10 @@ class Prep:
             pre = self.preprocess[process_tuple[i]]
             savepath = save_tuple[i]
 
-            for f in tqdm(
-                    files,
-                    total=len(files),
-                    desc="preprocessing the {}".format(
-                        ["images", "labels", "images_test"][i])):
+            for f in tqdm(files,
+                          total=len(files),
+                          desc="preprocessing the {}".format(
+                              ["images", "labels", "images_test"][i])):
 
                 # load data will transpose the image from "zyx" to "xyz"
                 spacing = dataset_json_dict["training"][osp.basename(f).split(
@@ -250,8 +254,8 @@ class Prep:
                         f_np)
 
                 if i == 0:
-                    dataset_json_dict["training"][osp.basename(f).split(".")[
-                        0]]["spacing_resample"] = new_spacing
+                    dataset_json_dict["training"][osp.basename(f).split(
+                        ".")[0]]["spacing_resample"] = new_spacing
 
         with open(self.dataset_json_path, 'w', encoding='utf-8') as f:
             json.dump(dataset_json_dict, f, ensure_ascii=False, indent=4)
@@ -361,7 +365,9 @@ class Prep:
             img_itk = sitk.ReadImage(image_name)
         infor_dict["dim"] = img_itk.GetDimension()
         img_npy = sitk.GetArrayFromImage(img_itk)
-        infor_dict["shape"] = [img_npy.shape, ]
+        infor_dict["shape"] = [
+            img_npy.shape,
+        ]
         infor_dict["minmax_vals"] = [str(img_npy.min()), str(img_npy.max())]
         infor_dict["spacing"] = img_itk.GetSpacing()
         infor_dict["origin"] = img_itk.GetOrigin()
@@ -422,29 +428,27 @@ class Prep:
         json_dict['training'] = {}
 
         for i, image_name in enumerate(
-                tqdm(
-                    self.image_files,
-                    total=len(self.image_files),
-                    desc="Load train file information into dataset.json")):
+                tqdm(self.image_files,
+                     total=len(self.image_files),
+                     desc="Load train file information into dataset.json")):
             infor_dict = {
                 'image': image_name,
                 "label": self.label_files[i]
             }  # nii.gz filename
             infor_dict = self.set_image_infor(image_name, infor_dict)
-            json_dict['training'][os.path.split(image_name)[1].split(".")[
-                0]] = infor_dict
+            json_dict['training'][os.path.split(image_name)[1].split(".")
+                                  [0]] = infor_dict
 
         json_dict['test'] = {}
         if self.image_files_test:
             for i, image_name in enumerate(
-                    tqdm(
-                        self.image_files_test,
-                        total=len(self.image_files_test),
-                        desc="Load Test file information")):
+                    tqdm(self.image_files_test,
+                         total=len(self.image_files_test),
+                         desc="Load Test file information")):
                 infor_dict = {'image': image_name}
                 infor_dict = self.set_image_infor(image_name, infor_dict)
-                json_dict['test'][os.path.split(image_name)[1].split(".")[
-                    0]] = infor_dict
+                json_dict['test'][os.path.split(image_name)[1].split(".")
+                                  [0]] = infor_dict
 
         with open(self.dataset_json_path, 'w', encoding='utf-8') as f:
             json.dump(json_dict, f, ensure_ascii=False, indent=4)

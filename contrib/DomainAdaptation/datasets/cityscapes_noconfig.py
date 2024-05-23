@@ -29,8 +29,8 @@ import paddleseg.transforms.functional as F
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
-IMG_MEAN = np.array(
-    (104.00698793, 116.66876762, 122.67891434), dtype=np.float32)
+IMG_MEAN = np.array((104.00698793, 116.66876762, 122.67891434),
+                    dtype=np.float32)
 
 label_colours = list(
     map(
@@ -104,6 +104,7 @@ def to_tuple(x):
 
 
 class CityDataset(io.Dataset):
+
     def __init__(self,
                  root,
                  list_path,
@@ -180,25 +181,27 @@ class CityDataset(io.Dataset):
         id = self.items[item]
         filename = id.split("train_")[-1].split("val_")[-1].split("test_")[-1]
         image_filepath = os.path.join(self.image_filepath,
-                                      id.split("_")[0], id.split("_")[1])
+                                      id.split("_")[0],
+                                      id.split("_")[1])
         image_filename = filename + "_leftImg8bit.png"
         image_path = os.path.join(image_filepath, image_filename)
         image = Image.open(image_path).convert("RGB")
 
         gt_filepath = os.path.join(self.gt_filepath,
-                                   id.split("_")[0], id.split("_")[1])
+                                   id.split("_")[0],
+                                   id.split("_")[1])
         gt_filename = filename + "_gtFine_labelIds.png"
         gt_image_path = os.path.join(gt_filepath, gt_filename)
         gt_image = Image.open(gt_image_path)
 
-        if (self.split == "train" or
-                self.split == "trainval") and self.training:
-            image, gt_image, edge_mask = self._train_sync_transform(image,
-                                                                    gt_image)
+        if (self.split == "train"
+                or self.split == "trainval") and self.training:
+            image, gt_image, edge_mask = self._train_sync_transform(
+                image, gt_image)
             return image, gt_image, edge_mask
         else:
-            image, gt_image, edge_mask = self._val_sync_transform(image,
-                                                                  gt_image)
+            image, gt_image, edge_mask = self._val_sync_transform(
+                image, gt_image)
             return image, gt_image, edge_mask, id
 
     def _train_sync_transform(self, img, mask):
@@ -223,14 +226,14 @@ class CityDataset(io.Dataset):
             assert w >= h
             if (base_w / w) > (base_h / h):
                 base_size = base_w
-                short_size = random.randint(
-                    int(base_size * 0.5), int(base_size * 2.0))
+                short_size = random.randint(int(base_size * 0.5),
+                                            int(base_size * 2.0))
                 ow = short_size
                 oh = int(1.0 * h * ow / w)
             else:
                 base_size = base_h
-                short_size = random.randint(
-                    int(base_size * 0.5), int(base_size * 2.0))
+                short_size = random.randint(int(base_size * 0.5),
+                                            int(base_size * 2.0))
                 oh = short_size
                 ow = int(1.0 * w * oh / h)
 
@@ -243,8 +246,9 @@ class CityDataset(io.Dataset):
                 padw = crop_w - ow if ow < crop_w else 0
                 img = ImageOps.expand(img, border=(0, 0, padw, padh), fill=0)
                 if mask:
-                    mask = ImageOps.expand(
-                        mask, border=(0, 0, padw, padh), fill=0)
+                    mask = ImageOps.expand(mask,
+                                           border=(0, 0, padw, padh),
+                                           fill=0)
             # random crop crop_size
             w, h = img.size
             x1 = random.randint(0, w - crop_w)
@@ -315,8 +319,9 @@ class CityDataset(io.Dataset):
         target = self.id2trainId(target).copy()
         edge_mask = None
         if self.edge:
-            edge_mask = F.mask_to_binary_edge(
-                target, radius=1, num_classes=self.NUM_CLASSES)
+            edge_mask = F.mask_to_binary_edge(target,
+                                              radius=1,
+                                              num_classes=self.NUM_CLASSES)
 
         target = paddle.to_tensor(target)
 

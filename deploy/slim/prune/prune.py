@@ -31,61 +31,60 @@ from paddleseg.utils import logger, utils
 def parse_args():
     parser = argparse.ArgumentParser(description='Model pruning')
     # params of pruning
-    parser.add_argument(
-        "--config", dest="cfg", help="The config file.", type=str, default=None)
-    parser.add_argument(
-        '--batch_size',
-        dest='batch_size',
-        help='Mini batch size of one gpu or cpu',
-        type=int,
-        default=None)
-    parser.add_argument(
-        '--learning_rate',
-        dest='learning_rate',
-        help='Learning rate',
-        type=float,
-        default=None)
-    parser.add_argument(
-        "--pruning_ratio",
-        dest="pruning_ratio",
-        help="The ratio of model pruning.",
-        type=float,
-        default=None,
-        required=True)
-    parser.add_argument(
-        '--retraining_iters',
-        dest='retraining_iters',
-        help='Number of iterations of retraining.',
-        type=int,
-        default=None,
-        required=True)
-    parser.add_argument(
-        '--save_dir',
-        dest='save_dir',
-        help='The directory for saving the model snapshot',
-        type=str,
-        default='./output')
-    parser.add_argument(
-        '--model_path',
-        dest='model_path',
-        help='The path of model for evaluation',
-        type=str,
-        default=None)
-    parser.add_argument(
-        '--num_workers',
-        dest='num_workers',
-        help='Num workers for data loader',
-        type=int,
-        default=0)
-    parser.add_argument(
-        '--opts', help='Update the key-value pairs of all options.', nargs='+')
+    parser.add_argument("--config",
+                        dest="cfg",
+                        help="The config file.",
+                        type=str,
+                        default=None)
+    parser.add_argument('--batch_size',
+                        dest='batch_size',
+                        help='Mini batch size of one gpu or cpu',
+                        type=int,
+                        default=None)
+    parser.add_argument('--learning_rate',
+                        dest='learning_rate',
+                        help='Learning rate',
+                        type=float,
+                        default=None)
+    parser.add_argument("--pruning_ratio",
+                        dest="pruning_ratio",
+                        help="The ratio of model pruning.",
+                        type=float,
+                        default=None,
+                        required=True)
+    parser.add_argument('--retraining_iters',
+                        dest='retraining_iters',
+                        help='Number of iterations of retraining.',
+                        type=int,
+                        default=None,
+                        required=True)
+    parser.add_argument('--save_dir',
+                        dest='save_dir',
+                        help='The directory for saving the model snapshot',
+                        type=str,
+                        default='./output')
+    parser.add_argument('--model_path',
+                        dest='model_path',
+                        help='The path of model for evaluation',
+                        type=str,
+                        default=None)
+    parser.add_argument('--num_workers',
+                        dest='num_workers',
+                        help='Num workers for data loader',
+                        type=int,
+                        default=0)
+    parser.add_argument('--opts',
+                        help='Update the key-value pairs of all options.',
+                        nargs='+')
 
     return parser.parse_args()
 
 
 def eval_fn(net, eval_dataset, num_workers):
-    miou, _, _, _, _ = evaluate(
-        net, eval_dataset, num_workers=num_workers, print_detail=False)
+    miou, _, _, _, _ = evaluate(net,
+                                eval_dataset,
+                                num_workers=num_workers,
+                                print_detail=False)
     return miou
 
 
@@ -126,12 +125,11 @@ def main(args):
 
     os.environ['PADDLESEG_EXPORT_STAGE'] = 'True'
 
-    cfg = Config(
-        args.cfg,
-        iters=args.retraining_iters,
-        batch_size=args.batch_size,
-        learning_rate=args.learning_rate,
-        opts=args.opts)
+    cfg = Config(args.cfg,
+                 iters=args.retraining_iters,
+                 batch_size=args.batch_size,
+                 learning_rate=args.learning_rate,
+                 opts=args.opts)
     builder = SegBuilder(cfg)
 
     train_dataset = builder.train_dataset
@@ -148,9 +146,9 @@ def main(args):
     sample_shape = [1] + list(train_dataset[0]['img'].shape)
     sen_file = os.path.join(args.save_dir, 'sen.pickle')
     pruner = L1NormFilterPruner(net, sample_shape)
-    pruner.sensitive(
-        eval_func=partial(eval_fn, net, val_dataset, args.num_workers),
-        sen_file=sen_file)
+    pruner.sensitive(eval_func=partial(eval_fn, net, val_dataset,
+                                       args.num_workers),
+                     sen_file=sen_file)
     logger.info(
         f'The sensitivity calculation of model parameters is complete. The result is saved in {sen_file}.'
     )
@@ -173,15 +171,14 @@ def main(args):
     logger.info(f'Model pruning completed. FLOPs after pruning: {flops}.')
 
     logger.info(f'Step 3/3: Start retraining the model.')
-    train(
-        net,
-        train_dataset,
-        optimizer=builder.optimizer,
-        save_dir=args.save_dir,
-        num_workers=args.num_workers,
-        iters=cfg.iters,
-        batch_size=cfg.batch_size,
-        losses=builder.loss)
+    train(net,
+          train_dataset,
+          optimizer=builder.optimizer,
+          save_dir=args.save_dir,
+          num_workers=args.num_workers,
+          iters=cfg.iters,
+          batch_size=cfg.batch_size,
+          losses=builder.loss)
 
     evaluate(net, val_dataset)
 

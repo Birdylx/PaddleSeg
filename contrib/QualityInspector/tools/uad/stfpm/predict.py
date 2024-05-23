@@ -34,21 +34,24 @@ from qinspector.uad.utils.utils import plot_fig
 
 def argsparser():
     parser = argparse.ArgumentParser("STFPM")
-    parser.add_argument(
-        "--config",
-        type=str,
-        default=None,
-        help="Path of config",
-        required=True)
+    parser.add_argument("--config",
+                        type=str,
+                        default=None,
+                        help="Path of config",
+                        required=True)
     parser.add_argument("--device", type=str, default=None)
     parser.add_argument("--seed", type=int, default=None)
     parser.add_argument("--save_path", type=str, default=None)
-    parser.add_argument(
-        "--img_path", type=str, default=None, help="picture path")
+    parser.add_argument("--img_path",
+                        type=str,
+                        default=None,
+                        help="picture path")
     parser.add_argument('--resize', type=list, default=None)
     parser.add_argument("--backbone", type=str, default=None)
-    parser.add_argument(
-        "--model_path", type=str, default=None, help="student model_path")
+    parser.add_argument("--model_path",
+                        type=str,
+                        default=None,
+                        help="student model_path")
     parser.add_argument("--category", type=str, default=None)
     parser.add_argument("--threshold", type=float, default=None)
     parser.add_argument("--save_pic", type=bool, default=None)
@@ -72,9 +75,10 @@ def main():
 
     # build datasets
     transform = transforms.Compose([
-        transforms.Resize(args.resize), transforms.ToTensor(),
-        transforms.Normalize(
-            mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        transforms.Resize(args.resize),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                             std=[0.229, 0.224, 0.225])
     ])
 
     saved_dict = paddle.load(args.model_path)
@@ -93,11 +97,10 @@ def main():
         t_feat[j] = F.normalize(t_feat[j], axis=1)
         s_feat[j] = F.normalize(s_feat[j], axis=1)
         sm = paddle.sum((t_feat[j] - s_feat[j])**2, 1, keepdim=True)
-        sm = F.interpolate(
-            sm,
-            size=(args.resize[0], args.resize[1]),
-            mode='bilinear',
-            align_corners=False)
+        sm = F.interpolate(sm,
+                           size=(args.resize[0], args.resize[1]),
+                           mode='bilinear',
+                           align_corners=False)
         # aggregate score map by element-wise product
         score_map = score_map * sm  # layer map
 
@@ -106,9 +109,8 @@ def main():
         dir_name = os.path.dirname(save_name)
         if dir_name and not os.path.exists(dir_name):
             os.makedirs(dir_name)
-        plot_fig(img.numpy(),
-                 score_map.squeeze(1), None, args.threshold, save_name,
-                 args.category, args.save_pic, 'predict')
+        plot_fig(img.numpy(), score_map.squeeze(1), None, args.threshold,
+                 save_name, args.category, args.save_pic, 'predict')
 
     print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + '\t' +
           "Predict :  Picture {}".format(args.img_path) + " done!")

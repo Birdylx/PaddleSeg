@@ -31,6 +31,7 @@ from widget.vtk import VTKWidget
 
 
 class Ui_EISeg(object):
+
     def __init__(self):
         super(Ui_EISeg, self).__init__()
         self.tr = partial(QtCore.QCoreApplication.translate, "APP_EISeg")
@@ -55,8 +56,8 @@ class Ui_EISeg(object):
         toolBar.setSizePolicy(sizePolicy)
         toolBar.setMinimumSize(QtCore.QSize(0, 33))
         toolBar.setMovable(True)
-        toolBar.setAllowedAreas(QtCore.Qt.BottomToolBarArea |
-                                QtCore.Qt.TopToolBarArea)
+        toolBar.setAllowedAreas(QtCore.Qt.BottomToolBarArea
+                                | QtCore.Qt.TopToolBarArea)
         toolBar.setObjectName("toolBar")
         toolBar.setContextMenuPolicy(QtCore.Qt.PreventContextMenu)
         self.toolBar = toolBar
@@ -97,8 +98,8 @@ class Ui_EISeg(object):
         # 模型加载
         widget = QtWidgets.QWidget()
         horizontalLayout = QtWidgets.QHBoxLayout(widget)
-        self.ModelDock = self.p_create_dock("ModelDock",
-                                            self.tr("模型选择"), widget)
+        self.ModelDock = self.p_create_dock("ModelDock", self.tr("模型选择"),
+                                            widget)
         ModelRegion = QtWidgets.QVBoxLayout()
         ModelRegion.setObjectName("ModelRegion")
         # labShowSet = self.create_text(CentralWidget, "labShowSet", "模型选择")
@@ -113,7 +114,8 @@ class Ui_EISeg(object):
             "btnParamsLoad",
             self.tr("加载网络参数"),
             osp.join(pjpath, "resource/Model.png"),
-            "Ctrl+D", )
+            "Ctrl+D",
+        )
         ModelRegion.addWidget(self.btnParamsSelect)  # 模型选择
         self.cheWithMask = QtWidgets.QCheckBox(self)
         self.cheWithMask.setText(self.tr("使用掩膜"))
@@ -153,7 +155,8 @@ class Ui_EISeg(object):
         self.btnLabelFind = self.p_create_button(
             "btnLabelFind",
             self.tr("查找"),
-            osp.join(pjpath, "resource/Find.png"), )
+            osp.join(pjpath, "resource/Find.png"),
+        )
         self.btnLabelFind.setMinimumSize(QtCore.QSize(0, 32))
         self.btnLabelFind.setMaximumWidth(68)
         findHorizontalLayout.addWidget(self.btnLabelFind)
@@ -173,12 +176,12 @@ class Ui_EISeg(object):
         self.labelListTable.setColumnCount(4)
         LabelRegion.addWidget(self.labelListTable)
         self.btnAddClass = self.p_create_button(
-            "btnAddClass",
-            self.tr("添加标签"), osp.join(pjpath, "resource/Label.png"))
+            "btnAddClass", self.tr("添加标签"),
+            osp.join(pjpath, "resource/Label.png"))
         LabelRegion.addWidget(self.btnAddClass)
         horizontalLayout.addLayout(LabelRegion)
-        self.LabelDock = self.p_create_dock("LabelDock",
-                                            self.tr("标签列表"), widget)
+        self.LabelDock = self.p_create_dock("LabelDock", self.tr("标签列表"),
+                                            widget)
         MainWindow.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.LabelDock)
         ## 滑块设置
         # 分割阈值
@@ -198,8 +201,8 @@ class Ui_EISeg(object):
         ShowSetRegion.addWidget(self.sldOpacity)
         # 点大小
         self.sldClickRadius, _, PointShowRegion = self.p_create_slider(
-            "sldClickRadius", "labClickRadius",
-            self.tr("点击可视化半径："), 3, 10, 0, 1)
+            "sldClickRadius", "labClickRadius", self.tr("点击可视化半径："), 3, 10, 0,
+            1)
         ShowSetRegion.addLayout(PointShowRegion)
         ShowSetRegion.addWidget(self.sldClickRadius)
         # 保存
@@ -207,7 +210,8 @@ class Ui_EISeg(object):
             "btnSave",
             self.tr("保存"),
             osp.join(pjpath, "resource/Save.png"),
-            "Ctrl+S", )
+            "Ctrl+S",
+        )
         ShowSetRegion.addWidget(self.btnSave)
         ShowSetRegion.addSpacerItem(
             QtWidgets.QSpacerItem(0, 0, QtWidgets.QSizePolicy.Minimum,
@@ -298,7 +302,8 @@ class Ui_EISeg(object):
             "btnFinishedGrid",
             self.tr("完成宫格"),
             osp.join(pjpath, "resource/Save.png"),
-            "", )
+            "",
+        )
         hbandLayout = QtWidgets.QHBoxLayout()
         hbandLayout.setObjectName("hbandLayout")
         # hbandLayout.addWidget(self.btnInitGrid)
@@ -333,20 +338,22 @@ class Ui_EISeg(object):
             "btn3DParamsLoad",
             self.tr("加载传播网络参数"),
             osp.join(pjpath, "resource/Model.png"),
-            "", )
+            "",
+        )
         VSTDock.addWidget(self.btn3DParamsSelect)
         self.btnPropagate = self.p_create_button(
             "btnPropagate",
             self.tr("传播"),
             osp.join(pjpath, "resource/Propagate.png"),
-            "", )
+            "",
+        )
         self.proPropagete = QtWidgets.QProgressBar(self.CentralWidget)
         self.proPropagete.setAlignment(QtCore.Qt.AlignVCenter)
         self.proPropagete.setValue(0)
         VSTDock.addWidget(self.btnPropagate)
         proLayer = QtWidgets.QHBoxLayout()
-        proLayer.addWidget(
-            create_text(self.CentralWidget, None, self.tr("进度：")))
+        proLayer.addWidget(create_text(self.CentralWidget, None,
+                                       self.tr("进度：")))
         proLayer.addWidget(self.proPropagete)
         VSTDock.addLayout(proLayer)
         VSTDock.addSpacerItem(
@@ -374,7 +381,8 @@ class Ui_EISeg(object):
             "videoPlay",
             self.tr("播放"),
             osp.join(pjpath, "resource/Play.png"),
-            "", )
+            "",
+        )
         height = self.videoPlay.height()
         min_size = QtCore.QSize(0, height)
         VideoRegion.addWidget(self.videoPlay)
@@ -389,10 +397,12 @@ class Ui_EISeg(object):
         VideoRegion.addWidget(self.textTime)
         self.preFrameButton = self.p_create_button(
             "preFrameButton",
-            self.tr("上一帧"), )
+            self.tr("上一帧"),
+        )
         self.nextFrameButton = self.p_create_button(
             "nextFrameButton",
-            self.tr("下一帧"), )
+            self.tr("下一帧"),
+        )
         # self.preFrameButton = QtWidgets.QPushButton("上一帧")
         # self.nextFrameButton = QtWidgets.QPushButton("下一帧")
         VideoRegion.addWidget(self.preFrameButton)
@@ -420,32 +430,36 @@ class Ui_EISeg(object):
         self.DetDock = self.p_create_dock("DetDock", self.tr("检测设置"), widget)
         DetRegion = QtWidgets.QVBoxLayout()
         DetRegion.setObjectName("DetRegion")
-        self.sldNMS, _, NMSRegion = self.p_create_slider("sldNMS", "textNMS",
-                                                         self.tr("分数阈值："))
+        self.sldNMS, _, NMSRegion = self.p_create_slider(
+            "sldNMS", "textNMS", self.tr("分数阈值："))
         DetRegion.addLayout(NMSRegion)
         DetRegion.addWidget(self.sldNMS)
         fixHorizontalLayout = QtWidgets.QHBoxLayout()
         self.btnDrawDet = self.p_create_button(
             "btnDrawDet",
             self.tr("开启画框功能"),
-            osp.join(pjpath, "resource/DrawRect.png"), )
+            osp.join(pjpath, "resource/DrawRect.png"),
+        )
         fixHorizontalLayout.addWidget(self.btnDrawDet)
         self.btnReDet = self.p_create_button(
             "btnReDet",
             self.tr("重推理"),
-            osp.join(pjpath, "resource/ReRun.png"), )
+            osp.join(pjpath, "resource/ReRun.png"),
+        )
         fixHorizontalLayout.addWidget(self.btnReDet)
         DetRegion.addLayout(fixHorizontalLayout)
         self.btnAutoLabelSetting = self.p_create_button(
             "btnAutoLabelSetting",
             self.tr("预标注设置"),
-            osp.join(pjpath, "resource/Setting.png"), )
+            osp.join(pjpath, "resource/Setting.png"),
+        )
         DetRegion.addWidget(self.btnAutoLabelSetting)
         btnDetSave = self.p_create_button(
             "btnDetSave",
             self.tr("保存"),
             osp.join(pjpath, "resource/Save.png"),
-            "Ctrl+S", )
+            "Ctrl+S",
+        )
         btnDetSave.clicked.connect(self.btnSave.click)  # 同步保存点击事件
         DetRegion.addWidget(btnDetSave)
         DetRegion.addSpacerItem(

@@ -146,11 +146,10 @@ def train(model,
         logger.info('use AMP to train. AMP level = {}'.format(amp_level))
         scaler = paddle.amp.GradScaler(init_loss_scaling=1024)
         if amp_level == 'O2':
-            model, optimizer = paddle.amp.decorate(
-                models=model,
-                optimizers=optimizer,
-                level='O2',
-                save_dtype='float32')
+            model, optimizer = paddle.amp.decorate(models=model,
+                                                   optimizers=optimizer,
+                                                   level='O2',
+                                                   save_dtype='float32')
 
     if nranks > 1:
         # Initialize parallel environment if not done.
@@ -161,14 +160,17 @@ def train(model,
         else:
             ddp_model = paddle.DataParallel(model)
 
-    batch_sampler = paddle.io.DistributedBatchSampler(
-        train_dataset, batch_size=batch_size, shuffle=True, drop_last=True)
+    batch_sampler = paddle.io.DistributedBatchSampler(train_dataset,
+                                                      batch_size=batch_size,
+                                                      shuffle=True,
+                                                      drop_last=True)
 
     loader = paddle.io.DataLoader(
         train_dataset,
         batch_sampler=batch_sampler,
         num_workers=num_workers,
-        return_list=True, )
+        return_list=True,
+    )
 
     if use_vdl:
         from visualdl import LogWriter
@@ -178,10 +180,10 @@ def train(model,
         metrics = [metrics]
     elif not isinstance(metrics, list):
         metrics = ['sad']
-    best_metrics_data, best_iter = get_best(
-        os.path.join(save_dir, 'best_model', 'best_metrics.txt'),
-        metrics,
-        resume_model=resume_model)
+    best_metrics_data, best_iter = get_best(os.path.join(
+        save_dir, 'best_model', 'best_metrics.txt'),
+                                            metrics,
+                                            resume_model=resume_model)
     avg_loss = defaultdict(float)
     iters_per_epoch = len(batch_sampler)
     reader_cost_averager = TimeAverager()
@@ -228,8 +230,8 @@ def train(model,
 
             for key, value in loss_dict.items():
                 avg_loss[key] += float(value)
-            batch_cost_averager.record(
-                time.time() - batch_start, num_samples=batch_size)
+            batch_cost_averager.record(time.time() - batch_start,
+                                       num_samples=batch_size)
 
             if (iter) % log_iters == 0 and local_rank == 0:
                 for key, value in avg_loss.items():
@@ -250,8 +252,8 @@ def train(model,
                     .format((iter - 1) // iters_per_epoch + 1, iter, iters,
                             avg_loss['all'], lr, avg_train_batch_cost,
                             avg_train_reader_cost,
-                            batch_cost_averager.get_ips_average(
-                            ), eta, loss_str))
+                            batch_cost_averager.get_ips_average(), eta,
+                            loss_str))
                 if use_vdl:
                     for key, value in avg_loss.items():
                         log_tag = 'Train/' + key
@@ -268,14 +270,15 @@ def train(model,
                         vis_dict['ground truth/img'] = data['img'][0]
                         for key in data['gt_fields']:
                             key = key[0]
-                            vis_dict['/'.join(['ground truth', key])] = data[
-                                key][0]
+                            vis_dict['/'.join(['ground truth',
+                                               key])] = data[key][0]
                         # predict
                         for key, value in logit_dict.items():
-                            vis_dict['/'.join(['predict', key])] = logit_dict[
-                                key][0]
-                        visual_in_traning(
-                            log_writer=log_writer, vis_dict=vis_dict, step=iter)
+                            vis_dict['/'.join(['predict',
+                                               key])] = logit_dict[key][0]
+                        visual_in_traning(log_writer=log_writer,
+                                          vis_dict=vis_dict,
+                                          step=iter)
 
                 for key in avg_loss.keys():
                     avg_loss[key] = 0.
@@ -304,15 +307,14 @@ def train(model,
                     val_dataset is not None
             ) and local_rank == 0 and iter >= eval_begin_iters:
                 num_workers = 1 if num_workers > 0 else 0
-                metrics_data = evaluate(
-                    model,
-                    val_dataset,
-                    num_workers=1,
-                    print_detail=True,
-                    save_results=False,
-                    metrics=metrics,
-                    precision=precision,
-                    amp_level=amp_level)
+                metrics_data = evaluate(model,
+                                        val_dataset,
+                                        num_workers=1,
+                                        print_detail=True,
+                                        save_results=False,
+                                        metrics=metrics,
+                                        precision=precision,
+                                        amp_level=amp_level)
                 model.train()
 
             # save best model and add evaluation results to vdl

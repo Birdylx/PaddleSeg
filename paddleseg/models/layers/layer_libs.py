@@ -23,9 +23,12 @@ import math
 
 
 class _AllReduce(paddle.autograd.PyLayer):
+
     @staticmethod
     def forward(ctx, input):
-        input_list = [paddle.zeros_like(input) for k in range(dist.get_world_size())]
+        input_list = [
+            paddle.zeros_like(input) for k in range(dist.get_world_size())
+        ]
         # Use allgather instead of allreduce since I don't trust in-place operations ..
         dist.all_gather(input_list, input, sync_op=True)
         inputs = paddle.stack(input_list, axis=0)
@@ -41,16 +44,14 @@ def differentiable_all_reduce(input):
     """
     Differentiable counterpart of `dist.all_reduce`.
     """
-    if (
-        not dist.is_available()
-        or not dist.is_initialized()
-        or dist.get_world_size() == 1
-    ):
+    if (not dist.is_available() or not dist.is_initialized()
+            or dist.get_world_size() == 1):
         return input
     return _AllReduce.apply(input)
 
 
 class NaiveSyncBatchNorm(nn.BatchNorm2D):
+
     def __init__(self, *args, stats_mode="", **kwargs):
         super().__init__(*args, **kwargs)
         assert stats_mode in ["", "N"]
@@ -70,11 +71,12 @@ class NaiveSyncBatchNorm(nn.BatchNorm2D):
             vec = paddle.concat([mean, meansqr], axis=0)
             vec = differentiable_all_reduce(vec) * (1.0 / dist.get_world_size())
             mean, meansqr = paddle.split(vec, [C, C])
-            momentum = 1 - self._momentum # NOTE: paddle has reverse momentum defination
+            momentum = 1 - self._momentum  # NOTE: paddle has reverse momentum defination
         else:
             if B == 0:
                 vec = paddle.zeros([2 * C + 1], dtype=mean.dtype)
-                vec = vec + input.sum()  # make sure there is gradient w.r.t input
+                vec = vec + input.sum(
+                )  # make sure there is gradient w.r.t input
             else:
                 vec = paddle.concat(
                     [
@@ -87,8 +89,11 @@ class NaiveSyncBatchNorm(nn.BatchNorm2D):
             vec = differentiable_all_reduce(vec * B)
 
             total_batch = vec[-1].detach()
-            momentum = total_batch.clip(max=1) * (1 - self._momentum)  # no update if total_batch is 0
-            mean, meansqr, _ = paddle.split(vec / total_batch.clip(min=1), [C, C, int(vec.shape[0] - 2*C)])  # avoid div-by-zero
+            momentum = total_batch.clip(max=1) * (
+                1 - self._momentum)  # no update if total_batch is 0
+            mean, meansqr, _ = paddle.split(
+                vec / total_batch.clip(min=1),
+                [C, C, int(vec.shape[0] - 2 * C)])  # avoid div-by-zero
 
         var = meansqr - mean * mean
         invstd = paddle.rsqrt(var + self._epsilon)
@@ -99,7 +104,8 @@ class NaiveSyncBatchNorm(nn.BatchNorm2D):
 
         tmp_mean = self._mean + momentum * (mean.detach() - self._mean)
         self._mean.set_value(tmp_mean)
-        tmp_variance = self._variance + (momentum * (var.detach() - self._variance))
+        tmp_variance = self._variance + (momentum *
+                                         (var.detach() - self._variance))
         self._variance.set_value(tmp_variance)
         ret = input * scale + bias
         return ret
@@ -108,8 +114,8 @@ class NaiveSyncBatchNorm(nn.BatchNorm2D):
 def SyncBatchNorm(*args, **kwargs):
     """In cpu environment nn.SyncBatchNorm does not have kernel so use nn.BatchNorm2D instead"""
     if paddle.get_device() == 'cpu' or os.environ.get(
-            'PADDLESEG_EXPORT_STAGE') or 'xpu' in paddle.get_device(
-            ) in paddle.get_device():
+            'PADDLESEG_EXPORT_STAGE'
+    ) or 'xpu' in paddle.get_device() in paddle.get_device():
         return nn.BatchNorm2D(*args, **kwargs)
     elif paddle.distributed.ParallelEnv().nranks == 1:
         return nn.BatchNorm2D(*args, **kwargs)
@@ -118,6 +124,7 @@ def SyncBatchNorm(*args, **kwargs):
 
 
 class ConvBNReLU(nn.Layer):
+
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -126,8 +133,11 @@ class ConvBNReLU(nn.Layer):
                  **kwargs):
         super().__init__()
 
-        self._conv = nn.Conv2D(
-            in_channels, out_channels, kernel_size, padding=padding, **kwargs)
+        self._conv = nn.Conv2D(in_channels,
+                               out_channels,
+                               kernel_size,
+                               padding=padding,
+                               **kwargs)
 
         if 'data_format' in kwargs:
             data_format = kwargs['data_format']
@@ -144,6 +154,7 @@ class ConvBNReLU(nn.Layer):
 
 
 class ConvGNAct(nn.Layer):
+
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -153,15 +164,19 @@ class ConvGNAct(nn.Layer):
                  act_type=None,
                  **kwargs):
         super().__init__()
-        self._conv = nn.Conv2D(
-            in_channels, out_channels, kernel_size, padding=padding, **kwargs)
+        self._conv = nn.Conv2D(in_channels,
+                               out_channels,
+                               kernel_size,
+                               padding=padding,
+                               **kwargs)
 
         if "data_format" in kwargs:
             data_format = kwargs["data_format"]
         else:
             data_format = "NCHW"
-        self._group_norm = nn.GroupNorm(
-            num_groups, out_channels, data_format=data_format)
+        self._group_norm = nn.GroupNorm(num_groups,
+                                        out_channels,
+                                        data_format=data_format)
         self._act_type = act_type
         if act_type is not None:
             self._act = layers.Activation(act_type)
@@ -175,6 +190,7 @@ class ConvGNAct(nn.Layer):
 
 
 class ConvNormAct(nn.Layer):
+
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -185,8 +201,11 @@ class ConvNormAct(nn.Layer):
                  **kwargs):
         super().__init__()
 
-        self._conv = nn.Conv2D(
-            in_channels, out_channels, kernel_size, padding=padding, **kwargs)
+        self._conv = nn.Conv2D(in_channels,
+                               out_channels,
+                               kernel_size,
+                               padding=padding,
+                               **kwargs)
 
         if 'data_format' in kwargs:
             data_format = kwargs['data_format']
@@ -209,6 +228,7 @@ class ConvNormAct(nn.Layer):
 
 
 class ConvBNAct(nn.Layer):
+
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -218,8 +238,11 @@ class ConvBNAct(nn.Layer):
                  **kwargs):
         super().__init__()
 
-        self._conv = nn.Conv2D(
-            in_channels, out_channels, kernel_size, padding=padding, **kwargs)
+        self._conv = nn.Conv2D(in_channels,
+                               out_channels,
+                               kernel_size,
+                               padding=padding,
+                               **kwargs)
 
         if 'data_format' in kwargs:
             data_format = kwargs['data_format']
@@ -240,6 +263,7 @@ class ConvBNAct(nn.Layer):
 
 
 class ConvBN(nn.Layer):
+
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -247,8 +271,11 @@ class ConvBN(nn.Layer):
                  padding='same',
                  **kwargs):
         super().__init__()
-        self._conv = nn.Conv2D(
-            in_channels, out_channels, kernel_size, padding=padding, **kwargs)
+        self._conv = nn.Conv2D(in_channels,
+                               out_channels,
+                               kernel_size,
+                               padding=padding,
+                               **kwargs)
         if 'data_format' in kwargs:
             data_format = kwargs['data_format']
         else:
@@ -262,15 +289,15 @@ class ConvBN(nn.Layer):
 
 
 class ConvReLUPool(nn.Layer):
+
     def __init__(self, in_channels, out_channels):
         super().__init__()
-        self.conv = nn.Conv2D(
-            in_channels,
-            out_channels,
-            kernel_size=3,
-            stride=1,
-            padding=1,
-            dilation=1)
+        self.conv = nn.Conv2D(in_channels,
+                              out_channels,
+                              kernel_size=3,
+                              stride=1,
+                              padding=1,
+                              dilation=1)
         self._relu = layers.Activation("relu")
         self._max_pool = nn.MaxPool2D(kernel_size=2, stride=2)
 
@@ -282,6 +309,7 @@ class ConvReLUPool(nn.Layer):
 
 
 class SeparableConvBNReLU(nn.Layer):
+
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -290,24 +318,22 @@ class SeparableConvBNReLU(nn.Layer):
                  pointwise_bias=None,
                  **kwargs):
         super().__init__()
-        self.depthwise_conv = ConvBN(
-            in_channels,
-            out_channels=in_channels,
-            kernel_size=kernel_size,
-            padding=padding,
-            groups=in_channels,
-            **kwargs)
+        self.depthwise_conv = ConvBN(in_channels,
+                                     out_channels=in_channels,
+                                     kernel_size=kernel_size,
+                                     padding=padding,
+                                     groups=in_channels,
+                                     **kwargs)
         if 'data_format' in kwargs:
             data_format = kwargs['data_format']
         else:
             data_format = 'NCHW'
-        self.piontwise_conv = ConvBNReLU(
-            in_channels,
-            out_channels,
-            kernel_size=1,
-            groups=1,
-            data_format=data_format,
-            bias_attr=pointwise_bias)
+        self.piontwise_conv = ConvBNReLU(in_channels,
+                                         out_channels,
+                                         kernel_size=1,
+                                         groups=1,
+                                         data_format=data_format,
+                                         bias_attr=pointwise_bias)
 
     def forward(self, x):
         x = self.depthwise_conv(x)
@@ -316,6 +342,7 @@ class SeparableConvBNReLU(nn.Layer):
 
 
 class DepthwiseConvBN(nn.Layer):
+
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -323,13 +350,12 @@ class DepthwiseConvBN(nn.Layer):
                  padding='same',
                  **kwargs):
         super().__init__()
-        self.depthwise_conv = ConvBN(
-            in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            padding=padding,
-            groups=in_channels,
-            **kwargs)
+        self.depthwise_conv = ConvBN(in_channels,
+                                     out_channels=out_channels,
+                                     kernel_size=kernel_size,
+                                     padding=padding,
+                                     groups=in_channels,
+                                     **kwargs)
 
     def forward(self, x):
         x = self.depthwise_conv(x)
@@ -355,19 +381,17 @@ class AuxLayer(nn.Layer):
                  **kwargs):
         super().__init__()
 
-        self.conv_bn_relu = ConvBNReLU(
-            in_channels=in_channels,
-            out_channels=inter_channels,
-            kernel_size=3,
-            padding=1,
-            **kwargs)
+        self.conv_bn_relu = ConvBNReLU(in_channels=in_channels,
+                                       out_channels=inter_channels,
+                                       kernel_size=3,
+                                       padding=1,
+                                       **kwargs)
 
         self.dropout = nn.Dropout(p=dropout_prob)
 
-        self.conv = nn.Conv2D(
-            in_channels=inter_channels,
-            out_channels=out_channels,
-            kernel_size=1)
+        self.conv = nn.Conv2D(in_channels=inter_channels,
+                              out_channels=out_channels,
+                              kernel_size=1)
 
     def forward(self, x):
         x = self.conv_bn_relu(x)
@@ -386,12 +410,21 @@ class JPU(nn.Layer):
     def __init__(self, in_channels, width=512):
         super().__init__()
 
-        self.conv5 = ConvBNReLU(
-            in_channels[-1], width, 3, padding=1, bias_attr=False)
-        self.conv4 = ConvBNReLU(
-            in_channels[-2], width, 3, padding=1, bias_attr=False)
-        self.conv3 = ConvBNReLU(
-            in_channels[-3], width, 3, padding=1, bias_attr=False)
+        self.conv5 = ConvBNReLU(in_channels[-1],
+                                width,
+                                3,
+                                padding=1,
+                                bias_attr=False)
+        self.conv4 = ConvBNReLU(in_channels[-2],
+                                width,
+                                3,
+                                padding=1,
+                                bias_attr=False)
+        self.conv3 = ConvBNReLU(in_channels[-3],
+                                width,
+                                3,
+                                padding=1,
+                                bias_attr=False)
 
         self.dilation1 = SeparableConvBNReLU(
             3 * width,
@@ -401,58 +434,63 @@ class JPU(nn.Layer):
             pointwise_bias=False,
             dilation=1,
             bias_attr=False,
-            stride=1, )
-        self.dilation2 = SeparableConvBNReLU(
-            3 * width,
-            width,
-            3,
-            padding=2,
-            pointwise_bias=False,
-            dilation=2,
-            bias_attr=False,
-            stride=1)
-        self.dilation3 = SeparableConvBNReLU(
-            3 * width,
-            width,
-            3,
-            padding=4,
-            pointwise_bias=False,
-            dilation=4,
-            bias_attr=False,
-            stride=1)
-        self.dilation4 = SeparableConvBNReLU(
-            3 * width,
-            width,
-            3,
-            padding=8,
-            pointwise_bias=False,
-            dilation=8,
-            bias_attr=False,
-            stride=1)
+            stride=1,
+        )
+        self.dilation2 = SeparableConvBNReLU(3 * width,
+                                             width,
+                                             3,
+                                             padding=2,
+                                             pointwise_bias=False,
+                                             dilation=2,
+                                             bias_attr=False,
+                                             stride=1)
+        self.dilation3 = SeparableConvBNReLU(3 * width,
+                                             width,
+                                             3,
+                                             padding=4,
+                                             pointwise_bias=False,
+                                             dilation=4,
+                                             bias_attr=False,
+                                             stride=1)
+        self.dilation4 = SeparableConvBNReLU(3 * width,
+                                             width,
+                                             3,
+                                             padding=8,
+                                             pointwise_bias=False,
+                                             dilation=8,
+                                             bias_attr=False,
+                                             stride=1)
 
     def forward(self, *inputs):
         feats = [
-            self.conv5(inputs[-1]), self.conv4(inputs[-2]),
+            self.conv5(inputs[-1]),
+            self.conv4(inputs[-2]),
             self.conv3(inputs[-3])
         ]
         size = paddle.shape(feats[-1])[2:]
-        feats[-2] = F.interpolate(
-            feats[-2], size, mode='bilinear', align_corners=True)
-        feats[-3] = F.interpolate(
-            feats[-3], size, mode='bilinear', align_corners=True)
+        feats[-2] = F.interpolate(feats[-2],
+                                  size,
+                                  mode='bilinear',
+                                  align_corners=True)
+        feats[-3] = F.interpolate(feats[-3],
+                                  size,
+                                  mode='bilinear',
+                                  align_corners=True)
 
         feat = paddle.concat(feats, axis=1)
-        feat = paddle.concat(
-            [
-                self.dilation1(feat), self.dilation2(feat),
-                self.dilation3(feat), self.dilation4(feat)
-            ],
-            axis=1)
+        feat = paddle.concat([
+            self.dilation1(feat),
+            self.dilation2(feat),
+            self.dilation3(feat),
+            self.dilation4(feat)
+        ],
+                             axis=1)
 
         return inputs[0], inputs[1], inputs[2], feat
 
 
 class ConvBNPReLU(nn.Layer):
+
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -461,8 +499,11 @@ class ConvBNPReLU(nn.Layer):
                  **kwargs):
         super().__init__()
 
-        self._conv = nn.Conv2D(
-            in_channels, out_channels, kernel_size, padding=padding, **kwargs)
+        self._conv = nn.Conv2D(in_channels,
+                               out_channels,
+                               kernel_size,
+                               padding=padding,
+                               **kwargs)
 
         if 'data_format' in kwargs:
             data_format = kwargs['data_format']
@@ -479,6 +520,7 @@ class ConvBNPReLU(nn.Layer):
 
 
 class ConvBNLeakyReLU(nn.Layer):
+
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -487,8 +529,11 @@ class ConvBNLeakyReLU(nn.Layer):
                  **kwargs):
         super().__init__()
 
-        self._conv = nn.Conv2D(
-            in_channels, out_channels, kernel_size, padding=padding, **kwargs)
+        self._conv = nn.Conv2D(in_channels,
+                               out_channels,
+                               kernel_size,
+                               padding=padding,
+                               **kwargs)
 
         if 'data_format' in kwargs:
             data_format = kwargs['data_format']

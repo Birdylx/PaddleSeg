@@ -74,28 +74,26 @@ class SeaFormer(nn.Layer):
         self.pretrained = pretrained
 
         for i in range(len(cfgs)):
-            smb = StackedMV2Block(
-                in_channels=in_channels,
-                cfgs=cfgs[i],
-                stem=True if i == 0 else False,
-                inp_channel=channels[i])
+            smb = StackedMV2Block(in_channels=in_channels,
+                                  cfgs=cfgs[i],
+                                  stem=True if i == 0 else False,
+                                  inp_channel=channels[i])
             setattr(self, f"smb{i + 1}", smb)
 
         for i in range(len(depths)):
             dpr = [
                 x.item() for x in paddle.linspace(0, drop_path_rate, depths[i])
             ]  # stochastic depth decay rule
-            trans = BasicLayer(
-                block_num=depths[i],
-                embedding_dim=emb_dims[i],
-                key_dim=key_dims[i],
-                num_heads=num_heads,
-                mlp_ratio=mlp_ratios[i],
-                attn_ratio=attn_ratios,
-                drop=0,
-                attn_drop=0,
-                drop_path=dpr,
-                act_layer=act_layer)
+            trans = BasicLayer(block_num=depths[i],
+                               embedding_dim=emb_dims[i],
+                               key_dim=key_dims[i],
+                               num_heads=num_heads,
+                               mlp_ratio=mlp_ratios[i],
+                               attn_ratio=attn_ratios,
+                               drop=0,
+                               attn_drop=0,
+                               drop_path=dpr,
+                               act_layer=act_layer)
             setattr(self, f"trans{i + 1}", trans)
 
         self.init_weights()
@@ -152,6 +150,7 @@ def _make_divisible(v, divisor, min_value=None):
 
 
 class Mlp(nn.Layer):
+
     def __init__(self,
                  in_features,
                  hidden_features=None,
@@ -162,19 +161,22 @@ class Mlp(nn.Layer):
 
         out_features = out_features or in_features
         hidden_features = hidden_features or in_features
-        self.fc1 = layers.ConvBN(
-            in_features, hidden_features, 1, bias_attr=False)
-        self.dwconv = nn.Conv2D(
-            hidden_features,
-            hidden_features,
-            3,
-            1,
-            1,
-            bias_attr=True,
-            groups=hidden_features)
+        self.fc1 = layers.ConvBN(in_features,
+                                 hidden_features,
+                                 1,
+                                 bias_attr=False)
+        self.dwconv = nn.Conv2D(hidden_features,
+                                hidden_features,
+                                3,
+                                1,
+                                1,
+                                bias_attr=True,
+                                groups=hidden_features)
         self.act = act_layer()
-        self.fc2 = layers.ConvBN(
-            hidden_features, out_features, 1, bias_attr=False)
+        self.fc2 = layers.ConvBN(hidden_features,
+                                 out_features,
+                                 1,
+                                 bias_attr=False)
         self.drop = nn.Dropout(drop)
 
     def forward(self, x):
@@ -188,6 +190,7 @@ class Mlp(nn.Layer):
 
 
 class InvertedResidual(nn.Layer):
+
     def __init__(self,
                  inp: int,
                  oup: int,
@@ -212,15 +215,15 @@ class InvertedResidual(nn.Layer):
             modules.append(layers.ConvBN(inp, hidden_dim, 1, bias_attr=False))
             modules.append(activations())
         modules.extend([
-            layers.ConvBN(
-                hidden_dim,
-                hidden_dim,
-                ks,
-                stride=stride,
-                padding=ks // 2,
-                groups=hidden_dim,
-                bias_attr=False), activations(), layers.ConvBN(
-                    hidden_dim, oup, 1, bias_attr=False)
+            layers.ConvBN(hidden_dim,
+                          hidden_dim,
+                          ks,
+                          stride=stride,
+                          padding=ks // 2,
+                          groups=hidden_dim,
+                          bias_attr=False),
+            activations(),
+            layers.ConvBN(hidden_dim, oup, 1, bias_attr=False)
         ])
         self.conv = nn.Sequential(*modules)
         self.out_channels = oup
@@ -234,6 +237,7 @@ class InvertedResidual(nn.Layer):
 
 
 class StackedMV2Block(nn.Layer):
+
     def __init__(self,
                  in_channels,
                  cfgs,
@@ -246,14 +250,12 @@ class StackedMV2Block(nn.Layer):
         self.stem = stem
         if stem:
             self.stem_block = nn.Sequential(
-                layers.ConvBN(
-                    in_channels,
-                    inp_channel,
-                    3,
-                    stride=2,
-                    padding=1,
-                    bias_attr=False),
-                activation())
+                layers.ConvBN(in_channels,
+                              inp_channel,
+                              3,
+                              stride=2,
+                              padding=1,
+                              bias_attr=False), activation())
         self.cfgs = cfgs
 
         self.layers = []
@@ -262,13 +264,12 @@ class StackedMV2Block(nn.Layer):
             exp_size = t * inp_channel
             exp_size = _make_divisible(exp_size * width_mult, 8)
             layer_name = 'layer{}'.format(i + 1)
-            layer = InvertedResidual(
-                inp_channel,
-                output_channel,
-                ks=k,
-                stride=s,
-                expand_ratio=t,
-                activations=activation)
+            layer = InvertedResidual(inp_channel,
+                                     output_channel,
+                                     ks=k,
+                                     stride=s,
+                                     expand_ratio=t,
+                                     activations=activation)
             self.add_sublayer(layer_name, layer)
             inp_channel = output_channel
             self.layers.append(layer_name)
@@ -283,6 +284,7 @@ class StackedMV2Block(nn.Layer):
 
 
 class SqueezeAxialPositionalEmbedding(nn.Layer):
+
     def __init__(self, dim, shape):
         super().__init__()
 
@@ -295,16 +297,16 @@ class SqueezeAxialPositionalEmbedding(nn.Layer):
 
     def forward(self, x):
         B, C, N = x.shape
-        x = x + F.interpolate(
-            self.pos_embed,
-            size=[N],
-            mode='linear',
-            align_corners=False,
-            data_format='NCW')
+        x = x + F.interpolate(self.pos_embed,
+                              size=[N],
+                              mode='linear',
+                              align_corners=False,
+                              data_format='NCW')
         return x
 
 
 class SeaAttention(nn.Layer):
+
     def __init__(self, dim, key_dim, num_heads, attn_ratio=4, activation=None):
         super().__init__()
 
@@ -321,28 +323,24 @@ class SeaAttention(nn.Layer):
         self.to_v = layers.ConvBN(dim, self.dh, 1, bias_attr=False)
 
         self.proj = nn.Sequential(
-            activation(), layers.ConvBN(
-                self.dh, dim, 1, bias_attr=False))
+            activation(), layers.ConvBN(self.dh, dim, 1, bias_attr=False))
         self.proj_encode_row = nn.Sequential(
-            activation(), layers.ConvBN(
-                self.dh, self.dh, 1, bias_attr=False))
+            activation(), layers.ConvBN(self.dh, self.dh, 1, bias_attr=False))
         self.pos_emb_rowq = SqueezeAxialPositionalEmbedding(self.nh_kd, 16)
         self.pos_emb_rowk = SqueezeAxialPositionalEmbedding(self.nh_kd, 16)
         self.proj_encode_column = nn.Sequential(
-            activation(), layers.ConvBN(
-                self.dh, self.dh, 1, bias_attr=False))
+            activation(), layers.ConvBN(self.dh, self.dh, 1, bias_attr=False))
         self.pos_emb_columnq = SqueezeAxialPositionalEmbedding(self.nh_kd, 16)
         self.pos_emb_columnk = SqueezeAxialPositionalEmbedding(self.nh_kd, 16)
 
-        self.dwconv = layers.ConvBN(
-            2 * self.dh,
-            2 * self.dh,
-            3,
-            stride=1,
-            padding=1,
-            dilation=1,
-            groups=2 * self.dh,
-            bias_attr=False)
+        self.dwconv = layers.ConvBN(2 * self.dh,
+                                    2 * self.dh,
+                                    3,
+                                    stride=1,
+                                    padding=1,
+                                    dilation=1,
+                                    groups=2 * self.dh,
+                                    bias_attr=False)
         self.act = activation()
 
         self.pwconv = layers.ConvBN(2 * self.dh, dim, 1, bias_attr=False)
@@ -362,11 +360,11 @@ class SeaAttention(nn.Layer):
 
         # squeeze axial attention
         ## squeeze row
-        qrow = self.pos_emb_rowq(q.mean(-1)).reshape(
-            [B, self.num_heads, -1, H]).transpose([0, 1, 3, 2])
+        qrow = self.pos_emb_rowq(q.mean(-1)).reshape([B, self.num_heads, -1, H
+                                                      ]).transpose([0, 1, 3, 2])
         krow = self.pos_emb_rowk(k.mean(-1)).reshape([B, self.num_heads, -1, H])
-        vrow = v.mean(-1).reshape([B, self.num_heads, -1, H]).transpose(
-            [0, 1, 3, 2])
+        vrow = v.mean(-1).reshape([B, self.num_heads, -1,
+                                   H]).transpose([0, 1, 3, 2])
 
         attn_row = paddle.matmul(qrow, krow) * self.scale
         attn_row = F.softmax(attn_row, axis=-1)
@@ -379,8 +377,8 @@ class SeaAttention(nn.Layer):
             [B, self.num_heads, -1, W]).transpose([0, 1, 3, 2])
         kcolumn = self.pos_emb_columnk(k.mean(-2)).reshape(
             [B, self.num_heads, -1, W])
-        vcolumn = v.mean(-2).reshape([B, self.num_heads, -1, W]).transpose(
-            [0, 1, 3, 2])
+        vcolumn = v.mean(-2).reshape([B, self.num_heads, -1,
+                                      W]).transpose([0, 1, 3, 2])
 
         attn_column = paddle.matmul(qcolumn, kcolumn) * self.scale
         attn_column = F.softmax(attn_column, axis=-1)
@@ -396,6 +394,7 @@ class SeaAttention(nn.Layer):
 
 
 class Block(nn.Layer):
+
     def __init__(self,
                  dim,
                  key_dim,
@@ -411,12 +410,11 @@ class Block(nn.Layer):
         self.num_heads = num_heads
         self.mlp_ratio = mlp_ratio
 
-        self.attn = SeaAttention(
-            dim,
-            key_dim=key_dim,
-            num_heads=num_heads,
-            attn_ratio=attn_ratio,
-            activation=act_layer)
+        self.attn = SeaAttention(dim,
+                                 key_dim=key_dim,
+                                 num_heads=num_heads,
+                                 attn_ratio=attn_ratio,
+                                 activation=act_layer)
 
         # NOTE: drop path for stochastic depth, we shall see if this is better than dropout here
         self.drop_path = DropPath(drop_path) if drop_path > 0 else nn.Identity()
@@ -433,6 +431,7 @@ class Block(nn.Layer):
 
 
 class BasicLayer(nn.Layer):
+
     def __init__(self,
                  block_num,
                  embedding_dim,
@@ -451,16 +450,15 @@ class BasicLayer(nn.Layer):
         self.transformer_blocks = nn.LayerList()
         for i in range(self.block_num):
             self.transformer_blocks.append(
-                Block(
-                    embedding_dim,
-                    key_dim=key_dim,
-                    num_heads=num_heads,
-                    mlp_ratio=mlp_ratio,
-                    attn_ratio=attn_ratio,
-                    drop=drop,
-                    drop_path=drop_path[i]
-                    if isinstance(drop_path, list) else drop_path,
-                    act_layer=act_layer))
+                Block(embedding_dim,
+                      key_dim=key_dim,
+                      num_heads=num_heads,
+                      mlp_ratio=mlp_ratio,
+                      attn_ratio=attn_ratio,
+                      drop=drop,
+                      drop_path=drop_path[i]
+                      if isinstance(drop_path, list) else drop_path,
+                      act_layer=act_layer))
 
     def forward(self, x):
         # token * N
@@ -471,16 +469,17 @@ class BasicLayer(nn.Layer):
 
 @manager.BACKBONES.add_component
 def SeaFormer_tiny(pretrained, **kwags):
-    seaformer = SeaFormer(
-        pretrained=pretrained,
-        cfgs=[[[3, 1, 16, 1], [3, 4, 16, 2], [3, 3, 16, 1]],
-              [[5, 3, 32, 2], [5, 3, 32, 1]], [[3, 3, 64, 2], [3, 3, 64, 1]],
-              [[5, 3, 128, 2]], [[3, 6, 160, 2]]],
-        emb_dims=[128, 160],
-        channels=[16, 16, 32, 64, 128, 160],
-        depths=[2, 2],
-        num_heads=4,
-        **kwags)
+    seaformer = SeaFormer(pretrained=pretrained,
+                          cfgs=[[[3, 1, 16, 1], [3, 4, 16, 2], [3, 3, 16, 1]],
+                                [[5, 3, 32, 2], [5, 3, 32, 1]],
+                                [[3, 3, 64, 2], [3, 3, 64, 1]], [[5, 3, 128,
+                                                                  2]],
+                                [[3, 6, 160, 2]]],
+                          emb_dims=[128, 160],
+                          channels=[16, 16, 32, 64, 128, 160],
+                          depths=[2, 2],
+                          num_heads=4,
+                          **kwags)
     seaformer.feat_channels = [32, 128, 160]
 
     return seaformer
@@ -488,16 +487,17 @@ def SeaFormer_tiny(pretrained, **kwags):
 
 @manager.BACKBONES.add_component
 def SeaFormer_small(pretrained, **kwags):
-    seaformer = SeaFormer(
-        pretrained=pretrained,
-        cfgs=[[[3, 1, 16, 1], [3, 4, 24, 2], [3, 3, 24, 1]],
-              [[5, 3, 48, 2], [5, 3, 48, 1]], [[3, 3, 96, 2], [3, 3, 96, 1]],
-              [[5, 4, 160, 2]], [[3, 6, 192, 2]]],
-        emb_dims=[160, 192],
-        channels=[16, 24, 48, 96, 160, 192],
-        depths=[3, 3],
-        num_heads=6,
-        **kwags)
+    seaformer = SeaFormer(pretrained=pretrained,
+                          cfgs=[[[3, 1, 16, 1], [3, 4, 24, 2], [3, 3, 24, 1]],
+                                [[5, 3, 48, 2], [5, 3, 48, 1]],
+                                [[3, 3, 96, 2], [3, 3, 96, 1]], [[5, 4, 160,
+                                                                  2]],
+                                [[3, 6, 192, 2]]],
+                          emb_dims=[160, 192],
+                          channels=[16, 24, 48, 96, 160, 192],
+                          depths=[3, 3],
+                          num_heads=6,
+                          **kwags)
     seaformer.feat_channels = [48, 160, 192]
 
     return seaformer
@@ -505,18 +505,18 @@ def SeaFormer_small(pretrained, **kwags):
 
 @manager.BACKBONES.add_component
 def SeaFormer_base(pretrained, **kwags):
-    seaformer = SeaFormer(
-        pretrained=pretrained,
-        cfgs=[[[3, 1, 16, 1], [3, 4, 32, 2], [3, 3, 32, 1]],
-              [[5, 3, 64, 2], [5, 3, 64, 1]], [[3, 3, 128, 2], [3, 3, 128, 1]],
-              [[5, 4, 192, 2]], [[3, 6, 256, 2]]],
-        emb_dims=[192, 256],
-        key_dims=[16, 24],
-        channels=[16, 32, 64, 128, 192, 256],
-        depths=[4, 4],
-        num_heads=8,
-        mlp_ratios=[2, 4],
-        **kwags)
+    seaformer = SeaFormer(pretrained=pretrained,
+                          cfgs=[[[3, 1, 16, 1], [3, 4, 32, 2], [3, 3, 32, 1]],
+                                [[5, 3, 64, 2], [5, 3, 64, 1]],
+                                [[3, 3, 128, 2], [3, 3, 128, 1]],
+                                [[5, 4, 192, 2]], [[3, 6, 256, 2]]],
+                          emb_dims=[192, 256],
+                          key_dims=[16, 24],
+                          channels=[16, 32, 64, 128, 192, 256],
+                          depths=[4, 4],
+                          num_heads=8,
+                          mlp_ratios=[2, 4],
+                          **kwags)
     seaformer.feat_channels = [64, 192, 256]
 
     return seaformer
@@ -524,19 +524,18 @@ def SeaFormer_base(pretrained, **kwags):
 
 @manager.BACKBONES.add_component
 def SeaFormer_large(pretrained, **kwags):
-    seaformer = SeaFormer(
-        pretrained=pretrained,
-        cfgs=[[[3, 3, 32, 1], [3, 4, 64, 2], [3, 4, 64, 1]],
-              [[5, 4, 128, 2], [5, 4, 128, 1]],
-              [[3, 4, 192, 2], [3, 4, 192, 1]], [[5, 4, 256, 2]],
-              [[3, 6, 320, 2]]],
-        emb_dims=[192, 256, 320],
-        key_dims=[16, 20, 24],
-        channels=[32, 64, 128, 192, 256, 320],
-        depths=[3, 3, 3],
-        num_heads=8,
-        mlp_ratios=[2, 4, 6],
-        **kwags)
+    seaformer = SeaFormer(pretrained=pretrained,
+                          cfgs=[[[3, 3, 32, 1], [3, 4, 64, 2], [3, 4, 64, 1]],
+                                [[5, 4, 128, 2], [5, 4, 128, 1]],
+                                [[3, 4, 192, 2], [3, 4, 192, 1]],
+                                [[5, 4, 256, 2]], [[3, 6, 320, 2]]],
+                          emb_dims=[192, 256, 320],
+                          key_dims=[16, 20, 24],
+                          channels=[32, 64, 128, 192, 256, 320],
+                          depths=[3, 3, 3],
+                          num_heads=8,
+                          mlp_ratios=[2, 4, 6],
+                          **kwags)
     seaformer.feat_channels = [128, 192, 256, 320]
 
     return seaformer

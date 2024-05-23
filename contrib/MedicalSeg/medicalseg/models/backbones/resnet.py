@@ -26,6 +26,7 @@ from medicalseg.cvlibs import manager
 
 
 class StdConv2d(nn.Conv2D):
+
     def forward(self, x):
         if self._padding_mode != 'zeros':
             x = F.pad(x,
@@ -38,36 +39,38 @@ class StdConv2d(nn.Conv2D):
         m = paddle.mean(w, axis=[1, 2, 3], keepdim=True)
         w = (w - m) / paddle.sqrt(v + 1e-5)
 
-        out = F.conv._conv_nd(
-            x,
-            w,
-            bias=self.bias,
-            stride=self._stride,
-            padding=self._updated_padding,
-            padding_algorithm=self._padding_algorithm,
-            dilation=self._dilation,
-            groups=self._groups,
-            data_format=self._data_format,
-            channel_dim=self._channel_dim,
-            op_type=self._op_type,
-            use_cudnn=self._use_cudnn)
+        out = F.conv._conv_nd(x,
+                              w,
+                              bias=self.bias,
+                              stride=self._stride,
+                              padding=self._updated_padding,
+                              padding_algorithm=self._padding_algorithm,
+                              dilation=self._dilation,
+                              groups=self._groups,
+                              data_format=self._data_format,
+                              channel_dim=self._channel_dim,
+                              op_type=self._op_type,
+                              use_cudnn=self._use_cudnn)
         return out
 
 
 def conv3x3(cin, cout, stride=1, groups=1, bias=False):
-    return StdConv2d(
-        cin,
-        cout,
-        kernel_size=3,
-        stride=stride,
-        padding=1,
-        bias_attr=bias,
-        groups=groups)
+    return StdConv2d(cin,
+                     cout,
+                     kernel_size=3,
+                     stride=stride,
+                     padding=1,
+                     bias_attr=bias,
+                     groups=groups)
 
 
 def conv1x1(cin, cout, stride=1, bias=False):
-    return StdConv2d(
-        cin, cout, kernel_size=1, stride=stride, padding=0, bias_attr=bias)
+    return StdConv2d(cin,
+                     cout,
+                     kernel_size=1,
+                     stride=stride,
+                     padding=0,
+                     bias_attr=bias)
 
 
 class Bottleneck(nn.Layer):
@@ -81,8 +84,8 @@ class Bottleneck(nn.Layer):
         self.gn1 = nn.GroupNorm(32, cmid, epsilon=1e-6)
         self.conv1 = conv1x1(cin, cmid, bias=False)
         self.gn2 = nn.GroupNorm(32, cmid, epsilon=1e-6)
-        self.conv2 = conv3x3(
-            cmid, cmid, stride, bias=False)  # Original code has it on conv1!!
+        self.conv2 = conv3x3(cmid, cmid, stride,
+                             bias=False)  # Original code has it on conv1!!
         self.gn3 = nn.GroupNorm(32, cout, epsilon=1e-6)
         self.conv3 = conv1x1(cmid, cout, bias=False)
         self.relu = nn.ReLU()
@@ -111,36 +114,46 @@ class Bottleneck(nn.Layer):
 
 @manager.BACKBONES.add_component
 class ResNet(nn.Layer):
+
     def __init__(self, block_units, width_factor):
         super().__init__()
         width = int(64 * width_factor)
         self.width = width
 
         self.root = nn.Sequential(
-            ('conv', StdConv2d(
-                3, width, kernel_size=7, stride=2, bias_attr=False, padding=3)),
-            ('gn', nn.GroupNorm(
-                32, width, epsilon=1e-6)), ('relu', nn.ReLU()))
+            ('conv',
+             StdConv2d(
+                 3, width, kernel_size=7, stride=2, bias_attr=False,
+                 padding=3)), ('gn', nn.GroupNorm(32, width, epsilon=1e-6)),
+            ('relu', nn.ReLU()))
 
         self.body = nn.Sequential(
-            ('block1', nn.Sequential(*([('unit1', Bottleneck(
-                cin=width, cout=width * 4, cmid=width))] + [
-                    (f'unit{i:d}', Bottleneck(
-                        cin=width * 4, cout=width * 4, cmid=width))
-                    for i in range(2, block_units[0] + 1)
-                ]))),
-            ('block2', nn.Sequential(*([('unit1', Bottleneck(
-                cin=width * 4, cout=width * 8, cmid=width * 2, stride=2))] + [
-                    (f'unit{i:d}', Bottleneck(
-                        cin=width * 8, cout=width * 8, cmid=width * 2))
-                    for i in range(2, block_units[1] + 1)
-                ]))),
-            ('block3', nn.Sequential(*([('unit1', Bottleneck(
-                cin=width * 8, cout=width * 16, cmid=width * 4, stride=2))] + [
-                    (f'unit{i:d}', Bottleneck(
-                        cin=width * 16, cout=width * 16, cmid=width * 4))
-                    for i in range(2, block_units[2] + 1)
-                ]))), )
+            ('block1',
+             nn.Sequential(
+                 *([('unit1',
+                     Bottleneck(cin=width, cout=width * 4, cmid=width))] +
+                   [(f'unit{i:d}',
+                     Bottleneck(cin=width * 4, cout=width * 4, cmid=width))
+                    for i in range(2, block_units[0] + 1)]))),
+            ('block2',
+             nn.Sequential(*(
+                 [('unit1',
+                   Bottleneck(
+                       cin=width *
+                       4, cout=width * 8, cmid=width * 2, stride=2))] +
+                 [(f'unit{i:d}',
+                   Bottleneck(cin=width * 8, cout=width * 8, cmid=width * 2))
+                  for i in range(2, block_units[1] + 1)]))),
+            ('block3',
+             nn.Sequential(*(
+                 [('unit1',
+                   Bottleneck(
+                       cin=width *
+                       8, cout=width * 16, cmid=width * 4, stride=2))] +
+                 [(f'unit{i:d}',
+                   Bottleneck(cin=width * 16, cout=width * 16, cmid=width * 4))
+                  for i in range(2, block_units[2] + 1)]))),
+        )
 
     def forward(self, x):
         features = []

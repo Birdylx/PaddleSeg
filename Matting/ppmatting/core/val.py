@@ -75,7 +75,8 @@ def evaluate(model,
         batch_size=1,
         drop_last=False,
         num_workers=num_workers,
-        return_list=True, )
+        return_list=True,
+    )
 
     total_iters = len(loader)
     # Get metric instances and data saving
@@ -91,10 +92,11 @@ def evaluate(model,
         metrics_data[key] = None
 
     if print_detail:
-        logger.info("Start evaluating (total_samples: {}, total_iters: {})...".
-                    format(len(eval_dataset), total_iters))
-    progbar_val = progbar.Progbar(
-        target=total_iters, verbose=1 if nranks < 2 else 2)
+        logger.info(
+            "Start evaluating (total_samples: {}, total_iters: {})...".format(
+                len(eval_dataset), total_iters))
+    progbar_val = progbar.Progbar(target=total_iters,
+                                  verbose=1 if nranks < 2 else 2)
     reader_cost_averager = TimeAverager()
     batch_cost_averager = TimeAverager()
     batch_start = time.time()
@@ -127,8 +129,8 @@ def evaluate(model,
                 trimap = trimap.numpy().astype('uint8')
             alpha_pred = np.round(alpha_pred * 255)
             for key in metrics_ins.keys():
-                metrics_data[key] = metrics_ins[key].update(alpha_pred,
-                                                            alpha_gt, trimap)
+                metrics_data[key] = metrics_ins[key].update(
+                    alpha_pred, alpha_gt, trimap)
 
             if save_results:
                 alpha_pred_one = alpha_pred[0].squeeze()
@@ -150,8 +152,8 @@ def evaluate(model,
                 save_alpha_pred(alpha_pred_one,
                                 os.path.join(save_dir, save_name))
 
-            batch_cost_averager.record(
-                time.time() - batch_start, num_samples=len(alpha_gt))
+            batch_cost_averager.record(time.time() - batch_start,
+                                       num_samples=len(alpha_gt))
             batch_cost = batch_cost_averager.get_average()
             reader_cost = reader_cost_averager.get_average()
 

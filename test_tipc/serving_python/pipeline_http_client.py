@@ -26,12 +26,12 @@ def parse_args():
     parser.add_argument(
         "--img_path",
         help="The path of image.",
-        type=str, )
-    parser.add_argument(
-        "--input_name",
-        help="The input name of inference model.",
         type=str,
-        default="x")
+    )
+    parser.add_argument("--input_name",
+                        help="The input name of inference model.",
+                        type=str,
+                        default="x")
     return parser.parse_args()
 
 

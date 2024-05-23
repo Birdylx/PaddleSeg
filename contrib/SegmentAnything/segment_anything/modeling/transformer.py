@@ -23,13 +23,14 @@ from common import MLPBlock
 
 
 class TwoWayTransformer(nn.Layer):
+
     def __init__(self,
                  depth: int,
                  embedding_dim: int,
                  num_heads: int,
                  mlp_dim: int,
-                 activation: Type[nn.Layer]=nn.ReLU,
-                 attention_downsample_rate: int=2) -> None:
+                 activation: Type[nn.Layer] = nn.ReLU,
+                 attention_downsample_rate: int = 2) -> None:
         """
         A transformer decoder that attends to an input image using
         queries whose positional embedding is supplied.
@@ -82,11 +83,10 @@ class TwoWayTransformer(nn.Layer):
         queries = point_embedding
         keys = image_embedding
         for layer in self.layers:
-            queries, keys = layer(
-                queries=queries,
-                keys=keys,
-                query_pe=point_embedding,
-                key_pe=image_pe)
+            queries, keys = layer(queries=queries,
+                                  keys=keys,
+                                  query_pe=point_embedding,
+                                  key_pe=image_pe)
         q = queries + point_embedding
         k = keys + image_pe
         attn_out = self.final_attn_token_to_image(q=q, k=k, v=keys)
@@ -96,13 +96,14 @@ class TwoWayTransformer(nn.Layer):
 
 
 class TwoWayAttentionBlock(nn.Layer):
+
     def __init__(self,
                  embedding_dim: int,
                  num_heads: int,
-                 mlp_dim: int=2048,
-                 activation: Type[nn.Layer]=nn.ReLU,
-                 attention_downsample_rate: int=2,
-                 skip_first_layer_pe: bool=False) -> None:
+                 mlp_dim: int = 2048,
+                 activation: Type[nn.Layer] = nn.ReLU,
+                 attention_downsample_rate: int = 2,
+                 skip_first_layer_pe: bool = False) -> None:
         """
         A transformer block with four layers: (1) self-attention of sparse
         inputs, (2) cross attention of sparse inputs to dense inputs, (3) mlp
@@ -162,7 +163,7 @@ class Attention(nn.Layer):
     def __init__(self,
                  embedding_dim: int,
                  num_heads: int,
-                 downsample_rate: int=1) -> None:
+                 downsample_rate: int = 1) -> None:
         super().__init__()
         self.embedding_dim = embedding_dim
         self.internal_dim = embedding_dim // downsample_rate
@@ -191,10 +192,10 @@ class Attention(nn.Layer):
         k = self._separate_heads(k, self.num_heads)
         v = self._separate_heads(v, self.num_heads)
         _, _, _, c_per_head = q.shape
-        attn = q @k.transpose([0, 1, 3, 2])
+        attn = q @ k.transpose([0, 1, 3, 2])
         attn = attn / math.sqrt(c_per_head)
         attn = F.softmax(attn, axis=-1)
-        out = attn @v
+        out = attn @ v
         out = self._recombine_heads(out)
         out = self.out_proj(out)
         return out

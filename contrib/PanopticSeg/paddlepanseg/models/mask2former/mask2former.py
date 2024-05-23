@@ -111,18 +111,18 @@ class Mask2Former(nn.Layer):
         multi_scale_features, mask_features = self.pixel_decoder(features)
         pred_logits, pred_masks, aux_logits, aux_masks = self.transformer_decoder(
             multi_scale_features, mask_features)
-        res = build_info_dict(
-            _type_='net_out', logits=pred_logits, masks=pred_masks)
+        res = build_info_dict(_type_='net_out',
+                              logits=pred_logits,
+                              masks=pred_masks)
         res['map_fields'] = ['masks']
         if self.training:
             res['aux_logits'] = aux_logits
             res['aux_masks'] = aux_masks
         else:
-            res['masks'] = F.interpolate(
-                res['masks'],
-                size=x.shape[-2:],
-                mode='bilinear',
-                align_corners=False)
+            res['masks'] = F.interpolate(res['masks'],
+                                         size=x.shape[-2:],
+                                         mode='bilinear',
+                                         align_corners=False)
         return res
 
     def init_weight(self):

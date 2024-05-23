@@ -228,8 +228,8 @@ def th_linear_fill(layer):
         linear = nn.Linear(128, 128)
         param_init.linear_fill(linear)
     """
-    nn.initializer.KaimingUniform(
-        negative_slope=math.sqrt(5), nonlinearity='leaky_relu')(layer.weight)
+    nn.initializer.KaimingUniform(negative_slope=math.sqrt(5),
+                                  nonlinearity='leaky_relu')(layer.weight)
 
     if getattr(layer, 'bias', None) is not None:
         fan_in = layer.weight.shape[0]

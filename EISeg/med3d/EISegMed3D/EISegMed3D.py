@@ -102,6 +102,7 @@ and Steve Pieper, Isomics, Inc. and was partially funded by NIH grant 3P41RR0132
 
 
 class Clicker(object):
+
     def __init__(self):
         self.reset_clicks()
 
@@ -154,13 +155,16 @@ def registerSampleData():
         # It can be created by Screen Capture module, "Capture all views" option enabled, "Number of images" set to "Single".
         thumbnailFileName=os.path.join(iconsPath, "placePoint1.png"),
         # Download URL and target file name
-        uris="https://github.com/Slicer/SlicerTestingData/releases/download/SHA256/998cb522173839c78657f4bc0ea907cea09fd04e44601f17c82ea27927937b95",
+        uris=
+        "https://github.com/Slicer/SlicerTestingData/releases/download/SHA256/998cb522173839c78657f4bc0ea907cea09fd04e44601f17c82ea27927937b95",
         fileNames="placePoint1.nrrd",
         # Checksum to ensure file integrity. Can be computed by this command:
         #  import hashlib; print(hashlib.sha256(open(filename, "rb").read()).hexdigest())
-        checksums="SHA256:998cb522173839c78657f4bc0ea907cea09fd04e44601f17c82ea27927937b95",
+        checksums=
+        "SHA256:998cb522173839c78657f4bc0ea907cea09fd04e44601f17c82ea27927937b95",
         # This node name will be used when the data set is loaded
-        nodeNames="placePoint1", )
+        nodeNames="placePoint1",
+    )
 
     # EISegMed3D2
     SampleData.SampleDataLogic.registerCustomSampleDataSource(
@@ -169,11 +173,14 @@ def registerSampleData():
         sampleName="placePoint2",
         thumbnailFileName=os.path.join(iconsPath, "placePoint2.png"),
         # Download URL and target file name
-        uris="https://github.com/Slicer/SlicerTestingData/releases/download/SHA256/1a64f3f422eb3d1c9b093d1a18da354b13bcf307907c66317e2463ee530b7a97",
+        uris=
+        "https://github.com/Slicer/SlicerTestingData/releases/download/SHA256/1a64f3f422eb3d1c9b093d1a18da354b13bcf307907c66317e2463ee530b7a97",
         fileNames="placePoint2.nrrd",
-        checksums="SHA256:1a64f3f422eb3d1c9b093d1a18da354b13bcf307907c66317e2463ee530b7a97",
+        checksums=
+        "SHA256:1a64f3f422eb3d1c9b093d1a18da354b13bcf307907c66317e2463ee530b7a97",
         # This node name will be used when the data set is loaded
-        nodeNames="placePoint2", )
+        nodeNames="placePoint2",
+    )
 
 
 #
@@ -313,8 +320,8 @@ class EISegMed3DWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         """init changble parameters here"""
         self.predictor_params_ = {"norm_radius": 2, "spatial_scale": 1.0}
         self.ratio = (
-            512 / 880, 512 / 880, 12 /
-            12)  # xyz 这个形状与训练的对数据预处理的形状要一致，怎么切换不同模型？ todo： 在模块上设置预处理形状。和模型一致
+            512 / 880, 512 / 880, 12 / 12
+        )  # xyz 这个形状与训练的对数据预处理的形状要一致，怎么切换不同模型？ todo： 在模块上设置预处理形状。和模型一致
         self.train_shape = (512, 512, 12)
         self.image_ww = (0, 2650)  # low, high range for image crop
         self.test_iou = False  # the label file need to be set correctly
@@ -381,8 +388,8 @@ class EISegMed3DWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
         # 1. ensure valid input
         if dataFolder is None or len(dataFolder) == 0:
-            slicer.util.errorDisplay(
-                "Please select a Data Folder first!", autoCloseMsec=5000)
+            slicer.util.errorDisplay("Please select a Data Folder first!",
+                                     autoCloseMsec=5000)
             return
 
         if not osp.exists(dataFolder):
@@ -419,12 +426,13 @@ class EISegMed3DWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self._currScanIdx, self._finishedPaths = self.getProgress()
         self.updateProgressWidgets()
 
-        if len(set(self._scanPaths) - set(
-                self._finishedPaths)) == 0 and self.ui.skipFinished.checked:
+        if len(set(self._scanPaths) -
+               set(self._finishedPaths)) == 0 and self.ui.skipFinished.checked:
             self.closePb()
             slicer.util.delayDisplay(
                 f"All {len(self._scanPaths)} scans have been annotated!\nUncheck Skip Finished Scans to browse through them.",
-                4000, )
+                4000,
+            )
             return
 
         self.setPb(0.6, "Loading Scan and label")
@@ -518,24 +526,26 @@ class EISegMed3DWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
                 if wait:
                     logging.info(f"loading {scanPath}")
                     self._loadingScans.add(scanPath)
-                    node = slicer.util.loadVolume(
-                        scanPath,
-                        properties={"show": False,
-                                    "singleFile": True})
+                    node = slicer.util.loadVolume(scanPath,
+                                                  properties={
+                                                      "show": False,
+                                                      "singleFile": True
+                                                  })
                     node.SetName(osp.basename(scanPath))
                     self._loadingScans.remove(scanPath)
                     return node
                 else:
 
                     def read(path):
-                        node = slicer.util.loadVolume(
-                            scanPath,
-                            properties={"show": False,
-                                        "singleFile": True})
+                        node = slicer.util.loadVolume(scanPath,
+                                                      properties={
+                                                          "show": False,
+                                                          "singleFile": True
+                                                      })
                         node.SetName(osp.basename(path))
 
-                    qt.QTimer.singleShot(
-                        random.randint(500, 1000), lambda: read(scanPath))
+                    qt.QTimer.singleShot(random.randint(500, 1000),
+                                         lambda: read(scanPath))
 
     def manageCache(self, currIdx, skipPreload=False):
         toKeepIdxs = [
@@ -575,8 +585,8 @@ class EISegMed3DWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             self.exitInteractiveMode()
 
         if len(self._scanPaths) == 0:
-            slicer.util.errorDisplay(
-                "No scan found, please load scans first.", autoCloseMsec=2000)
+            slicer.util.errorDisplay("No scan found, please load scans first.",
+                                     autoCloseMsec=2000)
             self.closePb()
             self._turninig = False
             return
@@ -674,8 +684,9 @@ class EISegMed3DWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
         layoutManager = slicer.app.layoutManager()
         for sliceViewName in layoutManager.sliceViewNames():
-            layoutManager.sliceWidget(sliceViewName).mrmlSliceNode(
-            ).RotateToVolumePlane(self._currVolumeNode)
+            layoutManager.sliceWidget(
+                sliceViewName).mrmlSliceNode().RotateToVolumePlane(
+                    self._currVolumeNode)
         slicer.util.resetSliceViews()
 
         self.closePb()
@@ -889,8 +900,8 @@ class EISegMed3DWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             wrapper.setLayout(layout)
             table.setCellWidget(idx, 0, wrapper)
             table.setItem(
-                idx, 1,
-                qt.QTableWidgetItem(osp.relpath(path, self._dataFolder)))
+                idx, 1, qt.QTableWidgetItem(osp.relpath(path,
+                                                        self._dataFolder)))
 
         table.cellDoubleClicked.connect(pathDoubleClicked)
         table.resizeColumnsToContents()
@@ -1000,9 +1011,8 @@ class EISegMed3DWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
                     self.segmentationNode, segmentId,
                     self._currVolumeNode).sum() != 0):
                 # TODO: prompt and let user choose whether to create new segment
-                segmentId = segmentation.AddEmptySegment("",
-                                                         segment.GetName(),
-                                                         segment.GetColor())
+                segmentId = segmentation.AddEmptySegment(
+                    "", segment.GetName(), segment.GetColor())
         self.ui.embeddedSegmentEditorWidget.setCurrentSegmentID(segmentId)
 
         if not TEST:
@@ -1043,9 +1053,9 @@ class EISegMed3DWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             enable_mkldnn=self.enable_mkldnn,
             **self.predictor_params_)
 
-        slicer.util.delayDisplay(
-            "Sucessfully loaded model to {}!".format(self.device),
-            autoCloseMsec=1500)
+        slicer.util.delayDisplay("Sucessfully loaded model to {}!".format(
+            self.device),
+                                 autoCloseMsec=1500)
 
     def onControlPointAdded(self, observer, eventid):
         if self._addingControlPoint:
@@ -1080,8 +1090,8 @@ class EISegMed3DWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             f"Current segment: {self.getSegmentId(segment)} {segment.GetName()} {segment.GetLabelValue()}",
         )
 
-        with slicer.util.tryWithErrorDisplay(
-                "Failed to run inference.", waitCursor=True):
+        with slicer.util.tryWithErrorDisplay("Failed to run inference.",
+                                             waitCursor=True):
             self.setPb(0.2, "Running inference")
 
             # predict image for test
@@ -1091,8 +1101,8 @@ class EISegMed3DWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
                 res = slicer.util.arrayFromSegmentBinaryLabelmap(
                     self.segmentationNode, segmentId, self._currVolumeNode)
                 mask = np.zeros_like(res)
-                mask[p[0] - 10:p[0] + 10, p[1] - 10:p[1] + 10, p[2] - 10:p[2] +
-                     10] = 1
+                mask[p[0] - 10:p[0] + 10, p[1] - 10:p[1] + 10,
+                     p[2] - 10:p[2] + 10] = 1
             else:
                 paddle.device.cuda.empty_cache()
                 mask = self.infer_image(
@@ -1117,10 +1127,10 @@ class EISegMed3DWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         obj_gt_mask = gt_mask == gt_mask[newPointPos[2], newPointPos[1],
                                          newPointPos[0]]
 
-        intersection = np.logical_and(
-            np.logical_and(pred_mask, obj_gt_mask), ignore_gt_mask_inv).sum()
-        union = np.logical_and(
-            np.logical_or(pred_mask, obj_gt_mask), ignore_gt_mask_inv).sum()
+        intersection = np.logical_and(np.logical_and(pred_mask, obj_gt_mask),
+                                      ignore_gt_mask_inv).sum()
+        union = np.logical_and(np.logical_or(pred_mask, obj_gt_mask),
+                               ignore_gt_mask_inv).sum()
 
         return intersection / union
 
@@ -1147,8 +1157,8 @@ class EISegMed3DWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         try:
             self.inference_predictor.set_input_image(self.input_data)
         except AttributeError:
-            slicer.util.errorDisplay(
-                "Please load model first", autoCloseMsec=1200)
+            slicer.util.errorDisplay("Please load model first",
+                                     autoCloseMsec=1200)
 
     def infer_image(self,
                     click_position=None,
@@ -1187,8 +1197,7 @@ class EISegMed3DWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         mask_itk_new = sitk.Cast(mask_itk_new, sitk.sitkUInt8)
 
         # if need max connect opponet filter, add it before here.
-        Mask, _ = inference.resampleImage(mask_itk_new,
-                                          self.origin.GetSize(),
+        Mask, _ = inference.resampleImage(mask_itk_new, self.origin.GetSize(),
                                           self.origin.GetSpacing(),
                                           sitk.sitkNearestNeighbor)
         Mask.CopyInformation(self.origin)
@@ -1212,12 +1221,12 @@ class EISegMed3DWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         else:
             click_position_new.append(-100)
 
-        logging.info("The {} click is click on {} (resampled)".format(
-            ["negative", "positive"][positive_click],
-            click_position_new))  # result is correct
+        logging.info("The {} click is click on {} (resampled)".format([
+            "negative", "positive"
+        ][positive_click], click_position_new))  # result is correct
 
-        click = inference.Click(
-            is_positive=positive_click, coords=click_position_new)
+        click = inference.Click(is_positive=positive_click,
+                                coords=click_position_new)
         self.clicker.add_click(click)
         logging.info("####################### clicker length",
                      len(self.clicker.clicks_list))
@@ -1265,8 +1274,8 @@ class EISegMed3DWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         colorTableNode.SetNamesInitialised(True)
 
         for segment in self.segments:
-            colorTableNode.SetColor(catgs[segment.GetName()],
-                                    segment.GetName(), *segment.GetColor(), 1.0)
+            colorTableNode.SetColor(catgs[segment.GetName()], segment.GetName(),
+                                    *segment.GetColor(), 1.0)
 
         labelmapVolumeNode = slicer.mrmlScene.AddNewNodeByClass(
             "vtkMRMLLabelMapVolumeNode")
@@ -1277,7 +1286,8 @@ class EISegMed3DWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             labelmapVolumeNode,
             self._currVolumeNode,
             segmentation.EXTENT_UNION_OF_EFFECTIVE_SEGMENTS,
-            colorTableNode, )
+            colorTableNode,
+        )
 
         res = slicer.util.saveNode(labelmapVolumeNode, labelPath)
 
@@ -1323,12 +1333,14 @@ class EISegMed3DWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.resetPointList(
             self.ui.dgPositiveControlPointPlacementWidget,
             self.dgPositivePointListNode,
-            self.dgPositivePointListNodeObservers, )
+            self.dgPositivePointListNodeObservers,
+        )
         self.dgPositivePointListNode = None
         self.resetPointList(
             self.ui.dgNegativeControlPointPlacementWidget,
             self.dgNegativePointListNode,
-            self.dgNegativePointListNodeObservers, )
+            self.dgNegativePointListNodeObservers,
+        )
         self.dgNegativePointListNode = None
 
     def enter(self):
@@ -1344,7 +1356,8 @@ class EISegMed3DWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.removeObserver(
             self._parameterNode,
             vtk.vtkCommand.ModifiedEvent,
-            self.updateGUIFromParameterNode, )
+            self.updateGUIFromParameterNode,
+        )
 
     def onReload(self):
         self.cleanup()
@@ -1372,12 +1385,14 @@ class EISegMed3DWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.resetPointList(
             self.ui.dgPositiveControlPointPlacementWidget,
             self.dgPositivePointListNode,
-            self.dgPositivePointListNodeObservers, )
+            self.dgPositivePointListNodeObservers,
+        )
         self.dgPositivePointListNode = None
         self.resetPointList(
             self.ui.dgNegativeControlPointPlacementWidget,
             self.dgNegativePointListNode,
-            self.dgNegativePointListNodeObservers, )
+            self.dgNegativePointListNodeObservers,
+        )
         self.dgNegativePointListNode = None
 
     def onSceneEndClose(self, caller, event):
@@ -1397,8 +1412,8 @@ class EISegMed3DWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.setParameterNode(self.logic.getParameterNode())
         segNode = self.segmentationNode
         if segNode is not None:
-            self.ui.opacitySlider.setValue(segNode.GetDisplayNode().GetOpacity(
-            ))
+            self.ui.opacitySlider.setValue(
+                segNode.GetDisplayNode().GetOpacity())
 
     def setParameterNode(self, inputParameterNode):
         """
@@ -1413,13 +1428,15 @@ class EISegMed3DWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             self.removeObserver(
                 self._parameterNode,
                 vtk.vtkCommand.ModifiedEvent,
-                self.updateGUIFromParameterNode, )
+                self.updateGUIFromParameterNode,
+            )
         self._parameterNode = inputParameterNode
         if self._parameterNode is not None:
             self.addObserver(
                 self._parameterNode,
                 vtk.vtkCommand.ModifiedEvent,
-                self.updateGUIFromParameterNode, )
+                self.updateGUIFromParameterNode,
+            )
 
         # Initial GUI update
         self.updateGUIFromParameterNode()
@@ -1538,7 +1555,8 @@ class EISegMed3DLogic(ScriptedLoadableModuleLogic):
             None,
             cliParams,
             wait_for_completion=True,
-            update_display=showResult, )
+            update_display=showResult,
+        )
         # We don't need the CLI module node anymore, remove it to not clutter the scene with it
         slicer.mrmlScene.RemoveNode(cliNode)
 

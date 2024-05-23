@@ -14,6 +14,7 @@ from tools.preprocess_utils.geometry import resize_image, resize_segmentation
 
 @manager.INFERENCE_HELPERS.add_component
 class NNFormerInferenceHelper(InferenceHelper):
+
     def load_medical_data(self, filename):
         self.nimg = nib.load(filename)
         data_array = self.nimg.get_data()
@@ -21,8 +22,8 @@ class NNFormerInferenceHelper(InferenceHelper):
         return data_array, original_spacing
 
     def preprocess(self, cfg, imgs_path, batch_size, batch_id):
-        data_array, original_spacing = self.load_medical_data(imgs_path[
-            batch_id:(batch_id + batch_size)][0])
+        data_array, original_spacing = self.load_medical_data(
+            imgs_path[batch_id:(batch_id + batch_size)][0])
         self.shape = data_array.shape
         self.target_spacing = [1.52, 1.52, 6.35]
         new_shape = np.round(((np.array(original_spacing) /

@@ -27,6 +27,7 @@ from paddlepanseg.core.launcher import AMPLauncher
 
 
 class _DistOptimizerWrapper(object):
+
     def __init__(self, dist_optim):
         assert isinstance(dist_optim, paddle.distributed.fleet.Fleet)
         self._optim = dist_optim
@@ -123,16 +124,17 @@ def train(model,
         ddp_model = paddle.distributed.fleet.distributed_model(model)
 
     # Build batch sampler and data loader
-    batch_sampler = paddle.io.DistributedBatchSampler(
-        train_dataset, batch_size=batch_size, shuffle=True, drop_last=True)
-    loader = paddle.io.DataLoader(
-        train_dataset,
-        batch_sampler=batch_sampler,
-        num_workers=num_workers,
-        return_list=True,
-        worker_init_fn=worker_init_fn,
-        collate_fn=train_dataset.collate
-        if hasattr(train_dataset, 'collate') else None)
+    batch_sampler = paddle.io.DistributedBatchSampler(train_dataset,
+                                                      batch_size=batch_size,
+                                                      shuffle=True,
+                                                      drop_last=True)
+    loader = paddle.io.DataLoader(train_dataset,
+                                  batch_sampler=batch_sampler,
+                                  num_workers=num_workers,
+                                  return_list=True,
+                                  worker_init_fn=worker_init_fn,
+                                  collate_fn=train_dataset.collate if hasattr(
+                                      train_dataset, 'collate') else None)
 
     if to_static_training:
         model = paddle.jit.to_static(model)
@@ -145,8 +147,9 @@ def train(model,
         runner.bind(model=model, criteria=losses, optimizer=optimizer)
 
     # Create launcher
-    launcher = AMPLauncher(
-        runner=runner, precision=precision, amp_level=amp_level)
+    launcher = AMPLauncher(runner=runner,
+                           precision=precision,
+                           amp_level=amp_level)
 
     if use_vdl:
         # Build log writer
@@ -173,8 +176,8 @@ def train(model,
 
             reader_cost_averager.record(time.time() - batch_start)
 
-            loss, loss_list = launcher.train_step(
-                data=data, return_loss_list=True)
+            loss, loss_list = launcher.train_step(data=data,
+                                                  return_loss_list=True)
 
             train_profiler.add_profiler_step(profiler_options)
 
@@ -185,8 +188,8 @@ def train(model,
                 for i in range(len(loss_list)):
                     avg_loss_list[i] += loss_list[i].numpy()
 
-            batch_cost_averager.record(
-                time.time() - batch_start, num_samples=batch_size)
+            batch_cost_averager.record(time.time() - batch_start,
+                                       num_samples=batch_size)
 
             if (iter) % log_iters == 0 and local_rank == 0:
                 lr = launcher.runner.optimizer.get_lr()
@@ -198,9 +201,9 @@ def train(model,
                 eta = calculate_eta(remain_iters, avg_train_batch_cost)
                 logger.info(
                     "[TRAIN] epoch: {}, iter: {}/{}, loss: {:.4f}, lr: {:.6f}, batch_cost: {:.4f}, reader_cost: {:.5f}, ips: {:.4f} samples/sec | ETA {}"
-                    .format((iter - 1
-                             ) // iters_per_epoch + 1, iter, iters, avg_loss,
-                            lr, avg_train_batch_cost, avg_train_reader_cost,
+                    .format((iter - 1) // iters_per_epoch + 1, iter, iters,
+                            avg_loss, lr, avg_train_batch_cost,
+                            avg_train_reader_cost,
                             batch_cost_averager.get_ips_average(), eta))
                 if use_vdl:
                     log_writer.add_scalar('Train/loss', avg_loss, iter)
@@ -240,20 +243,19 @@ def train(model,
                     shutil.rmtree(model_to_remove)
 
             # Eval model
-            if (iter % save_interval == 0 or iter == iters) and (
-                    val_dataset is not None) and local_rank == 0:
+            if (iter % save_interval == 0 or iter
+                    == iters) and (val_dataset is not None) and local_rank == 0:
                 num_workers = 1 if num_workers > 0 else 0
-                results = evaluate(
-                    model,
-                    val_dataset,
-                    postprocessor,
-                    num_workers=num_workers,
-                    print_detail=False,
-                    eval_sem=eval_sem,
-                    eval_ins=eval_ins,
-                    precision=precision,
-                    amp_level=amp_level,
-                    runner=runner)
+                results = evaluate(model,
+                                   val_dataset,
+                                   postprocessor,
+                                   num_workers=num_workers,
+                                   print_detail=False,
+                                   eval_sem=eval_sem,
+                                   eval_ins=eval_ins,
+                                   precision=precision,
+                                   amp_level=amp_level,
+                                   runner=runner)
 
                 pq = results['pan_metrics']['All']['pq']
                 desc = "[EVAL] PQ: {:.4f}".format(pq)

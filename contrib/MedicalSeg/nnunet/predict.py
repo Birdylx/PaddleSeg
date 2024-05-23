@@ -41,58 +41,56 @@ def parse_args():
         "CASENAME_XXXX.nii.gz where XXXX is the modality "
         "identifier (0000, 0001, etc)",
         required=True)
-    parser.add_argument(
-        '--output_folder',
-        "--output_folder",
-        required=True,
-        help="folder for saving predictions")
+    parser.add_argument('--output_folder',
+                        "--output_folder",
+                        required=True,
+                        help="folder for saving predictions")
     parser.add_argument(
         '--model_type',
         '--model_type',
         required=True,
         type=str,
-        help="Model type, only support '2d', '3d', 'cascade_lowres', 'cascade_fullres'."
+        help=
+        "Model type, only support '2d', '3d', 'cascade_lowres', 'cascade_fullres'."
     )
 
-    parser.add_argument(
-        '--plan_path',
-        "--plan_path",
-        required=True,
-        type=str,
-        help='the path to plan_path')
-    parser.add_argument(
-        '--model_paths',
-        '--model_paths',
-        nargs='+',
-        required=True,
-        help="The multi model paths.")
-    parser.add_argument(
-        '--postprocessing_json_path',
-        "--postprocessing_json_path",
-        required=True,
-        default=None,
-        type=str,
-        help='the path to postprocessing json.')
-    parser.add_argument(
-        '--folds',
-        "--folds",
-        required=False,
-        type=int,
-        default=5,
-        help='number of folds, default: 5.')
+    parser.add_argument('--plan_path',
+                        "--plan_path",
+                        required=True,
+                        type=str,
+                        help='the path to plan_path')
+    parser.add_argument('--model_paths',
+                        '--model_paths',
+                        nargs='+',
+                        required=True,
+                        help="The multi model paths.")
+    parser.add_argument('--postprocessing_json_path',
+                        "--postprocessing_json_path",
+                        required=True,
+                        default=None,
+                        type=str,
+                        help='the path to postprocessing json.')
+    parser.add_argument('--folds',
+                        "--folds",
+                        required=False,
+                        type=int,
+                        default=5,
+                        help='number of folds, default: 5.')
     parser.add_argument(
         '--lowres_segmentations',
         '--lowres_segmentations',
         required=False,
         default=None,
-        help="If model is the highres stage of the cascade then you can use this folder to provide "
+        help=
+        "If model is the highres stage of the cascade then you can use this folder to provide "
         "predictions from the low resolution 3D U-Net.")
     parser.add_argument(
         '--save_npz',
         '--save_npz',
         required=False,
         action='store_true',
-        help="use this if you want to ensemble these predictions with those of other models. Softmax "
+        help=
+        "use this if you want to ensemble these predictions with those of other models. Softmax "
         "probabilities will be saved as compressed numpy arrays in output_folder and can be "
         "merged between output_folders with nnUNet_ensemble_predictions")
 
@@ -102,7 +100,8 @@ def parse_args():
         required=False,
         default=6,
         type=int,
-        help="Determines many background processes will be used for data preprocessing. Reduce this if you "
+        help=
+        "Determines many background processes will be used for data preprocessing. Reduce this if you "
         "run into out of memory (RAM) problems. Default: 6")
 
     parser.add_argument(
@@ -111,50 +110,49 @@ def parse_args():
         required=False,
         default=2,
         type=int,
-        help="Determines many background processes will be used for segmentation export. Reduce this if you "
+        help=
+        "Determines many background processes will be used for segmentation export. Reduce this if you "
         "run into out of memory (RAM) problems. Default: 2")
 
-    parser.add_argument(
-        "--mode",
-        "--mode",
-        type=str,
-        default="normal",
-        required=False,
-        help="Hands off!")
-    parser.add_argument(
-        "--step_size",
-        "--step_size",
-        type=float,
-        default=0.5,
-        required=False,
-        help="don't touch")
+    parser.add_argument("--mode",
+                        "--mode",
+                        type=str,
+                        default="normal",
+                        required=False,
+                        help="Hands off!")
+    parser.add_argument("--step_size",
+                        "--step_size",
+                        type=float,
+                        default=0.5,
+                        required=False,
+                        help="don't touch")
     parser.add_argument(
         "--overwrite_existing",
         "--overwrite_existing",
         required=False,
         default=False,
         action="store_true",
-        help="Set this flag if the target folder contains predictions that you would like to overwrite"
+        help=
+        "Set this flag if the target folder contains predictions that you would like to overwrite"
     )
-    parser.add_argument(
-        "--disable_postprocessing",
-        "--disable_postprocessing",
-        required=False,
-        default=False,
-        action="store_true",
-        help="Set this flag if no need postprocessing")
+    parser.add_argument("--disable_postprocessing",
+                        "--disable_postprocessing",
+                        required=False,
+                        default=False,
+                        action="store_true",
+                        help="Set this flag if no need postprocessing")
     parser.add_argument(
         "--disable_tta",
         required=False,
         default=False,
         action="store_true",
-        help="set this flag to disable test time data augmentation via mirroring. Speeds up inference "
+        help=
+        "set this flag to disable test time data augmentation via mirroring. Speeds up inference "
         "by roughly factor 4 (2D) or 8 (3D)")
-    parser.add_argument(
-        '--precision',
-        default='fp16',
-        required=False,
-        help="whether use mixed precision prediction.")
+    parser.add_argument('--precision',
+                        default='fp16',
+                        required=False,
+                        help="whether use mixed precision prediction.")
     return parser.parse_args()
 
 
@@ -164,8 +162,8 @@ def check_input_folder_and_return_caseIDs(input_folder,
         expected_num_modalities))
     files = [
         file for file in os.listdir(input_folder)
-        if os.path.isfile(os.path.join(input_folder, file)) and file.endswith(
-            ".nii.gz")
+        if os.path.isfile(os.path.join(input_folder, file))
+        and file.endswith(".nii.gz")
     ]
     files.sort()
     maybe_case_ids = np.unique([i[:-12] for i in files])
@@ -184,17 +182,18 @@ def check_input_folder_and_return_caseIDs(input_folder,
                 missing.append(expected_output_file)
             else:
                 remaining.remove(expected_output_file)
-    print("Found {} unique case ids, here are some examples: ".format(
-        len(maybe_case_ids)),
-          np.random.choice(maybe_case_ids, min(len(maybe_case_ids), 10)))
+    print(
+        "Found {} unique case ids, here are some examples: ".format(
+            len(maybe_case_ids)),
+        np.random.choice(maybe_case_ids, min(len(maybe_case_ids), 10)))
     print(
         "If they don't look right, make sure to double check your filenames. They must end with _0000.nii.gz etc"
     )
 
     if len(remaining) > 0:
         print(
-            "found {} unexpected remaining files in the folder. Here are some examples:".
-            format(len(remaining)),
+            "found {} unexpected remaining files in the folder. Here are some examples:"
+            .format(len(remaining)),
             np.random.choice(remaining, min(len(remaining), 10)))
     if len(missing) > 0:
         print("Some files are missing:")
@@ -211,12 +210,12 @@ def predict_from_folder(predictor,
                         num_threads_nifti_save: int,
                         lowres_segmentations,
                         tta: bool,
-                        mixed_precision: bool=True,
-                        overwrite_existing: bool=True,
-                        mode: str='normal',
-                        step_size: float=0.5,
-                        segmentation_export_kwargs: dict=None,
-                        disable_postprocessing: bool=False,
+                        mixed_precision: bool = True,
+                        overwrite_existing: bool = True,
+                        mode: str = 'normal',
+                        step_size: float = 0.5,
+                        segmentation_export_kwargs: dict = None,
+                        disable_postprocessing: bool = False,
                         plan_path=None,
                         postprocessing_json_path=None):
     os.makedirs(output_folder, exist_ok=True)
@@ -234,8 +233,8 @@ def predict_from_folder(predictor,
     ]
     all_files = [
         file for file in os.listdir(input_folder)
-        if os.path.isfile(os.path.join(input_folder, file)) and file.endswith(
-            ".nii.gz")
+        if os.path.isfile(os.path.join(input_folder, file))
+        and file.endswith(".nii.gz")
     ]
     all_files.sort()
     list_of_lists = [[

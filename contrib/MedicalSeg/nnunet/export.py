@@ -31,30 +31,28 @@ import nnunet
 def parse_args():
     parser = argparse.ArgumentParser(description='Model export.')
     # params of training
-    parser.add_argument(
-        "--config",
-        dest="cfg",
-        help="The config file.",
-        default=None,
-        type=str,
-        required=True)
-    parser.add_argument(
-        '--save_dir',
-        dest='save_dir',
-        help='The directory for saving the exported model',
-        type=str,
-        default='./output')
-    parser.add_argument(
-        '--model_path',
-        dest='model_path',
-        help='The path of model for export',
-        type=str,
-        default=None)
+    parser.add_argument("--config",
+                        dest="cfg",
+                        help="The config file.",
+                        default=None,
+                        type=str,
+                        required=True)
+    parser.add_argument('--save_dir',
+                        dest='save_dir',
+                        help='The directory for saving the exported model',
+                        type=str,
+                        default='./output')
+    parser.add_argument('--model_path',
+                        dest='model_path',
+                        help='The path of model for export',
+                        type=str,
+                        default=None)
 
     return parser.parse_args()
 
 
 class SavedSegmentationNet(paddle.nn.Layer):
+
     def __init__(self, net):
         super().__init__()
         self.net = net
@@ -90,10 +88,11 @@ def main(args):
     new_net = SavedSegmentationNet(net)
 
     new_net.eval()
-    new_net = paddle.jit.to_static(
-        new_net,
-        input_spec=[paddle.static.InputSpec(
-            shape=shape, dtype='float32')])  # export is export to static graph
+    new_net = paddle.jit.to_static(new_net,
+                                   input_spec=[
+                                       paddle.static.InputSpec(shape=shape,
+                                                               dtype='float32')
+                                   ])  # export is export to static graph
     save_path = os.path.join(args.save_dir, 'model')
     paddle.jit.save(new_net, save_path)
 

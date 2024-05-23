@@ -22,7 +22,8 @@ ext_modules = [
             "./eiseg/util/coco/pycocotools/_mask.pyx",
         ],
         include_dirs=[np.get_include(), "./eiseg/util/coco/common"],
-        extra_compile_args=["-Wno-cpp", "-Wno-unused-function", "-std=c99"], )
+        extra_compile_args=["-Wno-cpp", "-Wno-unused-function", "-std=c99"],
+    )
 ]
 packages = find_packages(exclude=("test", ))
 setup(
@@ -45,4 +46,7 @@ setup(
     # packages=["EISeg"],
     include_package_data=True,
     install_requires=REQUIRED_PACKAGES,
-    entry_points={"console_scripts": ["eiseg=eiseg.run:main", ]}, )
+    entry_points={"console_scripts": [
+        "eiseg=eiseg.run:main",
+    ]},
+)

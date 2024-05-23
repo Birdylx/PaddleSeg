@@ -15,7 +15,7 @@ PaddleSeg支持利用FastDeploy在NVIDIA GPU、X86 CPU、飞腾CPU、ARM CPU、I
 | [Modnet-MobileNetV2](https://bj.bcebos.com/paddlehub/fastdeploy/PPModnet_MobileNetV2.tgz) | 28MB | - |
 | [Modnet-HRNet_w18](https://bj.bcebos.com/paddlehub/fastdeploy/PPModnet_HRNet_w18.tgz) | 51MB | - |
 
-## 3. 自行导出PaddleSeg部署模型 
+## 3. 自行导出PaddleSeg部署模型
 ### 3.1 模型版本
 
 支持[PaddleSeg](https://github.com/PaddlePaddle/PaddleSeg/tree/develop) 高于2.6版本的Matting模型，目前FastDeploy中测试过模型如下：  

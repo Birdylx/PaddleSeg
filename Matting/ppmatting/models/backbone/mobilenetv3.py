@@ -185,26 +185,25 @@ class MobileNetV3(nn.Layer):
         self.return_last_conv = return_last_conv
         inplanes = 16
 
-        self.conv = ConvBNLayer(
-            in_c=in_channels,
-            out_c=_make_divisible(inplanes * self.scale),
-            filter_size=3,
-            stride=2,
-            padding=1,
-            num_groups=1,
-            if_act=True,
-            act="hardswish")
+        self.conv = ConvBNLayer(in_c=in_channels,
+                                out_c=_make_divisible(inplanes * self.scale),
+                                filter_size=3,
+                                stride=2,
+                                padding=1,
+                                num_groups=1,
+                                if_act=True,
+                                act="hardswish")
         self.blocks = nn.Sequential(*[
-            ResidualUnit(
-                in_c=_make_divisible(inplanes * self.scale if i == 0 else
-                                     self.cfg[i - 1][2] * self.scale),
-                mid_c=_make_divisible(self.scale * exp),
-                out_c=_make_divisible(self.scale * c),
-                filter_size=k,
-                stride=s,
-                use_se=se,
-                act=act,
-                dilation=td[0] if td else 1)
+            ResidualUnit(in_c=_make_divisible(inplanes * self.scale if i ==
+                                              0 else self.cfg[i - 1][2] *
+                                              self.scale),
+                         mid_c=_make_divisible(self.scale * exp),
+                         out_c=_make_divisible(self.scale * c),
+                         filter_size=k,
+                         stride=s,
+                         use_se=se,
+                         act=act,
+                         dilation=td[0] if td else 1)
             for i, (k, exp, c, se, act, s, *td) in enumerate(self.cfg)
         ])
         self.last_second_conv = ConvBNLayer(
@@ -235,7 +234,9 @@ class MobileNetV3(nn.Layer):
         if self.pretrained is not None:
             utils.load_entire_model(self, self.pretrained)
 
-    def init_res(self, stages_pattern, return_patterns=None,
+    def init_res(self,
+                 stages_pattern,
+                 return_patterns=None,
                  return_stages=None):
         if return_patterns and return_stages:
             msg = f"The 'return_patterns' would be ignored when 'return_stages' is set."
@@ -275,6 +276,7 @@ class MobileNetV3(nn.Layer):
 
 
 class ConvBNLayer(nn.Layer):
+
     def __init__(self,
                  in_c,
                  out_c,
@@ -287,22 +289,20 @@ class ConvBNLayer(nn.Layer):
                  dilation=1):
         super().__init__()
 
-        self.conv = Conv2D(
-            in_channels=in_c,
-            out_channels=out_c,
-            kernel_size=filter_size,
-            stride=stride,
-            padding=padding,
-            groups=num_groups,
-            bias_attr=False,
-            dilation=dilation)
-        self.bn = BatchNorm(
-            num_channels=out_c,
-            act=None,
-            epsilon=0.001,
-            momentum=0.99,
-            param_attr=ParamAttr(regularizer=L2Decay(0.0)),
-            bias_attr=ParamAttr(regularizer=L2Decay(0.0)))
+        self.conv = Conv2D(in_channels=in_c,
+                           out_channels=out_c,
+                           kernel_size=filter_size,
+                           stride=stride,
+                           padding=padding,
+                           groups=num_groups,
+                           bias_attr=False,
+                           dilation=dilation)
+        self.bn = BatchNorm(num_channels=out_c,
+                            act=None,
+                            epsilon=0.001,
+                            momentum=0.99,
+                            param_attr=ParamAttr(regularizer=L2Decay(0.0)),
+                            bias_attr=ParamAttr(regularizer=L2Decay(0.0)))
         self.if_act = if_act
         self.act = _create_act(act)
 
@@ -315,6 +315,7 @@ class ConvBNLayer(nn.Layer):
 
 
 class ResidualUnit(nn.Layer):
+
     def __init__(self,
                  in_c,
                  mid_c,
@@ -333,34 +334,32 @@ class ResidualUnit(nn.Layer):
         # There is not expand conv in pytorch version when in_c equaled to mid_c.
 
         if in_c != mid_c:
-            self.expand_conv = ConvBNLayer(
-                in_c=in_c,
-                out_c=mid_c,
-                filter_size=1,
-                stride=1,
-                padding=0,
-                if_act=True,
-                act=act)
-        self.bottleneck_conv = ConvBNLayer(
-            in_c=mid_c,
-            out_c=mid_c,
-            filter_size=filter_size,
-            stride=stride,
-            padding=int((filter_size - 1) // 2) * dilation,
-            num_groups=mid_c,
-            if_act=True,
-            act=act,
-            dilation=dilation)
+            self.expand_conv = ConvBNLayer(in_c=in_c,
+                                           out_c=mid_c,
+                                           filter_size=1,
+                                           stride=1,
+                                           padding=0,
+                                           if_act=True,
+                                           act=act)
+        self.bottleneck_conv = ConvBNLayer(in_c=mid_c,
+                                           out_c=mid_c,
+                                           filter_size=filter_size,
+                                           stride=stride,
+                                           padding=int((filter_size - 1) // 2) *
+                                           dilation,
+                                           num_groups=mid_c,
+                                           if_act=True,
+                                           act=act,
+                                           dilation=dilation)
         if self.if_se:
             self.mid_se = SEModule(mid_c)
-        self.linear_conv = ConvBNLayer(
-            in_c=mid_c,
-            out_c=out_c,
-            filter_size=1,
-            stride=1,
-            padding=0,
-            if_act=False,
-            act=None)
+        self.linear_conv = ConvBNLayer(in_c=mid_c,
+                                       out_c=out_c,
+                                       filter_size=1,
+                                       stride=1,
+                                       padding=0,
+                                       if_act=False,
+                                       act=None)
 
     def forward(self, x):
         identity = x
@@ -377,33 +376,36 @@ class ResidualUnit(nn.Layer):
 
 # nn.Hardsigmoid can't transfer "slope" and "offset" in nn.functional.hardsigmoid
 class Hardsigmoid(nn.Layer):
+
     def __init__(self, slope=0.2, offset=0.5):
         super().__init__()
         self.slope = slope
         self.offset = offset
 
     def forward(self, x):
-        return nn.functional.hardsigmoid(
-            x, slope=self.slope, offset=self.offset)
+        return nn.functional.hardsigmoid(x,
+                                         slope=self.slope,
+                                         offset=self.offset)
 
 
 class SEModule(nn.Layer):
+
     def __init__(self, channel, reduction=4):
         super().__init__()
         self.avg_pool = AdaptiveAvgPool2D(1)
-        self.conv1 = Conv2D(
-            in_channels=channel,
-            out_channels=_make_divisible(channel // reduction, 8),
-            kernel_size=1,
-            stride=1,
-            padding=0)
+        self.conv1 = Conv2D(in_channels=channel,
+                            out_channels=_make_divisible(
+                                channel // reduction, 8),
+                            kernel_size=1,
+                            stride=1,
+                            padding=0)
         self.relu = nn.ReLU()
-        self.conv2 = Conv2D(
-            in_channels=_make_divisible(channel // reduction, 8),
-            out_channels=channel,
-            kernel_size=1,
-            stride=1,
-            padding=0)
+        self.conv2 = Conv2D(in_channels=_make_divisible(channel // reduction,
+                                                        8),
+                            out_channels=channel,
+                            kernel_size=1,
+                            stride=1,
+                            padding=0)
         self.hardsigmoid = Hardsigmoid(slope=0.1666667, offset=0.5)
 
     def forward(self, x):

@@ -8,56 +8,56 @@
 |硬件类型|该硬件是否支持|使用指南|Python|C++|
 |:---:|:---:|:---:|:---:|:---:|
 |X86 CPU|✅|[链接](cpu-gpu)|✅|✅|
-|NVIDIA GPU|✅|[链接](cpu-gpu)|✅|✅| 
+|NVIDIA GPU|✅|[链接](cpu-gpu)|✅|✅|
 |飞腾CPU|✅|[链接](cpu-gpu)|✅|✅|
-|ARM CPU|✅|[链接](cpu-gpu)|✅|✅| 
+|ARM CPU|✅|[链接](cpu-gpu)|✅|✅|
 |Intel GPU(集成显卡)|✅|[链接](cpu-gpu)|✅|✅|  
-|Intel GPU(独立显卡)|✅|[链接](cpu-gpu)|✅|✅|    
+|Intel GPU(独立显卡)|✅|[链接](cpu-gpu)|✅|✅|  
 |昆仑|✅|[链接](kunlunxin)|✅|✅|
 |昇腾|✅|[链接](ascend)|✅|✅|
 |瑞芯微|✅|[链接](rockchip)|✅|✅|  
-|晶晨|✅|[链接](amlogic)|--|✅|      
-|算能|✅|[链接](sophgo)|✅|✅|       
+|晶晨|✅|[链接](amlogic)|--|✅|  
+|算能|✅|[链接](sophgo)|✅|✅|  
 
 ## 3. 详细使用文档
 - X86 CPU
   - [部署模型准备](cpu-gpu)  
-  - [Python部署示例](cpu-gpu/python/) 
+  - [Python部署示例](cpu-gpu/python/)
   - [C++部署示例](cpu-gpu/cpp/)
 - NVIDIA GPU
   - [部署模型准备](cpu-gpu)  
-  - [Python部署示例](cpu-gpu/python/) 
+  - [Python部署示例](cpu-gpu/python/)
   - [C++部署示例](cpu-gpu/cpp/)
 - 飞腾CPU
   - [部署模型准备](cpu-gpu)  
-  - [Python部署示例](cpu-gpu/python/) 
+  - [Python部署示例](cpu-gpu/python/)
   - [C++部署示例](cpu-gpu/cpp/)
 - ARM CPU
   - [部署模型准备](cpu-gpu)  
-  - [Python部署示例](cpu-gpu/python/) 
+  - [Python部署示例](cpu-gpu/python/)
   - [C++部署示例](cpu-gpu/cpp/)  
 - Intel GPU
   - [部署模型准备](cpu-gpu)  
-  - [Python部署示例](cpu-gpu/python/) 
+  - [Python部署示例](cpu-gpu/python/)
   - [C++部署示例](cpu-gpu/cpp/)
 - 昆仑 XPU
   - [部署模型准备](kunlunxin)  
-  - [Python部署示例](kunlunxin/python/) 
+  - [Python部署示例](kunlunxin/python/)
   - [C++部署示例](kunlunxin/cpp/)
 - 昇腾 Ascend
   - [部署模型准备](ascend)  
-  - [Python部署示例](ascend/python/) 
+  - [Python部署示例](ascend/python/)
   - [C++部署示例](ascend/cpp/)
 - 瑞芯微 Rockchip
   - [部署模型准备](rockchip/)  
-  - [Python部署示例](rockchip/rknpu2/) 
+  - [Python部署示例](rockchip/rknpu2/)
   - [C++部署示例](rockchip/rknpu2/)
 - 晶晨 Amlogic
   - [部署模型准备](amlogic/a311d/)  
-  - [C++部署示例](amlogic/a311d/cpp/)    
+  - [C++部署示例](amlogic/a311d/cpp/)  
 - 算能 Sophgo
   - [部署模型准备](sophgo/)  
-  - [Python部署示例](sophgo/python/) 
+  - [Python部署示例](sophgo/python/)
   - [C++部署示例](sophgo/cpp/)  
 
 ## 4. 更多部署方式

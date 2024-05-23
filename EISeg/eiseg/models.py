@@ -21,6 +21,7 @@ here = osp.dirname(osp.abspath(__file__))
 
 
 class EISegModel:
+
     @abstractmethod
     def __init__(self, model_path, param_path, use_gpu=False):
         model_path, param_path = self.check_param(model_path, param_path)

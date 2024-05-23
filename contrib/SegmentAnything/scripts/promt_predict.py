@@ -17,6 +17,7 @@
 import os
 import sys
 import argparse
+
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
 
 import paddle
@@ -43,32 +44,32 @@ def get_args():
     parser = argparse.ArgumentParser(
         description='Segment image with point promp or box')
     # Parameters
-    parser.add_argument(
-        '--input_path', type=str, required=True, help='The directory of image.')
+    parser.add_argument('--input_path',
+                        type=str,
+                        required=True,
+                        help='The directory of image.')
     parser.add_argument(
         "--model-type",
         type=str,
         default="vit_l",
         required=True,
-        help="The type of model to load, in ['vit_h', 'vit_l', 'vit_b', 'vit_t']",
+        help=
+        "The type of model to load, in ['vit_h', 'vit_l', 'vit_b', 'vit_t']",
     )
-    parser.add_argument(
-        '--point_prompt',
-        type=int,
-        nargs='+',
-        default=None,
-        help='point prompt.')
-    parser.add_argument(
-        '--box_prompt',
-        type=int,
-        nargs='+',
-        default=None,
-        help='box prompt format as xyxy.')
-    parser.add_argument(
-        '--output_path',
-        type=str,
-        default='./output/',
-        help='The directory for saving the results')
+    parser.add_argument('--point_prompt',
+                        type=int,
+                        nargs='+',
+                        default=None,
+                        help='point prompt.')
+    parser.add_argument('--box_prompt',
+                        type=int,
+                        nargs='+',
+                        default=None,
+                        help='box prompt format as xyxy.')
+    parser.add_argument('--output_path',
+                        type=str,
+                        default='./output/',
+                        help='The directory for saving the results')
     return parser.parse_args()
 
 
@@ -109,7 +110,8 @@ def main(args):
         point_coords=point,
         point_labels=input_label,
         box=box,
-        multimask_output=True, )
+        multimask_output=True,
+    )
 
     plt.figure(figsize=(10, 10))
     plt.imshow(image)

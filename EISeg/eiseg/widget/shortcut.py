@@ -26,7 +26,8 @@ from qtpy.QtWidgets import (
     QPushButton,
     QGridLayout,
     QKeySequenceEdit,
-    QMessageBox, )
+    QMessageBox,
+)
 from qtpy.QtGui import QIcon
 from qtpy import QtCore
 from qtpy.QtCore import Qt
@@ -35,6 +36,7 @@ from util import save_configs
 
 
 class RecordShortcutWidget(QKeySequenceEdit):
+
     def __init__(self, finishCallback, location):
         super().__init__()
         self.finishCallback = finishCallback
@@ -49,6 +51,7 @@ class RecordShortcutWidget(QKeySequenceEdit):
 
 
 class ShortcutWidget(QWidget):
+
     def __init__(self, actions, pjpath):
         super().__init__()
         self.tr = partial(QtCore.QCoreApplication.translate, "ShortcutWidget")
@@ -77,7 +80,8 @@ class ShortcutWidget(QWidget):
             grid.addWidget(
                 button,
                 idx // 3,
-                idx % 3 * 3 + 1, )
+                idx % 3 * 3 + 1,
+            )
 
     def refreshUi(self):
         actions = self.actions
@@ -87,7 +91,8 @@ class ShortcutWidget(QWidget):
                 shortcut = self.tr("-")
             self.layout().itemAtPosition(
                 idx // 3,
-                idx % 3 * 3 + 1, ).widget().setText(shortcut)
+                idx % 3 * 3 + 1,
+            ).widget().setText(shortcut)
 
     def recordShortcut(self, action):
         # 打开快捷键设置的窗口时，如果之前的还在就先关闭
@@ -108,9 +113,9 @@ class ShortcutWidget(QWidget):
                 msg = QMessageBox()
                 msg.setIcon(QMessageBox.Warning)
                 msg.setWindowTitle(key + " " + self.tr("快捷键冲突"))
-                msg.setText(key + " " + self.tr("快捷键已被") + " " + a.data(
-                ) + " " + self.tr("使用，请设置其他快捷键或先修改") + " " + a.data() + " " +
-                            self.tr("的快捷键"))
+                msg.setText(key + " " + self.tr("快捷键已被") + " " + a.data() +
+                            " " + self.tr("使用，请设置其他快捷键或先修改") + " " + a.data() +
+                            " " + self.tr("的快捷键"))
                 msg.setStandardButtons(QMessageBox.Ok)
                 msg.exec_()
                 return

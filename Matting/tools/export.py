@@ -35,40 +35,35 @@ from ppmatting.utils import get_input_spec, Config, MatBuilder
 def parse_args():
     parser = argparse.ArgumentParser(description='Model export.')
     # params of training
-    parser.add_argument(
-        "--config",
-        dest="cfg",
-        help="The config file.",
-        default=None,
-        type=str,
-        required=True)
-    parser.add_argument(
-        '--save_dir',
-        dest='save_dir',
-        help='The directory for saving the exported model',
-        type=str,
-        default='./output')
-    parser.add_argument(
-        '--model_path',
-        dest='model_path',
-        help='The path of model for export',
-        type=str,
-        default=None)
-    parser.add_argument(
-        '--trimap',
-        dest='trimap',
-        help='Whether to input trimap',
-        action='store_true')
+    parser.add_argument("--config",
+                        dest="cfg",
+                        help="The config file.",
+                        default=None,
+                        type=str,
+                        required=True)
+    parser.add_argument('--save_dir',
+                        dest='save_dir',
+                        help='The directory for saving the exported model',
+                        type=str,
+                        default='./output')
+    parser.add_argument('--model_path',
+                        dest='model_path',
+                        help='The path of model for export',
+                        type=str,
+                        default=None)
+    parser.add_argument('--trimap',
+                        dest='trimap',
+                        help='Whether to input trimap',
+                        action='store_true')
     parser.add_argument(
         "--input_shape",
         nargs='+',
         help="Export the model with fixed input shape, such as 1 3 1024 1024.",
         type=int,
         default=None)
-    parser.add_argument(
-        '--for_fd',
-        action='store_true',
-        help="Export the model to FD-compatible format.")
+    parser.add_argument('--for_fd',
+                        action='store_true',
+                        help="Export the model to FD-compatible format.")
 
     return parser.parse_args()
 
@@ -94,8 +89,9 @@ def main(args):
         shape = [None, 3, None, None]
     else:
         shape = args.input_shape
-    input_spec = get_input_spec(
-        net.__class__.__name__, shape=shape, trimap=args.trimap)
+    input_spec = get_input_spec(net.__class__.__name__,
+                                shape=shape,
+                                trimap=args.trimap)
 
     net = paddle.jit.to_static(net, input_spec=input_spec)
     if args.for_fd:

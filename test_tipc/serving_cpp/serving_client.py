@@ -24,21 +24,18 @@ from paddle_serving_client import Client
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Test')
-    parser.add_argument(
-        "--img_path",
-        help="The path of image.",
-        type=str,
-        default="../data/cityscapes_small.png")
-    parser.add_argument(
-        "--input_name",
-        help="The input name of inference model.",
-        type=str,
-        default="x")
-    parser.add_argument(
-        "--output_name",
-        help="The output name of inference model.",
-        type=str,
-        default="argmax_0.tmp_0")
+    parser.add_argument("--img_path",
+                        help="The path of image.",
+                        type=str,
+                        default="../data/cityscapes_small.png")
+    parser.add_argument("--input_name",
+                        help="The input name of inference model.",
+                        type=str,
+                        default="x")
+    parser.add_argument("--output_name",
+                        help="The output name of inference model.",
+                        type=str,
+                        default="argmax_0.tmp_0")
     return parser.parse_args()
 
 

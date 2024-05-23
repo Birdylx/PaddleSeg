@@ -44,12 +44,11 @@ CLASS_NAMES = textures + objects
 
 def argsparser():
     parser = argparse.ArgumentParser('PatchCore')
-    parser.add_argument(
-        "--config",
-        type=str,
-        default=None,
-        help="Path of config",
-        required=True)
+    parser.add_argument("--config",
+                        type=str,
+                        default=None,
+                        help="Path of config",
+                        required=True)
     parser.add_argument("--device", type=str, default=None)
     parser.add_argument('--batch_size', type=int, default=None)
     parser.add_argument('--num_workers', type=int, default=None)
@@ -57,24 +56,25 @@ def argsparser():
     parser.add_argument('--data_path', type=str, default=None)
     parser.add_argument('--save_path', type=str, default=None)
     parser.add_argument('--model_path', type=str, default=None)
-    parser.add_argument(
-        "--category",
-        type=str,
-        default=None,
-        help="category name for MvTec AD dataset")
+    parser.add_argument("--category",
+                        type=str,
+                        default=None,
+                        help="category name for MvTec AD dataset")
     parser.add_argument('--resize', type=list or tuple, default=None)
     parser.add_argument('--crop_size', type=list or tuple, default=None)
     parser.add_argument(
         "--backbone",
         type=str,
         default=None,
-        help="backbone model arch, one of [resnet18, resnet50, wide_resnet50_2]")
+        help="backbone model arch, one of [resnet18, resnet50, wide_resnet50_2]"
+    )
     parser.add_argument("--k", type=int, default=None, help="feature used")
     parser.add_argument(
         "--method",
         type=str,
         default=None,
-        help="projection method, one of ['sample','h_sample', 'ortho', 'svd_ortho', 'gaussian']"
+        help=
+        "projection method, one of ['sample','h_sample', 'ortho', 'svd_ortho', 'gaussian']"
     )
     parser.add_argument("--save_pic", type=str2bool, default=None)
 
@@ -110,8 +110,8 @@ def main():
         args.save_path + f"/{args.method}_{args.backbone}_{args.k}",
         '{}_seed{}.csv'.format(args.category, args.seed))
     for i, class_name in enumerate(class_names):
-        print("Eval model {}/{} for {}".format(i + 1,
-                                               len(class_names), class_name))
+        print("Eval model {}/{} for {}".format(i + 1, len(class_names),
+                                               class_name))
 
         # build model
         model_path = args.model_path or args.save_path + f"/{args.method}_{args.arch}_{args.k}" + '/{}.pdparams'.format(
@@ -126,16 +126,14 @@ def main():
         model.eval()
 
         # build datasets
-        test_dataset = mvtec.MVTecDataset(
-            args.data_path,
-            class_name=class_name,
-            is_train=False,
-            resize=args.resize,
-            cropsize=args.crop_size)
-        test_dataloader = DataLoader(
-            test_dataset,
-            batch_size=args.test_batch_size,
-            num_workers=args.num_workers)
+        test_dataset = mvtec.MVTecDataset(args.data_path,
+                                          class_name=class_name,
+                                          is_train=False,
+                                          resize=args.resize,
+                                          cropsize=args.crop_size)
+        test_dataloader = DataLoader(test_dataset,
+                                     batch_size=args.test_batch_size,
+                                     num_workers=args.num_workers)
         result.append(
             [class_name, *val(args, model, test_dataloader, class_name)])
         if args.category in ['all', 'textures', 'objects']:
@@ -184,8 +182,9 @@ def val(args, model, test_dataloader, class_name):
     # calculate image-level ROC AUC score
     gt_list = np.asarray(gt_list)
     # fpr, tpr, _ = roc_curve(gt_list, image_score)
-    img_auroc = compute_roc_score(
-        gt_list, image_score, args.eval_threthold_step, args.non_partial_AUC)
+    img_auroc = compute_roc_score(gt_list, image_score,
+                                  args.eval_threthold_step,
+                                  args.non_partial_AUC)
     # get optimal threshold
     precision, recall, thresholds = precision_recall_curve(gt_list, image_score)
     a = 2 * precision * recall
@@ -196,12 +195,12 @@ def val(args, model, test_dataloader, class_name):
     # calculate per-pixel level ROCAUC
     gt_mask = np.asarray(gt_mask_list, dtype=np.int64).squeeze()
     # fpr, tpr, _ = roc_curve(gt_mask.flatten(), scores.flatten())
-    per_pixel_auroc = compute_roc_score(
-        gt_mask.flatten(),
-        score_map.flatten(), args.eval_threthold_step, args.non_partial_AUC)
+    per_pixel_auroc = compute_roc_score(gt_mask.flatten(), score_map.flatten(),
+                                        args.eval_threthold_step,
+                                        args.non_partial_AUC)
     # get optimal threshold
-    precision, recall, thresholds = precision_recall_curve(gt_mask.flatten(),
-                                                           score_map.flatten())
+    precision, recall, thresholds = precision_recall_curve(
+        gt_mask.flatten(), score_map.flatten())
     a = 2 * precision * recall
     b = precision + recall
     f1 = np.divide(a, b, out=np.zeros_like(a), where=b != 0)
@@ -237,12 +236,11 @@ def plot_roc(fpr, tpr, score, save_dir, class_name, tag='pixel'):
 def plot_roc_all(fprs, tprs, scores, class_names, save_dir, tag='pixel'):
     plt.figure()
     for fpr, tpr, score, class_name in zip(fprs, tprs, scores, class_names):
-        plt.plot(
-            fpr,
-            tpr,
-            marker="o",
-            color="k",
-            label=f"{class_name} AUROC: {score:.3f}")
+        plt.plot(fpr,
+                 tpr,
+                 marker="o",
+                 color="k",
+                 label=f"{class_name} AUROC: {score:.3f}")
         plt.xlabel("FPR: FP / (TN + FP)", fontsize=14)
         plt.ylabel("TPR: TP / (TP + FN)", fontsize=14)
         plt.legend(fontsize=14)

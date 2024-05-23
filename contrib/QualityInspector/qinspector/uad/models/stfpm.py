@@ -28,6 +28,7 @@ models = {
 
 @register
 class ResNet_MS3(nn.Layer):
+
     def __init__(self, arch='resnet18', pretrained=True):
         super(ResNet_MS3, self).__init__()
         assert arch in models.keys(), 'arch {} not supported'.format(arch)
@@ -45,6 +46,7 @@ class ResNet_MS3(nn.Layer):
 
 
 class ResNet_MS3_EXPORT(nn.Layer):
+
     def __init__(self, student, teacher):
         super(ResNet_MS3_EXPORT, self).__init__()
         self.student = student

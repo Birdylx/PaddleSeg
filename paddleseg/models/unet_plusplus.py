@@ -60,69 +60,59 @@ class UNetPlusPlus(nn.Layer):
         self.conv3_0 = DoubleConv(channels[2], channels[3])
         self.conv4_0 = DoubleConv(channels[3], channels[4])
 
-        self.up_cat0_1 = UpSampling(
-            channels[1],
-            channels[0],
-            n_cat=2,
-            use_deconv=use_deconv,
-            align_corners=align_corners)
-        self.up_cat1_1 = UpSampling(
-            channels[2],
-            channels[1],
-            n_cat=2,
-            use_deconv=use_deconv,
-            align_corners=align_corners)
-        self.up_cat2_1 = UpSampling(
-            channels[3],
-            channels[2],
-            n_cat=2,
-            use_deconv=use_deconv,
-            align_corners=align_corners)
-        self.up_cat3_1 = UpSampling(
-            channels[4],
-            channels[3],
-            n_cat=2,
-            use_deconv=use_deconv,
-            align_corners=align_corners)
+        self.up_cat0_1 = UpSampling(channels[1],
+                                    channels[0],
+                                    n_cat=2,
+                                    use_deconv=use_deconv,
+                                    align_corners=align_corners)
+        self.up_cat1_1 = UpSampling(channels[2],
+                                    channels[1],
+                                    n_cat=2,
+                                    use_deconv=use_deconv,
+                                    align_corners=align_corners)
+        self.up_cat2_1 = UpSampling(channels[3],
+                                    channels[2],
+                                    n_cat=2,
+                                    use_deconv=use_deconv,
+                                    align_corners=align_corners)
+        self.up_cat3_1 = UpSampling(channels[4],
+                                    channels[3],
+                                    n_cat=2,
+                                    use_deconv=use_deconv,
+                                    align_corners=align_corners)
 
-        self.up_cat0_2 = UpSampling(
-            channels[1],
-            channels[0],
-            n_cat=3,
-            use_deconv=use_deconv,
-            align_corners=align_corners)
-        self.up_cat1_2 = UpSampling(
-            channels[2],
-            channels[1],
-            n_cat=3,
-            use_deconv=use_deconv,
-            align_corners=align_corners)
-        self.up_cat2_2 = UpSampling(
-            channels[3],
-            channels[2],
-            n_cat=3,
-            use_deconv=use_deconv,
-            align_corners=align_corners)
+        self.up_cat0_2 = UpSampling(channels[1],
+                                    channels[0],
+                                    n_cat=3,
+                                    use_deconv=use_deconv,
+                                    align_corners=align_corners)
+        self.up_cat1_2 = UpSampling(channels[2],
+                                    channels[1],
+                                    n_cat=3,
+                                    use_deconv=use_deconv,
+                                    align_corners=align_corners)
+        self.up_cat2_2 = UpSampling(channels[3],
+                                    channels[2],
+                                    n_cat=3,
+                                    use_deconv=use_deconv,
+                                    align_corners=align_corners)
 
-        self.up_cat0_3 = UpSampling(
-            channels[1],
-            channels[0],
-            n_cat=4,
-            use_deconv=use_deconv,
-            align_corners=align_corners)
-        self.up_cat1_3 = UpSampling(
-            channels[2],
-            channels[1],
-            n_cat=4,
-            use_deconv=use_deconv,
-            align_corners=align_corners)
+        self.up_cat0_3 = UpSampling(channels[1],
+                                    channels[0],
+                                    n_cat=4,
+                                    use_deconv=use_deconv,
+                                    align_corners=align_corners)
+        self.up_cat1_3 = UpSampling(channels[2],
+                                    channels[1],
+                                    n_cat=4,
+                                    use_deconv=use_deconv,
+                                    align_corners=align_corners)
 
-        self.up_cat0_4 = UpSampling(
-            channels[1],
-            channels[0],
-            n_cat=5,
-            use_deconv=use_deconv,
-            align_corners=align_corners)
+        self.up_cat0_4 = UpSampling(channels[1],
+                                    channels[0],
+                                    n_cat=5,
+                                    use_deconv=use_deconv,
+                                    align_corners=align_corners)
 
         self.out_1 = nn.Conv2D(channels[0], num_classes, 1, 1, 0)
         self.out_2 = nn.Conv2D(channels[0], num_classes, 1, 1, 0)
@@ -186,6 +176,7 @@ class UNetPlusPlus(nn.Layer):
 
 
 class DoubleConv(nn.Layer):
+
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -195,8 +186,7 @@ class DoubleConv(nn.Layer):
         super(DoubleConv, self).__init__()
         self.conv = nn.Sequential(
             nn.Conv2D(in_channels, out_channels, filter_size, stride, padding),
-            SyncBatchNorm(out_channels),
-            nn.ReLU(),
+            SyncBatchNorm(out_channels), nn.ReLU(),
             nn.Conv2D(out_channels, out_channels, filter_size, stride, padding),
             SyncBatchNorm(out_channels), nn.ReLU())
 
@@ -207,6 +197,7 @@ class DoubleConv(nn.Layer):
 
 
 class UpSampling(nn.Layer):
+
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -215,14 +206,16 @@ class UpSampling(nn.Layer):
                  align_corners=False):
         super(UpSampling, self).__init__()
         if use_deconv:
-            self.up = nn.Conv2DTranspose(
-                in_channels, out_channels, kernel_size=2, stride=2, padding=0)
+            self.up = nn.Conv2DTranspose(in_channels,
+                                         out_channels,
+                                         kernel_size=2,
+                                         stride=2,
+                                         padding=0)
         else:
             self.up = nn.Sequential(
-                nn.Upsample(
-                    scale_factor=2,
-                    mode='bilinear',
-                    align_corners=align_corners),
+                nn.Upsample(scale_factor=2,
+                            mode='bilinear',
+                            align_corners=align_corners),
                 nn.Conv2D(in_channels, out_channels, 1, 1, 0))
 
         self.conv = DoubleConv(n_cat * out_channels, out_channels)

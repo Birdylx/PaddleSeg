@@ -208,5 +208,5 @@ if __name__ == "__main__":
     # Map from trainID to label
     trainId = 0
     name = trainId2label[trainId].name
-    print(("Name of label with trainID '{id}': {name}".format(
-        id=trainId, name=name)))
+    print(("Name of label with trainID '{id}': {name}".format(id=trainId,
+                                                              name=name)))

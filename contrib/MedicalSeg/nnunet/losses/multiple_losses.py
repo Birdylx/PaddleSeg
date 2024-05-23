@@ -26,6 +26,7 @@ from medicalseg.cvlibs import manager
 
 @manager.LOSSES.add_component
 class MultipleLoss(nn.Layer):
+
     def __init__(self,
                  losses,
                  coef,

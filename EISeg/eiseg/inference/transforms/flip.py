@@ -24,11 +24,11 @@ from .base import BaseTransform
 
 
 class AddHorizontalFlip(BaseTransform):
+
     def transform(self, image_nd, clicks_lists):
         assert len(image_nd.shape) == 4
         image_nd = paddle.concat(
-            [image_nd, paddle.flip(
-                image_nd, axis=[3])], axis=0)
+            [image_nd, paddle.flip(image_nd, axis=[3])], axis=0)
 
         image_width = image_nd.shape[3]
         clicks_lists_flipped = []

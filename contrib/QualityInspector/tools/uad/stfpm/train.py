@@ -39,12 +39,11 @@ from val import val, cal_error
 
 def argsparser():
     parser = argparse.ArgumentParser("STFPM")
-    parser.add_argument(
-        "--config",
-        type=str,
-        default=None,
-        help="Path of config",
-        required=True)
+    parser.add_argument("--config",
+                        type=str,
+                        default=None,
+                        help="Path of config",
+                        required=True)
     parser.add_argument("--device", type=str, default=None)
     parser.add_argument("--batch_size", type=int, default=None)
     parser.add_argument('--num_workers', type=int, default=None)
@@ -55,12 +54,16 @@ def argsparser():
     parser.add_argument('--resize', type=list, default=None)
     parser.add_argument("--backbone", type=str, default=None)
     parser.add_argument("--do_eval", type=bool, default=None)
-    parser.add_argument(
-        "--epochs", type=int, default=None, help='number of epochs')
+    parser.add_argument("--epochs",
+                        type=int,
+                        default=None,
+                        help='number of epochs')
     parser.add_argument("--lr", type=float, default=None, help='learning rate')
     parser.add_argument("--momentum", type=float, default=None, help='momentum')
-    parser.add_argument(
-        "--weight_decay", type=float, default=None, help='weight_decay')
+    parser.add_argument("--weight_decay",
+                        type=float,
+                        default=None,
+                        help='weight_decay')
 
     parser.add_argument("--print_freq", type=int, default=20)
     return parser.parse_args()
@@ -82,31 +85,31 @@ def main():
 
     # build datasets
     transform = transforms.Compose([
-        transforms.Resize(args.resize), transforms.ToTensor(),
-        transforms.Normalize(
-            mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        transforms.Resize(args.resize),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                             std=[0.229, 0.224, 0.225])
     ])
 
     image_list = sorted(
         glob(
             os.path.join(args.data_path, args.category, 'train', 'good',
                          '*.png')))
-    train_image_list, val_image_list = train_test_split(
-        image_list, test_size=0.2, random_state=0)
+    train_image_list, val_image_list = train_test_split(image_list,
+                                                        test_size=0.2,
+                                                        random_state=0)
     train_dataset = MVTecDatasetSTFPM(train_image_list, transform=transform)
-    train_loader = DataLoader(
-        train_dataset,
-        batch_size=args.batch_size,
-        shuffle=True,
-        drop_last=False,
-        num_workers=args.num_workers)
+    train_loader = DataLoader(train_dataset,
+                              batch_size=args.batch_size,
+                              shuffle=True,
+                              drop_last=False,
+                              num_workers=args.num_workers)
     val_dataset = MVTecDatasetSTFPM(val_image_list, transform=transform)
-    val_loader = DataLoader(
-        val_dataset,
-        batch_size=args.batch_size,
-        shuffle=False,
-        drop_last=False,
-        num_workers=args.num_workers)
+    val_loader = DataLoader(val_dataset,
+                            batch_size=args.batch_size,
+                            shuffle=False,
+                            drop_last=False,
+                            num_workers=args.num_workers)
     if args.do_eval:
         test_neg_image_list = sorted(
             glob(
@@ -117,22 +120,20 @@ def main():
                 os.path.join(args.data_path, args.category, 'test', '*',
                              '*.png'))) - set(test_neg_image_list)
         test_pos_image_list = sorted(list(test_pos_image_list))
-        test_neg_dataset = MVTecDatasetSTFPM(
-            test_neg_image_list, transform=transform)
-        test_pos_dataset = MVTecDatasetSTFPM(
-            test_pos_image_list, transform=transform)
-        test_neg_loader = DataLoader(
-            test_neg_dataset,
-            batch_size=1,
-            shuffle=False,
-            drop_last=False,
-            num_workers=args.num_workers)
-        test_pos_loader = DataLoader(
-            test_pos_dataset,
-            batch_size=1,
-            shuffle=False,
-            drop_last=False,
-            num_workers=args.num_workers)
+        test_neg_dataset = MVTecDatasetSTFPM(test_neg_image_list,
+                                             transform=transform)
+        test_pos_dataset = MVTecDatasetSTFPM(test_pos_image_list,
+                                             transform=transform)
+        test_neg_loader = DataLoader(test_neg_dataset,
+                                     batch_size=1,
+                                     shuffle=False,
+                                     drop_last=False,
+                                     num_workers=args.num_workers)
+        test_pos_loader = DataLoader(test_pos_dataset,
+                                     batch_size=1,
+                                     shuffle=False,
+                                     drop_last=False,
+                                     num_workers=args.num_workers)
 
     if args.do_eval:
         train(teacher, student, train_loader, val_loader, args, test_pos_loader,
@@ -151,11 +152,10 @@ def train(teacher,
     min_err = 10000
     teacher.eval()
     student.train()
-    optimizer = optim.Momentum(
-        parameters=student.parameters(),
-        learning_rate=args.lr,
-        momentum=args.momentum,
-        weight_decay=args.weight_decay)
+    optimizer = optim.Momentum(parameters=student.parameters(),
+                               learning_rate=args.lr,
+                               momentum=args.momentum,
+                               weight_decay=args.weight_decay)
     for epoch in range(args.epochs):
         student.train()
         epoch_begin = time.time()
@@ -185,13 +185,13 @@ def train(teacher,
 
             if index % args.print_freq == 0:
                 print(
-                    datetime.datetime.now().strftime(
-                        "%Y-%m-%d %H:%M:%S") + '\t' +
-                    "Epoch {}[{}/{}]: loss:{:.5f}, lr:{:.5f}, batch time:{:.4f}, data time:{:.4f}".
-                    format(epoch, args.batch_size * (index + 1),
-                           len(train_loader.dataset),
-                           loss.cpu().numpy()[0],
-                           float(lr), float(bacth_time), float(data_time)))
+                    datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") +
+                    '\t' +
+                    "Epoch {}[{}/{}]: loss:{:.5f}, lr:{:.5f}, batch time:{:.4f}, data time:{:.4f}"
+                    .format(epoch, args.batch_size *
+                            (index + 1), len(train_loader.dataset),
+                            loss.cpu().numpy()[0], float(lr), float(bacth_time),
+                            float(data_time)))
         t = time.time() - epoch_begin
         print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + '\t' +
               "Epoch {} training ends, total {:.2f}s".format(epoch, t))

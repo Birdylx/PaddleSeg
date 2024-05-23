@@ -25,15 +25,17 @@ import datasets, models
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Model export.')
-    parser.add_argument(
-        "--config", help="The config file.", type=str, required=True)
-    parser.add_argument(
-        '--model_path', help='The path of model for export', type=str)
-    parser.add_argument(
-        '--save_dir',
-        help='The directory for saving the exported model',
-        type=str,
-        default='./output/inference_model')
+    parser.add_argument("--config",
+                        help="The config file.",
+                        type=str,
+                        required=True)
+    parser.add_argument('--model_path',
+                        help='The path of model for export',
+                        type=str)
+    parser.add_argument('--save_dir',
+                        help='The directory for saving the exported model',
+                        type=str,
+                        default='./output/inference_model')
     parser.add_argument(
         '--output_op',
         choices=['argmax', 'softmax', 'none'],
@@ -41,7 +43,8 @@ def parse_args():
         help="Select which op to be appended to output result, default: argmax")
     parser.add_argument(
         '--without_argmax',
-        help='Do not add the argmax operation at the end of the network. [Deprecated]',
+        help=
+        'Do not add the argmax operation at the end of the network. [Deprecated]',
         action='store_true')
     parser.add_argument(
         '--with_softmax',
@@ -58,6 +61,7 @@ def parse_args():
 
 
 class SavedSegmentationNet(paddle.nn.Layer):
+
     def __init__(self, net, output_op):
         super().__init__()
         self.net = net
@@ -104,13 +108,12 @@ def main(args):
             '--with_softmax will be deprecated, please use --output_op')
         output_op = 'softmax'
 
-    new_net = net if output_op == 'none' else SavedSegmentationNet(net,
-                                                                   output_op)
+    new_net = net if output_op == 'none' else SavedSegmentationNet(
+        net, output_op)
     new_net.eval()
     new_net = paddle.jit.to_static(
         new_net,
-        input_spec=[paddle.static.InputSpec(
-            shape=shape, dtype='float32')])
+        input_spec=[paddle.static.InputSpec(shape=shape, dtype='float32')])
 
     save_path = os.path.join(args.save_dir, 'model')
     paddle.jit.save(new_net, save_path)

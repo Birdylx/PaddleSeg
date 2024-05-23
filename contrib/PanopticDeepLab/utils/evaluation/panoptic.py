@@ -25,6 +25,7 @@ OFFSET = 256 * 256 * 256
 
 
 class PQStatCat():
+
     def __init__(self):
         self.iou = 0.0
         self.tp = 0
@@ -45,6 +46,7 @@ class PQStatCat():
 
 
 class PQStat():
+
     def __init__(self, num_classes):
         self.pq_per_cat = defaultdict(PQStatCat)
         self.num_classes = num_classes

@@ -17,6 +17,7 @@ import cv2
 import time
 import sys
 import argparse
+
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
 
 import paddle
@@ -55,7 +56,8 @@ parser.add_argument(
     type=str,
     default="vit_h",
     required=True,
-    help="The type of model to load, in ['vit_h', 'vit_l', 'vit_b', 'vit_t']", )
+    help="The type of model to load, in ['vit_h', 'vit_l', 'vit_b', 'vit_t']",
+)
 
 
 def download(img):
@@ -97,7 +99,7 @@ def image_text_match(cropped_objects, text_query):
     text_features /= text_features.norm(axis=-1, keepdim=True)
     if len(text_features.shape) == 3:
         text_features = text_features.squeeze(0)
-    probs = 100. * image_features @text_features.T
+    probs = 100. * image_features @ text_features.T
     return F.softmax(probs[:, 0], axis=0)
 
 
@@ -152,8 +154,9 @@ def get_id_photo_output(image, text):
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     masks = mask_generator.generate(image)
     pred_result, pseudo_map = masks2pseudomap(masks)  # PIL Image
-    added_pseudo_map = visualize(
-        image, pred_result, color_map=get_color_map_list(256))
+    added_pseudo_map = visualize(image,
+                                 pred_result,
+                                 color_map=get_color_map_list(256))
     cropped_objects = []
     image_pil = Image.fromarray(image)
     for mask in masks:
@@ -181,8 +184,8 @@ def get_id_photo_output(image, text):
     for text_matching_mask in text_matching_masks:
         draw.bitmap((0, 0), text_matching_mask, fill=alpha_color)
 
-    result_image = Image.alpha_composite(
-        image_pil_ori.convert('RGBA'), alpha_image)
+    result_image = Image.alpha_composite(image_pil_ori.convert('RGBA'),
+                                         alpha_image)
     res_download = download(result_image)
     return result_image, added_pseudo_map, res_download
 
@@ -196,20 +199,18 @@ def gradio_display():
     demo_mask_sam = gr.Interface(
         fn=get_id_photo_output,
         inputs=[
-            gr.Image(
-                value=ID_PHOTO_IMAGE_DEMO,
-                label="Input image").style(height=400), gr.inputs.Textbox(
-                    lines=3,
-                    placeholder=None,
-                    default="a photo of car",
-                    label='🔥 Input text prompt 🔥',
-                    optional=False)
+            gr.Image(value=ID_PHOTO_IMAGE_DEMO,
+                     label="Input image").style(height=400),
+            gr.inputs.Textbox(lines=3,
+                              placeholder=None,
+                              default="a photo of car",
+                              label='🔥 Input text prompt 🔥',
+                              optional=False)
         ],
         outputs=[
-            gr.Image(
-                label="Output based on text",
-                interactive=False).style(height=300), gr.Image(
-                    label="Output mask", interactive=False).style(height=300)
+            gr.Image(label="Output based on text",
+                     interactive=False).style(height=300),
+            gr.Image(label="Output mask", interactive=False).style(height=300)
         ],
         examples=examples_sam,
         description="<p> \
@@ -218,13 +219,18 @@ def gradio_display():
                         1. Upload images to be tested to 'input image'. 2. Input a text prompt to 'input text prompt' and click 'submit'</strong>.  <br>\
                         </p>",
         cache_examples=False,
-        allow_flagging="never", )
+        allow_flagging="never",
+    )
 
     demo = gr.TabbedInterface(
-        [demo_mask_sam, ], ['SAM+CLIP(Text to Segment)'],
+        [
+            demo_mask_sam,
+        ], ['SAM+CLIP(Text to Segment)'],
         title=" 🔥 Text to Segment Anything with PaddleSeg 🔥")
-    demo.launch(
-        server_name="0.0.0.0", enable_queue=False, server_port=8078, share=True)
+    demo.launch(server_name="0.0.0.0",
+                enable_queue=False,
+                server_port=8078,
+                share=True)
 
 
 args = parser.parse_args()

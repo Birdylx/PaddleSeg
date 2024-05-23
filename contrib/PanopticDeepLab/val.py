@@ -29,38 +29,36 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Model evaluation')
 
     # params of evaluate
-    parser.add_argument(
-        "--config", dest="cfg", help="The config file.", default=None, type=str)
-    parser.add_argument(
-        '--model_path',
-        dest='model_path',
-        help='The path of model for evaluation',
-        type=str,
-        default=None)
-    parser.add_argument(
-        '--num_workers',
-        dest='num_workers',
-        help='Num workers for data loader',
-        type=int,
-        default=0)
-    parser.add_argument(
-        '--threshold',
-        dest='threshold',
-        help='Threshold applied to center heatmap score',
-        type=float,
-        default=0.1)
-    parser.add_argument(
-        '--nms_kernel',
-        dest='nms_kernel',
-        help='NMS max pooling kernel size',
-        type=int,
-        default=7)
-    parser.add_argument(
-        '--top_k',
-        dest='top_k',
-        help='Top k centers to keep',
-        type=int,
-        default=200)
+    parser.add_argument("--config",
+                        dest="cfg",
+                        help="The config file.",
+                        default=None,
+                        type=str)
+    parser.add_argument('--model_path',
+                        dest='model_path',
+                        help='The path of model for evaluation',
+                        type=str,
+                        default=None)
+    parser.add_argument('--num_workers',
+                        dest='num_workers',
+                        help='Num workers for data loader',
+                        type=int,
+                        default=0)
+    parser.add_argument('--threshold',
+                        dest='threshold',
+                        help='Threshold applied to center heatmap score',
+                        type=float,
+                        default=0.1)
+    parser.add_argument('--nms_kernel',
+                        dest='nms_kernel',
+                        help='NMS max pooling kernel size',
+                        type=int,
+                        default=7)
+    parser.add_argument('--top_k',
+                        dest='top_k',
+                        help='Top k centers to keep',
+                        type=int,
+                        default=200)
 
     return parser.parse_args()
 
@@ -101,7 +99,8 @@ def main(args):
         threshold=args.threshold,
         nms_kernel=args.nms_kernel,
         top_k=args.top_k,
-        num_workers=args.num_workers, )
+        num_workers=args.num_workers,
+    )
 
 
 if __name__ == '__main__':

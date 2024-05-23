@@ -33,37 +33,34 @@ from qinspector.cvlib.uad_configs import ConfigParser
 
 def argsparser():
     parser = argparse.ArgumentParser('PatchCore')
-    parser.add_argument(
-        "--config",
-        type=str,
-        default=None,
-        help="Path of config",
-        required=True)
+    parser.add_argument("--config",
+                        type=str,
+                        default=None,
+                        help="Path of config",
+                        required=True)
     parser.add_argument('--img_path', type=str, default=None)
     parser.add_argument('--save_path', type=str, default=None)
-    parser.add_argument(
-        '--model_path',
-        type=str,
-        default=None,
-        help="specify model path if needed")
-    parser.add_argument(
-        "--category",
-        type=str,
-        default=None,
-        help="category name for MvTec AD dataset")
+    parser.add_argument('--model_path',
+                        type=str,
+                        default=None,
+                        help="specify model path if needed")
+    parser.add_argument("--category",
+                        type=str,
+                        default=None,
+                        help="category name for MvTec AD dataset")
     parser.add_argument('--resize', type=list or tuple, default=None)
     parser.add_argument('--crop_size', type=list or tuple, default=None)
     parser.add_argument(
         "--backbone",
         type=str,
         default=None,
-        help="backbone model arch, one of [resnet18, resnet50, wide_resnet50_2]")
+        help="backbone model arch, one of [resnet18, resnet50, wide_resnet50_2]"
+    )
     parser.add_argument("--k", type=int, default=None, help="feature used")
-    parser.add_argument(
-        "--method",
-        type=str,
-        default=None,
-        help="projection method, one of [sample,ortho]")
+    parser.add_argument("--method",
+                        type=str,
+                        default=None,
+                        help="projection method, one of [sample,ortho]")
     parser.add_argument("--save_pic", type=str2bool, default=None)
     parser.add_argument("--seed", type=int, default=None)
     parser.add_argument("--threshold", type=float, default=None)
@@ -131,8 +128,8 @@ def predict(args, model, x):
     print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + '\t' +
           "Predict :  Picture {}".format(args.img_path) + " done!")
     if args.save_pic:
-        print("Result saved at {}/{}_predict.png".format(save_name,
-                                                         args.category))
+        print("Result saved at {}/{}_predict.png".format(
+            save_name, args.category))
 
 
 if __name__ == '__main__':

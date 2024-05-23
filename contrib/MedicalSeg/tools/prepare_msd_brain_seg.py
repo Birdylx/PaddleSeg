@@ -36,20 +36,22 @@ tasks = {
 
 
 class PrepMSDBrain(Prep):
+
     def __init__(self, task_id):
         task_name = list(tasks[task_id].keys())[0].split('.')[0]
         print(f"Preparing task {task_id} {task_name}")
-        super().__init__(
-            dataset_root=f"data/{task_name}",
-            raw_dataset_dir=f"{task_name}_raw/",
-            images_dir=f"{task_name}/{task_name}/imagesTr",
-            labels_dir=f"{task_name}/{task_name}/labelsTr",
-            phase_dir=f"{task_name}_phase0/",
-            urls=tasks[task_id],
-            valid_suffix=("nii.gz", "nii.gz"),
-            filter_key=(None, None),
-            uncompress_params={"format": "tar",
-                               "num_files": 1})
+        super().__init__(dataset_root=f"data/{task_name}",
+                         raw_dataset_dir=f"{task_name}_raw/",
+                         images_dir=f"{task_name}/{task_name}/imagesTr",
+                         labels_dir=f"{task_name}/{task_name}/labelsTr",
+                         phase_dir=f"{task_name}_phase0/",
+                         urls=tasks[task_id],
+                         valid_suffix=("nii.gz", "nii.gz"),
+                         filter_key=(None, None),
+                         uncompress_params={
+                             "format": "tar",
+                             "num_files": 1
+                         })
         self.preprocess = {"images": [], "labels": []}
 
     def generate_txt(self, train_split=0.8, test_split=0.95):
@@ -127,11 +129,10 @@ class PrepMSDBrain(Prep):
         for i, files in enumerate(process_files):
             pre = self.preprocess[process_tuple[i]]
             savepath = save_tuple[i]
-            for f in tqdm(
-                    files,
-                    total=len(files),
-                    desc="preprocessing the {}".format(
-                        ["images", "labels", "images_test"][i])):
+            for f in tqdm(files,
+                          total=len(files),
+                          desc="preprocessing the {}".format(
+                              ["images", "labels", "images_test"][i])):
                 # load data will transpose the image from "zyx" to "xyz"
                 spacing = (1, 1, 1)
                 f_nps = self.load_medical_data(f)

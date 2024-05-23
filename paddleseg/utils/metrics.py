@@ -18,7 +18,11 @@ import paddle.nn.functional as F
 import sklearn.metrics as skmetrics
 
 
-def calculate_area(pred, label, num_classes, ignore_index=255, use_multilabel=False):
+def calculate_area(pred,
+                   label,
+                   num_classes,
+                   ignore_index=255,
+                   use_multilabel=False):
     """
     Calculate intersect, prediction and label area
 
@@ -41,8 +45,8 @@ def calculate_area(pred, label, num_classes, ignore_index=255, use_multilabel=Fa
             label = paddle.squeeze(label, axis=1)
         if not pred.shape == label.shape:
             raise ValueError('Shape of `pred` and `label should be equal, '
-                             'but there are {} and {}.'.format(pred.shape,
-                                                               label.shape))
+                             'but there are {} and {}.'.format(
+                                 pred.shape, label.shape))
         pred_area = []
         label_area = []
         intersect_area = []
@@ -102,8 +106,8 @@ def auc_roc(logits, label, num_classes, ignore_index=None):
 
     if not logits.shape[0] == label.shape[0]:
         raise ValueError('length of `logit` and `label` should be equal, '
-                         'but they are {} and {}.'.format(logits.shape[0],
-                                                          label.shape[0]))
+                         'but they are {} and {}.'.format(
+                             logits.shape[0], label.shape[0]))
 
     if num_classes == 2:
         auc = skmetrics.roc_auc_score(label, logits[:, 1])

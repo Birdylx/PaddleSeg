@@ -27,8 +27,8 @@ from app import APP_EISeg  # 导入带槽的界面
 
 def main():
     ## -- log --
-    settings = QtCore.QSettings(
-        osp.join(pjpath, "config/setting.txt"), QtCore.QSettings.IniFormat)
+    settings = QtCore.QSettings(osp.join(pjpath, "config/setting.txt"),
+                                QtCore.QSettings.IniFormat)
     #
     # logFolder = settings.value("logFolder")
     # logLevel = settings.value("logLevel")

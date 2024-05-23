@@ -3,6 +3,7 @@ from collections.abc import Sequence
 
 
 class ComponentManager:
+
     def __init__(self, name=None):
         self._components_dict = dict()
         self._name = name
@@ -47,8 +48,9 @@ class ComponentManager:
     def _add_single_component(self, component):
         # Currently only support class or function type
         if not (inspect.isclass(component) or inspect.isfunction(component)):
-            raise TypeError("Expect class/function type, but received {}".
-                            format(type(component)))
+            raise TypeError(
+                "Expect class/function type, but received {}".format(
+                    type(component)))
 
         # Obtain the internal name of the component
         component_name = component.__name__

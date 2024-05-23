@@ -72,8 +72,9 @@ class KCenterGreedy:
                 self.min_distances = paddle.minimum(self.min_distances,
                                                     distance)
 
-    def select_coreset_idxs(
-            self, selected_idxs: Optional[List[int]]=None) -> List[int]:
+    def select_coreset_idxs(self,
+                            selected_idxs: Optional[List[int]] = None
+                            ) -> List[int]:
         """Greedily form a coreset to minimize the maximum distance of a cluster.
 
         Args:
@@ -107,7 +108,8 @@ class KCenterGreedy:
 
         return paddle.concat(selected_coreset_idxs)
 
-    def sample_coreset(self, selected_idxs: Optional[List[int]]=None) -> Tensor:
+    def sample_coreset(self,
+                       selected_idxs: Optional[List[int]] = None) -> Tensor:
         """Select coreset from the embedding.
 
         Args:

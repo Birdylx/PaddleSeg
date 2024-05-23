@@ -81,11 +81,12 @@ class MaskFormer(nn.Layer):
                 mask_pred_results,
                 size=(x.shape[-2], x.shape[-1]),
                 mode="bilinear",
-                align_corners=False, )
+                align_corners=False,
+            )
             processed_results = []
 
-            for mask_cls_result, mask_pred_result in zip(mask_cls_results,
-                                                         mask_pred_results):
+            for mask_cls_result, mask_pred_result in zip(
+                    mask_cls_results, mask_pred_results):
                 image_size = x.shape[-2:]
                 if self.sem_seg_postprocess_before_inference:
                     mask_pred_result = self.sem_seg_postprocess(
@@ -123,11 +124,10 @@ class MaskFormer(nn.Layer):
                 (C, output_height, output_width) that contains per-pixel soft predictions.
         """
         result = paddle.unsqueeze(result[:, :img_size[0], :img_size[1]], axis=0)
-        result = F.interpolate(
-            result,
-            size=(output_height, output_width),
-            mode="bilinear",
-            align_corners=False)[0]
+        result = F.interpolate(result,
+                               size=(output_height, output_width),
+                               mode="bilinear",
+                               align_corners=False)[0]
         return result
 
     def loss_computation(self, logits_list, losses, data):
@@ -143,6 +143,7 @@ class MaskFormer(nn.Layer):
 
 
 class BasePixelDecoder(nn.Layer):
+
     def __init__(self, input_shape, conv_dim=256, norm="GN", mask_dim=256):
         super().__init__()
         input_shape = sorted(input_shape.items(), key=lambda x: x[1]['stride'])
@@ -153,65 +154,65 @@ class BasePixelDecoder(nn.Layer):
         use_bias = norm == ''
         for idx, in_channels in enumerate(feature_channels):
             if idx == len(self.in_features) - 1:
-                output_conv = layers.ConvNormAct(
-                    in_channels,
-                    conv_dim,
-                    kernel_size=3,
-                    bias_attr=use_bias,
-                    norm=nn.GroupNorm(
-                        num_groups=32, num_channels=conv_dim),
-                    act_type='relu')
+                output_conv = layers.ConvNormAct(in_channels,
+                                                 conv_dim,
+                                                 kernel_size=3,
+                                                 bias_attr=use_bias,
+                                                 norm=nn.GroupNorm(
+                                                     num_groups=32,
+                                                     num_channels=conv_dim),
+                                                 act_type='relu')
                 self.output_convs.append(output_conv)
                 self.lateral_convs.append(None)
                 for layer in output_conv.sublayers():
                     if hasattr(layer, "weight"):
-                        param_init.kaiming_uniform(
-                            layer.weight,
-                            negative_slope=1,
-                            nonlinearity='leaky_relu')
+                        param_init.kaiming_uniform(layer.weight,
+                                                   negative_slope=1,
+                                                   nonlinearity='leaky_relu')
                     if getattr(layer, 'bias', None) is not None:
                         param_init.constant_init(layer.bias, value=0)
             else:
-                lateral_norm = nn.GroupNorm(
-                    num_groups=32, num_channels=conv_dim)
+                lateral_norm = nn.GroupNorm(num_groups=32,
+                                            num_channels=conv_dim)
                 output_norm = nn.GroupNorm(num_groups=32, num_channels=conv_dim)
 
-                lateral_conv = layers.ConvNormAct(
-                    in_channels,
-                    conv_dim,
-                    kernel_size=1,
-                    bias_attr=False,
-                    norm=lateral_norm)
-                output_conv = layers.ConvNormAct(
-                    conv_dim,
-                    conv_dim,
-                    kernel_size=3,
-                    stride=1,
-                    padding=1,
-                    bias_attr=use_bias,
-                    norm=output_norm,
-                    act_type='relu')
+                lateral_conv = layers.ConvNormAct(in_channels,
+                                                  conv_dim,
+                                                  kernel_size=1,
+                                                  bias_attr=False,
+                                                  norm=lateral_norm)
+                output_conv = layers.ConvNormAct(conv_dim,
+                                                 conv_dim,
+                                                 kernel_size=3,
+                                                 stride=1,
+                                                 padding=1,
+                                                 bias_attr=use_bias,
+                                                 norm=output_norm,
+                                                 act_type='relu')
                 self.lateral_convs.append(lateral_conv)
                 self.output_convs.append(output_conv)
 
                 for layer in output_conv.sublayers() + lateral_conv.sublayers():
                     if hasattr(layer, "weight"):
-                        param_init.kaiming_uniform(
-                            layer.weight,
-                            negative_slope=1,
-                            nonlinearity='leaky_relu')
+                        param_init.kaiming_uniform(layer.weight,
+                                                   negative_slope=1,
+                                                   nonlinearity='leaky_relu')
                     if getattr(layer, 'bias', None) is not None:
                         param_init.constant_init(layer.bias, value=0)
 
         self.lateral_convs = self.lateral_convs[::-1]
         self.output_convs = self.output_convs[::-1]
 
-        self.mask_features = layers.ConvNormAct(
-            conv_dim, mask_dim, kernel_size=3, stride=1, padding=1)
+        self.mask_features = layers.ConvNormAct(conv_dim,
+                                                mask_dim,
+                                                kernel_size=3,
+                                                stride=1,
+                                                padding=1)
         for layer in self.mask_features.sublayers():
             if hasattr(layer, "weight"):
-                param_init.kaiming_uniform(
-                    layer.weight, negative_slope=1, nonlinearity='leaky_relu')
+                param_init.kaiming_uniform(layer.weight,
+                                           negative_slope=1,
+                                           nonlinearity='leaky_relu')
             if getattr(layer, 'bias', None) is not None:
                 param_init.constant_init(layer.bias, value=0)
 
@@ -231,6 +232,7 @@ class BasePixelDecoder(nn.Layer):
 
 
 class PositionEmbeddingSine(nn.Layer):
+
     def __init__(self,
                  num_pos_feats=64,
                  temperature=10000,
@@ -248,8 +250,8 @@ class PositionEmbeddingSine(nn.Layer):
 
     def forward(self, x, mask=None):
         if mask is None:
-            mask = paddle.zeros(
-                shape=(x.shape[0], x.shape[2], x.shape[3]), dtype='bool')
+            mask = paddle.zeros(shape=(x.shape[0], x.shape[2], x.shape[3]),
+                                dtype='bool')
         not_mask = ~mask
         y_embed = paddle.cumsum(not_mask, axis=1, dtype='float32')
         x_embed = paddle.cumsum(not_mask, axis=2, dtype='float32')
@@ -266,21 +268,16 @@ class PositionEmbeddingSine(nn.Layer):
         pos_x = x_embed[:, :, :, None] / dim_t
         pos_y = y_embed[:, :, :, None] / dim_t
 
-        pos_x = paddle.flatten(
-            paddle.stack(
-                (paddle.sin(pos_x[:, :, :, 0::2]),
-                 paddle.cos(pos_x[:, :, :, 1::2])),
-                axis=4),
-            start_axis=3)
-        pos_y = paddle.flatten(
-            paddle.stack(
-                (paddle.sin(pos_y[:, :, :, 0::2]),
-                 paddle.cos(pos_y[:, :, :, 1::2])),
-                axis=4),
-            start_axis=3)
-        pos = paddle.transpose(
-            paddle.concat(
-                (pos_y, pos_x), axis=3), perm=(0, 3, 1, 2))
+        pos_x = paddle.flatten(paddle.stack((paddle.sin(
+            pos_x[:, :, :, 0::2]), paddle.cos(pos_x[:, :, :, 1::2])),
+                                            axis=4),
+                               start_axis=3)
+        pos_y = paddle.flatten(paddle.stack((paddle.sin(
+            pos_y[:, :, :, 0::2]), paddle.cos(pos_y[:, :, :, 1::2])),
+                                            axis=4),
+                               start_axis=3)
+        pos = paddle.transpose(paddle.concat((pos_y, pos_x), axis=3),
+                               perm=(0, 3, 1, 2))
         return pos
 
 
@@ -365,11 +362,10 @@ class TransformerEncoder(nn.Layer):
 
         for layer in self.layers:
             # if pos is not none, all the encoder layer will have the position embedding
-            output = layer(
-                output,
-                src_mask=mask,
-                src_key_padding_mask=src_key_padding_mask,
-                pos=pos)
+            output = layer(output,
+                           src_mask=mask,
+                           src_key_padding_mask=src_key_padding_mask,
+                           pos=pos)
 
         if self.norm is not None:
             output = self.norm(output)
@@ -398,8 +394,9 @@ class DecoderLayer(nn.Layer):
         super().__init__()
 
         self.self_attn = nn.MultiHeadAttention(d_model, nhead, dropout)
-        self.multihead_attn = nn.MultiHeadAttention(
-            d_model, nhead, dropout=dropout)
+        self.multihead_attn = nn.MultiHeadAttention(d_model,
+                                                    nhead,
+                                                    dropout=dropout)
 
         self.linear1 = nn.Linear(d_model, dim_feedforward)
         self.dropout = nn.Dropout(dropout)
@@ -436,12 +433,11 @@ class DecoderLayer(nn.Layer):
             raise ValueError(
                 "The multihead attention does not support key_padding_mask")
 
-        q = k = self.with_pos_embed(tgt, query_pos).transpose(perm=(
-            1, 0, 2))  # [2, 100, 256]
+        q = k = self.with_pos_embed(tgt, query_pos).transpose(
+            perm=(1, 0, 2))  # [2, 100, 256]
         tgt = tgt.transpose(perm=(1, 0, 2))
-        attn = self.self_attn(
-            q, k, value=tgt,
-            attn_mask=tgt_mask).transpose(perm=(1, 0, 2))  # [100, 2, 256]
+        attn = self.self_attn(q, k, value=tgt, attn_mask=tgt_mask).transpose(
+            perm=(1, 0, 2))  # [100, 2, 256]
         tgt = tgt.transpose(perm=(1, 0, 2))  # [100, 2, 256]
 
         tgt += self.dropout1(attn)
@@ -450,13 +446,15 @@ class DecoderLayer(nn.Layer):
         q = self.with_pos_embed(tgt, query_pos).transpose(perm=(1, 0, 2))
         k = self.with_pos_embed(memory, pos).transpose(perm=(1, 0, 2))
         v = memory.transpose(perm=(1, 0, 2))
-        attn = self.multihead_attn(
-            query=q, key=k, value=v,
-            attn_mask=memory_mask).transpose(perm=(1, 0, 2))
+        attn = self.multihead_attn(query=q,
+                                   key=k,
+                                   value=v,
+                                   attn_mask=memory_mask).transpose(perm=(1, 0,
+                                                                          2))
         tgt += self.dropout2(attn)
         tgt = self.norm2(tgt)  # [100, 2, 256]
-        attn = self.linear2(
-            self.dropout(self.activation(self.linear1(tgt))))  # [100, 2, 256]
+        attn = self.linear2(self.dropout(self.activation(
+            self.linear1(tgt))))  # [100, 2, 256]
         tgt += self.dropout3(attn)
         tgt = self.norm3(tgt)
         return tgt
@@ -497,15 +495,14 @@ class TransformerDecoder(nn.Layer):
         output = tgt
         intermediate = []
         for layer in self.decoder_list:
-            output = layer(
-                output,
-                memory,
-                tgt_mask=tgt_mask,
-                memory_mask=memory_mask,
-                tgt_key_padding_mask=tgt_key_padding_mask,
-                memory_key_padding_mask=memory_key_padding_mask,
-                pos=pos,
-                query_pos=query_pos)
+            output = layer(output,
+                           memory,
+                           tgt_mask=tgt_mask,
+                           memory_mask=memory_mask,
+                           tgt_key_padding_mask=tgt_key_padding_mask,
+                           memory_key_padding_mask=memory_key_padding_mask,
+                           pos=pos,
+                           query_pos=query_pos)
             if self.return_intermediate:
                 intermediate.append(self.norm(output))
 
@@ -522,6 +519,7 @@ class TransformerDecoder(nn.Layer):
 
 
 class Transformer(nn.Layer):
+
     def __init__(self,
                  d_model=256,
                  nhead=8,
@@ -559,32 +557,30 @@ class Transformer(nn.Layer):
                 param_init.xavier_uniform(p)
 
     def forward(self, src, mask, query_embed, pos_embed):
-        # flatten NxCxHxW to HWxNxC 
+        # flatten NxCxHxW to HWxNxC
         bs, c, h, w = src.shape
         src = paddle.transpose(paddle.flatten(src, start_axis=2), (2, 0, 1))
-        pos_embed = paddle.transpose(
-            paddle.flatten(
-                pos_embed, start_axis=2), (2, 0, 1))
+        pos_embed = paddle.transpose(paddle.flatten(pos_embed, start_axis=2),
+                                     (2, 0, 1))
         query_embed = paddle.stack([query_embed for i in range(bs)], axis=1)
         if mask is not None:
             mask = paddle.flatten(mask, start_axis=1)
 
         tgt = paddle.zeros_like(query_embed)  # No.querry, N, hdim [100, 2, 256]
-        memory = self.encoder(
-            src, src_key_padding_mask=mask,
-            pos=pos_embed)  # HWxNxC memory = src
-        hs = self.decoder(
-            tgt,
-            memory,
-            memory_key_padding_mask=mask,
-            pos=pos_embed,
-            query_pos=query_embed)
+        memory = self.encoder(src, src_key_padding_mask=mask,
+                              pos=pos_embed)  # HWxNxC memory = src
+        hs = self.decoder(tgt,
+                          memory,
+                          memory_key_padding_mask=mask,
+                          pos=pos_embed,
+                          query_pos=query_embed)
 
         return paddle.transpose(hs, (0, 2, 1, 3)), paddle.reshape(
             paddle.transpose(memory, (1, 2, 0)), (bs, c, h, w))
 
 
 class MLP(nn.Layer):
+
     def __init__(self, input_dim, hidden_dim, output_dim, num_layers):
         super().__init__()
         self.num_layers = num_layers
@@ -605,6 +601,7 @@ class MLP(nn.Layer):
 
 
 class TransformerPredictor(nn.Layer):
+
     def __init__(self,
                  in_channels,
                  mask_classification,
@@ -624,25 +621,23 @@ class TransformerPredictor(nn.Layer):
         self.mask_classification = mask_classification
         self.pe_layer = PositionEmbeddingSine(hidden_dim // 2, normalize=True)
 
-        self.transformer = Transformer(
-            d_model=hidden_dim,
-            dropout=dropout,
-            nhead=nheads,
-            dim_feedforward=dim_feedforward,
-            num_encoder_layers=enc_layers,
-            num_decoder_layers=dec_layers,
-            normalize_before=pre_norm,
-            return_intermediate_dec=deep_supervision)
+        self.transformer = Transformer(d_model=hidden_dim,
+                                       dropout=dropout,
+                                       nhead=nheads,
+                                       dim_feedforward=dim_feedforward,
+                                       num_encoder_layers=enc_layers,
+                                       num_decoder_layers=dec_layers,
+                                       normalize_before=pre_norm,
+                                       return_intermediate_dec=deep_supervision)
 
         self.query_embed = nn.Embedding(num_queries, hidden_dim)
 
         if in_channels != hidden_dim or enforce_input_project:
             self.input_proj = nn.Conv2D(in_channels, hidden_dim, kernel_size=1)
             if hasattr(self.input_proj, "weight"):
-                param_init.kaiming_uniform(
-                    self.input_proj.weight,
-                    negative_slope=1,
-                    nonlinearity='leaky_relu')
+                param_init.kaiming_uniform(self.input_proj.weight,
+                                           negative_slope=1,
+                                           nonlinearity='leaky_relu')
             if getattr(self.input_proj, 'bias', None) is not None:
                 param_init.constant_init(self.input_proj.bias, value=0)
         else:
@@ -663,8 +658,8 @@ class TransformerPredictor(nn.Layer):
         pos = self.pe_layer(x)
 
         mask = None
-        hs, memory = self.transformer(
-            self.input_proj(x), mask, self.query_embed.weight, pos)
+        hs, memory = self.transformer(self.input_proj(x), mask,
+                                      self.query_embed.weight, pos)
 
         out = {}
         if self.mask_classification:
@@ -696,6 +691,7 @@ class TransformerPredictor(nn.Layer):
 
 
 class MaskFormerHead(nn.Layer):
+
     def __init__(self, input_shape, num_classes, transformer_in_feature='res5'):
         super(MaskFormerHead, self).__init__()
         self.transformer_in_feature = transformer_in_feature

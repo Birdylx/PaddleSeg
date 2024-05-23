@@ -18,8 +18,9 @@ from skimage import exposure
 
 
 # 2%线性拉伸
-def two_percentLinear(image: np.ndarray, max_out: int=255,
-                      min_out: int=0) -> np.ndarray:
+def two_percentLinear(image: np.ndarray,
+                      max_out: int = 255,
+                      min_out: int = 0) -> np.ndarray:
     b, g, r = cv2.split(image)
 
     def __gray_process(gray, maxout=max_out, minout=min_out):
@@ -52,8 +53,9 @@ def sample_norm(image: np.ndarray) -> np.ndarray:
 
 
 # 计算缩略图
-def get_thumbnail(image: np.ndarray, range: int=2000,
-                  max_size: int=1000) -> np.ndarray:
+def get_thumbnail(image: np.ndarray,
+                  range: int = 2000,
+                  max_size: int = 1000) -> np.ndarray:
     h, w = image.shape[:2]
     if h >= range or w >= range:
         if h >= w:

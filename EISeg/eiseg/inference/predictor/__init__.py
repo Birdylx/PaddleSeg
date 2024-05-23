@@ -41,8 +41,10 @@ def get_predictor(net,
         if predictor_params is not None:
             predictor_params_.update(predictor_params)
 
-        predictor = BasePredictor(
-            net, zoom_in=zoom_in, with_flip=with_flip, **predictor_params_)
+        predictor = BasePredictor(net,
+                                  zoom_in=zoom_in,
+                                  with_flip=with_flip,
+                                  **predictor_params_)
 
     else:
         raise NotImplementedError("Just support NoBRS mode")

@@ -46,46 +46,49 @@ class MLFF(nn.Layer):
         # Check arguments
         if len(in_channels) != len(mid_channels):
             raise ValueError(
-                "`mid_channels` should have the same length as `in_channels`, but they are {} and {}".
-                format(mid_channels, in_channels))
-        if self.merge_type == 'add' and len(np.unique(np.array(
-                mid_channels))) != 1:
+                "`mid_channels` should have the same length as `in_channels`, but they are {} and {}"
+                .format(mid_channels, in_channels))
+        if self.merge_type == 'add' and len(np.unique(
+                np.array(mid_channels))) != 1:
             raise ValueError(
-                "if `merge_type='add', `mid_channels` should be same of all input features, but it is {}.".
-                format(mid_channels))
+                "if `merge_type='add', `mid_channels` should be same of all input features, but it is {}."
+                .format(mid_channels))
 
         self.pwconvs = nn.LayerList()
         self.dwconvs = nn.LayerList()
         for in_channel, mid_channel in zip(in_channels, mid_channels):
             self.pwconvs.append(
-                layers.ConvBN(
-                    in_channel, mid_channel, 1, bias_attr=False))
+                layers.ConvBN(in_channel, mid_channel, 1, bias_attr=False))
             self.dwconvs.append(
-                layers.ConvBNReLU(
-                    mid_channel,
-                    mid_channel,
-                    3,
-                    padding=1,
-                    groups=mid_channel,
-                    bias_attr=False))
+                layers.ConvBNReLU(mid_channel,
+                                  mid_channel,
+                                  3,
+                                  padding=1,
+                                  groups=mid_channel,
+                                  bias_attr=False))
 
         num_feas = len(in_channels)
         self.conv_atten = nn.Sequential(
-            layers.ConvBNReLU(
-                2 * num_feas,
-                num_feas,
-                kernel_size=3,
-                padding=1,
-                bias_attr=False),
-            layers.ConvBN(
-                num_feas, num_feas, kernel_size=3, padding=1, bias_attr=False))
+            layers.ConvBNReLU(2 * num_feas,
+                              num_feas,
+                              kernel_size=3,
+                              padding=1,
+                              bias_attr=False),
+            layers.ConvBN(num_feas,
+                          num_feas,
+                          kernel_size=3,
+                          padding=1,
+                          bias_attr=False))
 
         if self.merge_type == 'add':
             in_chan = mid_channels[0]
         else:
             in_chan = sum(mid_channels)
-        self.conv_out = layers.ConvBNReLU(
-            in_chan, out_channel, kernel_size=3, padding=1, bias_attr=False)
+        self.conv_out = layers.ConvBNReLU(in_chan,
+                                          out_channel,
+                                          kernel_size=3,
+                                          padding=1,
+                                          bias_attr=False)
 
     def forward(self, inputs, shape):
         """
@@ -96,8 +99,10 @@ class MLFF(nn.Layer):
         feas = []
         for i, input in enumerate(inputs):
             x = self.pwconvs[i](input)
-            x = F.interpolate(
-                x, size=shape, mode='bilinear', align_corners=False)
+            x = F.interpolate(x,
+                              size=shape,
+                              mode='bilinear',
+                              align_corners=False)
             x = self.dwconvs[i](x)
             feas.append(x)
 

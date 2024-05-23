@@ -47,19 +47,20 @@ class BasePredictor:
     def __call__(self, *args, **kwargs):
         raise NotImplementedError
 
-    def predict_3D(self,
-                   x: np.ndarray,
-                   do_mirroring: bool,
-                   mirror_axes: Tuple[int, ...]=(0, 1, 2),
-                   use_sliding_window: bool=False,
-                   step_size: float=0.5,
-                   patch_size: Tuple[int, ...]=None,
-                   regions_class_order: Tuple[int, ...]=None,
-                   use_gaussian: bool=False,
-                   pad_border_mode: str="constant",
-                   pad_kwargs: dict=None,
-                   verbose: bool=True,
-                   mixed_precision: bool=True) -> Tuple[np.ndarray, np.ndarray]:
+    def predict_3D(
+            self,
+            x: np.ndarray,
+            do_mirroring: bool,
+            mirror_axes: Tuple[int, ...] = (0, 1, 2),
+            use_sliding_window: bool = False,
+            step_size: float = 0.5,
+            patch_size: Tuple[int, ...] = None,
+            regions_class_order: Tuple[int, ...] = None,
+            use_gaussian: bool = False,
+            pad_border_mode: str = "constant",
+            pad_kwargs: dict = None,
+            verbose: bool = True,
+            mixed_precision: bool = True) -> Tuple[np.ndarray, np.ndarray]:
         """
         x: Input data. Must be a nd.ndarray of shape (c, x, y, z).
         do_mirroring: If True, use test time data augmentation in the form of mirroring.
@@ -139,8 +140,11 @@ class BasePredictor:
         center_coords = [i // 2 for i in patch_size]
         sigmas = [i * sigma_scale for i in patch_size]
         tmp[tuple(center_coords)] = 1
-        gaussian_importance_map = gaussian_filter(
-            tmp, sigmas, 0, mode='constant', cval=0)
+        gaussian_importance_map = gaussian_filter(tmp,
+                                                  sigmas,
+                                                  0,
+                                                  mode='constant',
+                                                  cval=0)
         gaussian_importance_map = gaussian_importance_map / np.max(
             gaussian_importance_map) * 1
         gaussian_importance_map = gaussian_importance_map.astype(np.float32)
@@ -160,9 +164,8 @@ class BasePredictor:
 
         target_step_sizes_in_voxels = [i * step_size for i in patch_size]
         num_steps = [
-            int(np.ceil((i - k) / j)) + 1
-            for i, j, k in zip(image_size, target_step_sizes_in_voxels,
-                               patch_size)
+            int(np.ceil((i - k) / j)) + 1 for i, j, k in zip(
+                image_size, target_step_sizes_in_voxels, patch_size)
         ]
 
         steps = []
@@ -181,16 +184,9 @@ class BasePredictor:
         return steps
 
     def _internal_predict_3D_3Dconv_tiled(
-            self,
-            x: np.ndarray,
-            step_size: float,
-            do_mirroring: bool,
-            mirror_axes: tuple,
-            patch_size: tuple,
-            regions_class_order: tuple,
-            use_gaussian: bool,
-            pad_border_mode: str,
-            pad_kwargs: dict,
+            self, x: np.ndarray, step_size: float, do_mirroring: bool,
+            mirror_axes: tuple, patch_size: tuple, regions_class_order: tuple,
+            use_gaussian: bool, pad_border_mode: str, pad_kwargs: dict,
             verbose: bool) -> Tuple[np.ndarray, np.ndarray]:
         assert len(x.shape) == 4, "x must be (c, x, y, z)"
         assert patch_size is not None, "patch_size cannot be None for tiled prediction"
@@ -199,8 +195,9 @@ class BasePredictor:
                                     True, None)
         data_shape = data.shape
 
-        steps = self._compute_steps_for_sliding_window(
-            patch_size, data_shape[1:], step_size)
+        steps = self._compute_steps_for_sliding_window(patch_size,
+                                                       data_shape[1:],
+                                                       step_size)
         num_tiles = len(steps[0]) * len(steps[1]) * len(steps[2])
 
         if verbose:
@@ -213,12 +210,11 @@ class BasePredictor:
 
         if use_gaussian and num_tiles > 1:
             if self._gaussian_3d is None or not all([
-                    i == j
-                    for i, j in zip(patch_size,
-                                    self._patch_size_for_gaussian_3d)
+                    i == j for i, j in zip(patch_size,
+                                           self._patch_size_for_gaussian_3d)
             ]):
-                gaussian_importance_map = self._get_gaussian(
-                    patch_size, sigma_scale=1. / 8)
+                gaussian_importance_map = self._get_gaussian(patch_size,
+                                                             sigma_scale=1. / 8)
 
                 self._gaussian_3d = gaussian_importance_map
                 self._patch_size_for_gaussian_3d = patch_size
@@ -237,10 +233,11 @@ class BasePredictor:
             add_for_nb_of_preds = self._gaussian_3d
         else:
             add_for_nb_of_preds = np.ones(patch_size, dtype=np.float32)
-        aggregated_results = np.zeros(
-            [self.num_classes] + list(data.shape[1:]), dtype=np.float32)
-        aggregated_nb_of_predictions = np.zeros(
-            [self.num_classes] + list(data.shape[1:]), dtype=np.float32)
+        aggregated_results = np.zeros([self.num_classes] + list(data.shape[1:]),
+                                      dtype=np.float32)
+        aggregated_nb_of_predictions = np.zeros([self.num_classes] +
+                                                list(data.shape[1:]),
+                                                dtype=np.float32)
 
         for x in steps[0]:
             lb_x = x
@@ -257,8 +254,8 @@ class BasePredictor:
                         mirror_axes, do_mirroring, gaussian_importance_map)[0]
 
                     predicted_patch = predicted_patch.numpy()
-                    aggregated_results[:, lb_x:ub_x, lb_y:ub_y, lb_z:
-                                       ub_z] += predicted_patch
+                    aggregated_results[:, lb_x:ub_x, lb_y:ub_y,
+                                       lb_z:ub_z] += predicted_patch
                     aggregated_nb_of_predictions[:, lb_x:ub_x, lb_y:ub_y, lb_z:
                                                  ub_z] += add_for_nb_of_preds
 
@@ -289,11 +286,11 @@ class BasePredictor:
             x: np.ndarray,
             min_size: Tuple[int, int],
             do_mirroring: bool,
-            mirror_axes: tuple=(0, 1, 2),
-            regions_class_order: tuple=None,
-            pad_border_mode: str="constant",
-            pad_kwargs: dict=None,
-            verbose: bool=True) -> Tuple[np.ndarray, np.ndarray]:
+            mirror_axes: tuple = (0, 1, 2),
+            regions_class_order: tuple = None,
+            pad_border_mode: str = "constant",
+            pad_kwargs: dict = None,
+            verbose: bool = True) -> Tuple[np.ndarray, np.ndarray]:
         assert len(x.shape) == 3, "x must be (c, x, y), but got {}.".format(
             x.shape)
 
@@ -307,8 +304,7 @@ class BasePredictor:
             data[None], mirror_axes, do_mirroring, None)[0]
 
         slicer = tuple([
-            slice(0, predicted_probabilities.shape[i])
-            for i in range(
+            slice(0, predicted_probabilities.shape[i]) for i in range(
                 len(predicted_probabilities.shape) - (len(slicer) - 1))
         ] + slicer[1:])
         predicted_probabilities = predicted_probabilities[slicer]
@@ -319,8 +315,8 @@ class BasePredictor:
             predicted_probabilities = predicted_probabilities.numpy()
         else:
             predicted_probabilities = predicted_probabilities.numpy()
-            predicted_segmentation = np.zeros(
-                predicted_probabilities.shape[1:], dtype=np.float32)
+            predicted_segmentation = np.zeros(predicted_probabilities.shape[1:],
+                                              dtype=np.float32)
             for i, c in enumerate(regions_class_order):
                 predicted_segmentation[predicted_probabilities[i] > 0.5] = c
 
@@ -331,11 +327,11 @@ class BasePredictor:
             x: np.ndarray,
             min_size: Tuple[int, ...],
             do_mirroring: bool,
-            mirror_axes: tuple=(0, 1, 2),
-            regions_class_order: tuple=None,
-            pad_border_mode: str="constant",
-            pad_kwargs: dict=None,
-            verbose: bool=True) -> Tuple[np.ndarray, np.ndarray]:
+            mirror_axes: tuple = (0, 1, 2),
+            regions_class_order: tuple = None,
+            pad_border_mode: str = "constant",
+            pad_kwargs: dict = None,
+            verbose: bool = True) -> Tuple[np.ndarray, np.ndarray]:
         assert len(x.shape) == 4, "x must be (c, x, y, z), but got {}.".format(
             x.shape)
 
@@ -349,8 +345,7 @@ class BasePredictor:
             data[None], mirror_axes, do_mirroring, None)[0]
 
         slicer = tuple([
-            slice(0, predicted_probabilities.shape[i])
-            for i in range(
+            slice(0, predicted_probabilities.shape[i]) for i in range(
                 len(predicted_probabilities.shape) - (len(slicer) - 1))
         ] + slicer[1:])
         predicted_probabilities = predicted_probabilities[slicer]
@@ -361,26 +356,26 @@ class BasePredictor:
             predicted_probabilities = predicted_probabilities.numpy()
         else:
             predicted_probabilities = predicted_probabilities.numpy()
-            predicted_segmentation = np.zeros(
-                predicted_probabilities.shape[1:], dtype=np.float32)
+            predicted_segmentation = np.zeros(predicted_probabilities.shape[1:],
+                                              dtype=np.float32)
             for i, c in enumerate(regions_class_order):
                 predicted_segmentation[predicted_probabilities[i] > 0.5] = c
 
         return predicted_segmentation, predicted_probabilities
 
-    def _internal_maybe_mirror_and_pred_3D(self,
-                                           x: Union[np.ndarray, paddle.Tensor],
-                                           mirror_axes: tuple,
-                                           do_mirroring: bool=True,
-                                           mult: np.ndarray or
-                                           paddle.Tensor=None) -> paddle.Tensor:
+    def _internal_maybe_mirror_and_pred_3D(
+            self,
+            x: Union[np.ndarray, paddle.Tensor],
+            mirror_axes: tuple,
+            do_mirroring: bool = True,
+            mult: np.ndarray or paddle.Tensor = None) -> paddle.Tensor:
         assert len(
             x.shape) == 5, 'x must be (b, c, x, y, z), but got {}.'.format(
                 x.shape)
 
         x = paddle.to_tensor(x).astype('float32')
-        result = paddle.zeros(
-            [1, self.num_classes] + list(x.shape[2:]), dtype='float32')
+        result = paddle.zeros([1, self.num_classes] + list(x.shape[2:]),
+                              dtype='float32')
 
         if mult is not None:
             mult = paddle.to_tensor(mult).astype('float32')
@@ -431,18 +426,19 @@ class BasePredictor:
             result[:, :] *= mult
         return result
 
-    def _internal_maybe_mirror_and_pred_2D(self,
-                                           x: Union[np.ndarray, paddle.Tensor],
-                                           mirror_axes: tuple,
-                                           do_mirroring: bool=True,
-                                           mult: np.ndarray or
-                                           paddle.Tensor=None) -> paddle.Tensor:
+    def _internal_maybe_mirror_and_pred_2D(
+            self,
+            x: Union[np.ndarray, paddle.Tensor],
+            mirror_axes: tuple,
+            do_mirroring: bool = True,
+            mult: np.ndarray or paddle.Tensor = None) -> paddle.Tensor:
         assert len(x.shape) == 4, 'x must be (b, c, x, y), but got {}.'.format(
             x.shape)
 
         x = paddle.to_tensor(x).astype('float32')
-        result = paddle.zeros(
-            [x.shape[0], self.num_classes] + list(x.shape[2:]), dtype='float32')
+        result = paddle.zeros([x.shape[0], self.num_classes] +
+                              list(x.shape[2:]),
+                              dtype='float32')
 
         if mult is not None:
             mult = paddle.to_tensor(mult).astype('float32')
@@ -474,16 +470,9 @@ class BasePredictor:
         return result
 
     def _internal_predict_2D_2Dconv_tiled(
-            self,
-            x: np.ndarray,
-            step_size: float,
-            do_mirroring: bool,
-            mirror_axes: tuple,
-            patch_size: tuple,
-            regions_class_order: tuple,
-            use_gaussian: bool,
-            pad_border_mode: str,
-            pad_kwargs: dict,
+            self, x: np.ndarray, step_size: float, do_mirroring: bool,
+            mirror_axes: tuple, patch_size: tuple, regions_class_order: tuple,
+            use_gaussian: bool, pad_border_mode: str, pad_kwargs: dict,
             verbose: bool) -> Tuple[np.ndarray, np.ndarray]:
         assert len(x.shape) == 3, "x must be (c, x, y), but got {}.".format(
             x.shape)
@@ -493,8 +482,9 @@ class BasePredictor:
                                     True, None)
         data_shape = data.shape
 
-        steps = self._compute_steps_for_sliding_window(
-            patch_size, data_shape[1:], step_size)
+        steps = self._compute_steps_for_sliding_window(patch_size,
+                                                       data_shape[1:],
+                                                       step_size)
         num_tiles = len(steps[0]) * len(steps[1])
 
         if verbose:
@@ -507,14 +497,13 @@ class BasePredictor:
 
         if use_gaussian and num_tiles > 1:
             if self._gaussian_2d is None or not all([
-                    i == j
-                    for i, j in zip(patch_size,
-                                    self._patch_size_for_gaussian_2d)
+                    i == j for i, j in zip(patch_size,
+                                           self._patch_size_for_gaussian_2d)
             ]):
                 if verbose:
                     print('computing Gaussian')
-                gaussian_importance_map = self._get_gaussian(
-                    patch_size, sigma_scale=1. / 8)
+                gaussian_importance_map = self._get_gaussian(patch_size,
+                                                             sigma_scale=1. / 8)
                 self._gaussian_2d = gaussian_importance_map
                 self._patch_size_for_gaussian_2d = patch_size
             else:
@@ -530,10 +519,11 @@ class BasePredictor:
             add_for_nb_of_preds = self._gaussian_2d
         else:
             add_for_nb_of_preds = np.ones(patch_size, dtype=np.float32)
-        aggregated_results = np.zeros(
-            [self.num_classes] + list(data.shape[1:]), dtype=np.float32)
-        aggregated_nb_of_predictions = np.zeros(
-            [self.num_classes] + list(data.shape[1:]), dtype=np.float32)
+        aggregated_results = np.zeros([self.num_classes] + list(data.shape[1:]),
+                                      dtype=np.float32)
+        aggregated_nb_of_predictions = np.zeros([self.num_classes] +
+                                                list(data.shape[1:]),
+                                                dtype=np.float32)
 
         for x in steps[0]:
             lb_x = x
@@ -548,8 +538,8 @@ class BasePredictor:
 
                 predicted_patch = predicted_patch.numpy()
                 aggregated_results[:, lb_x:ub_x, lb_y:ub_y] += predicted_patch
-                aggregated_nb_of_predictions[:, lb_x:ub_x, lb_y:
-                                             ub_y] += add_for_nb_of_preds
+                aggregated_nb_of_predictions[:, lb_x:ub_x,
+                                             lb_y:ub_y] += add_for_nb_of_preds
 
         slicer = tuple([
             slice(0, aggregated_results.shape[i])
@@ -578,11 +568,11 @@ class BasePredictor:
             x: np.ndarray,
             min_size: Tuple[int, int],
             do_mirroring: bool,
-            mirror_axes: tuple=(0, 1),
-            regions_class_order: tuple=None,
-            pad_border_mode: str="constant",
-            pad_kwargs: dict=None,
-            verbose: bool=True) -> Tuple[np.ndarray, np.ndarray]:
+            mirror_axes: tuple = (0, 1),
+            regions_class_order: tuple = None,
+            pad_border_mode: str = "constant",
+            pad_kwargs: dict = None,
+            verbose: bool = True) -> Tuple[np.ndarray, np.ndarray]:
         assert len(x.shape) == 4, "x must be (c, x, y, z), but got {}.".format(
             x.shape)
         predicted_segmentation = []
@@ -602,13 +592,13 @@ class BasePredictor:
             x: np.ndarray,
             patch_size: Tuple[int, int],
             do_mirroring: bool,
-            mirror_axes: tuple=(0, 1),
-            step_size: float=0.5,
-            regions_class_order: tuple=None,
-            use_gaussian: bool=False,
-            pad_border_mode: str="edge",
-            pad_kwargs: dict=None,
-            verbose: bool=True) -> Tuple[np.ndarray, np.ndarray]:
+            mirror_axes: tuple = (0, 1),
+            step_size: float = 0.5,
+            regions_class_order: tuple = None,
+            use_gaussian: bool = False,
+            pad_border_mode: str = "edge",
+            pad_kwargs: dict = None,
+            verbose: bool = True) -> Tuple[np.ndarray, np.ndarray]:
         assert len(x.shape) == 4, "x must be (c, x, y, z), but got {}.".format(
             x.shape)
         predicted_segmentation = []
@@ -627,6 +617,7 @@ class BasePredictor:
 
 
 class DynamicPredictor(BasePredictor):
+
     def __init__(self, model):
         super().__init__()
         assert hasattr(
@@ -636,8 +627,8 @@ class DynamicPredictor(BasePredictor):
             model.net_num_pool_op_kernel_sizes, 0, dtype=np.int64)
         self.threeD = model.threeD
         self.num_classes = model.num_classes
-        self.inference_apply_nonlin = partial(
-            paddle.nn.functional.softmax, axis=1)
+        self.inference_apply_nonlin = partial(paddle.nn.functional.softmax,
+                                              axis=1)
         self.model = model
 
     def __call__(self, x):
@@ -646,6 +637,7 @@ class DynamicPredictor(BasePredictor):
 
 
 class MultiFoldsPredictor(BasePredictor):
+
     def __init__(self, model, param_paths):
         super().__init__()
         assert hasattr(
@@ -655,8 +647,8 @@ class MultiFoldsPredictor(BasePredictor):
             model.net_num_pool_op_kernel_sizes, 0, dtype=np.int64)
         self.threeD = model.threeD
         self.num_classes = model.num_classes
-        self.inference_apply_nonlin = partial(
-            paddle.nn.functional.softmax, axis=1)
+        self.inference_apply_nonlin = partial(paddle.nn.functional.softmax,
+                                              axis=1)
         self.model = model
         self.param_list = [
             paddle.load(param_path) for param_path in param_paths
@@ -695,9 +687,10 @@ class MultiFoldsPredictor(BasePredictor):
         else:
             preprocessor_class = PreprocessorFor2D
 
-        preprocessor = preprocessor_class(
-            self.normalization_schemes, self.use_mask_for_norm,
-            self.transpose_forward, self.intensity_properties)
+        preprocessor = preprocessor_class(self.normalization_schemes,
+                                          self.use_mask_for_norm,
+                                          self.transpose_forward,
+                                          self.intensity_properties)
         d, s, properties = preprocessor.preprocess_test_case(
             input_files,
             self.plans['plans_per_stage'][self.stage]['current_spacing'])
@@ -706,14 +699,14 @@ class MultiFoldsPredictor(BasePredictor):
     def predict_preprocessed_data_return_seg_and_softmax(
             self,
             data: np.ndarray,
-            do_mirroring: bool=True,
-            mirror_axes: Tuple[int]=None,
-            use_sliding_window: bool=True,
-            step_size: float=0.5,
-            use_gaussian: bool=True,
-            pad_border_mode: str='constant',
-            pad_kwargs: dict=None,
-            verbose: bool=True,
+            do_mirroring: bool = True,
+            mirror_axes: Tuple[int] = None,
+            use_sliding_window: bool = True,
+            step_size: float = 0.5,
+            use_gaussian: bool = True,
+            pad_border_mode: str = 'constant',
+            pad_kwargs: dict = None,
+            verbose: bool = True,
             mixed_precision=True):
         if pad_border_mode == 'constant' and pad_kwargs is None:
             pad_kwargs = {'constant_values': 0}
@@ -723,32 +716,31 @@ class MultiFoldsPredictor(BasePredictor):
             assert self.data_aug_params["do_mirror"], "Cannot do mirroring as test time augmentation when training " \
                                                       "was done without mirroring"
         self.model.eval()
-        res = self.predict_3D(
-            x=data,
-            do_mirroring=do_mirroring,
-            mirror_axes=mirror_axes,
-            use_sliding_window=use_sliding_window,
-            step_size=step_size,
-            patch_size=self.model.patch_size,
-            regions_class_order=None,
-            use_gaussian=use_gaussian,
-            pad_border_mode=pad_border_mode,
-            pad_kwargs=pad_kwargs,
-            verbose=verbose,
-            mixed_precision=mixed_precision)
+        res = self.predict_3D(x=data,
+                              do_mirroring=do_mirroring,
+                              mirror_axes=mirror_axes,
+                              use_sliding_window=use_sliding_window,
+                              step_size=step_size,
+                              patch_size=self.model.patch_size,
+                              regions_class_order=None,
+                              use_gaussian=use_gaussian,
+                              pad_border_mode=pad_border_mode,
+                              pad_kwargs=pad_kwargs,
+                              verbose=verbose,
+                              mixed_precision=mixed_precision)
         return res
 
     def multi_folds_predict_preprocessed_data_return_seg_and_softmax(
             self,
             data: np.ndarray,
-            do_mirroring: bool=True,
-            mirror_axes: Tuple[int]=None,
-            use_sliding_window: bool=True,
-            step_size: float=0.5,
-            use_gaussian: bool=True,
-            pad_border_mode: str='constant',
-            pad_kwargs: dict=None,
-            verbose: bool=True,
+            do_mirroring: bool = True,
+            mirror_axes: Tuple[int] = None,
+            use_sliding_window: bool = True,
+            step_size: float = 0.5,
+            use_gaussian: bool = True,
+            pad_border_mode: str = 'constant',
+            pad_kwargs: dict = None,
+            verbose: bool = True,
             mixed_precision=True):
         softmax_res = None
         for params in self.param_list:

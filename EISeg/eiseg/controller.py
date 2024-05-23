@@ -32,10 +32,12 @@ from util.vis import draw_with_blend_and_clicks
 
 
 class InteractiveController:
+
     def __init__(
-            self,
-            predictor_params: dict=None,
-            prob_thresh: float=0.5, ):
+        self,
+        predictor_params: dict = None,
+        prob_thresh: float = 0.5,
+    ):
         """初始化控制器.
 
         Parameters
@@ -118,7 +120,7 @@ class InteractiveController:
             logger.info(f"Load model {model_path} took {time.time() - tic}")
             return True, "模型设置成功"
 
-    def setImage(self, image: np.array, type_seg: bool=True):
+    def setImage(self, image: np.array, type_seg: bool = True):
         """设置当前标注的图片
 
         Parameters
@@ -272,10 +274,9 @@ class InteractiveController:
         object_mask = object_prob > self.prob_thresh
         if self.lccFilter:
             object_mask = self.getLargestCC(object_mask)
-        polygon = util.get_polygon(
-            (object_mask.astype(np.uint8) * 255),
-            img_size=object_mask.shape,
-            building=building)
+        polygon = util.get_polygon((object_mask.astype(np.uint8) * 255),
+                                   img_size=object_mask.shape,
+                                   building=building)
         if polygon is not None:
             self._result_mask[object_mask] = self.curr_label_number
             self.resetLastObject()
@@ -361,7 +362,8 @@ class InteractiveController:
             alpha=alpha_blend,
             clicks_list=self.clicker.clicks_list,
             radius=click_radius,
-            palette=self.palette, )
+            palette=self.palette,
+        )
         return vis
 
     def inImage(self, x: int, y: int):

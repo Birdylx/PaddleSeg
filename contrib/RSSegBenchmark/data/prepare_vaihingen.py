@@ -36,16 +36,14 @@ def parse_args():
     parser.add_argument('dataset_path', help='vaihingen folder path')
     parser.add_argument('--tmp_dir', help='path of the temporary directory')
     parser.add_argument('-o', '--out_dir', help='output path')
-    parser.add_argument(
-        '--clip_size',
-        type=int,
-        help='clipped size of image after preparation',
-        default=512)
-    parser.add_argument(
-        '--stride_size',
-        type=int,
-        help='stride of clipping original images',
-        default=256)
+    parser.add_argument('--clip_size',
+                        type=int,
+                        help='clipped size of image after preparation',
+                        default=512)
+    parser.add_argument('--stride_size',
+                        type=int,
+                        help='stride of clipping original images',
+                        default=256)
     args = parser.parse_args()
     return args
 
@@ -70,19 +68,19 @@ def clip_big_image(image_path, clip_save_dir, to_label=False):
     ymin = ymin.ravel()
     xmin_offset = np.where(xmin + cs > w, w - xmin - cs, np.zeros_like(xmin))
     ymin_offset = np.where(ymin + cs > h, h - ymin - cs, np.zeros_like(ymin))
-    boxes = np.stack(
-        [
-            xmin + xmin_offset, ymin + ymin_offset, np.minimum(xmin + cs, w),
-            np.minimum(ymin + cs, h)
-        ],
-        axis=1)
+    boxes = np.stack([
+        xmin + xmin_offset, ymin + ymin_offset,
+        np.minimum(xmin + cs, w),
+        np.minimum(ymin + cs, h)
+    ],
+                     axis=1)
 
     if to_label:
         color_map = np.array([[255, 255, 255], [255, 0, 0], [255, 255, 0],
                               [0, 255, 0], [0, 255, 255], [0, 0, 255],
                               [0, 0, 0]])
-        flatten_v = np.matmul(
-            image.reshape(-1, c), np.array([2, 3, 4]).reshape(3, 1))
+        flatten_v = np.matmul(image.reshape(-1, c),
+                              np.array([2, 3, 4]).reshape(3, 1))
         out = np.zeros_like(flatten_v)
         for idx, class_color in enumerate(color_map):
             value_idx = np.matmul(class_color,
@@ -95,9 +93,9 @@ def clip_big_image(image_path, clip_save_dir, to_label=False):
 
     for box in boxes:
         start_x, start_y, end_x, end_y = box
-        clipped_image = image[start_y:end_y, start_x:
-                              end_x] if to_label else image[start_y:end_y,
-                                                            start_x:end_x, :]
+        clipped_image = image[start_y:end_y,
+                              start_x:end_x] if to_label else image[
+                                  start_y:end_y, start_x:end_x, :]
         area_idx = osp.basename(image_path).split('_')[3].strip('.tif')
         cv2.imwrite(
             osp.join(clip_save_dir,

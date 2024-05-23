@@ -37,6 +37,5 @@ if __name__ == "__main__":
             if new_source == pre_source and type == "unfinished":
                 nms.translation.string = pms.translation.string
                 del nms.translation["type"]
-    open(
-        pre_path.replace(".ts", "2.ts"), "w",
-        encoding="utf-8").write(str(new_xml))
+    open(pre_path.replace(".ts", "2.ts"), "w",
+         encoding="utf-8").write(str(new_xml))
